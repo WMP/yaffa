@@ -37,11 +37,15 @@ jobs:
             echo "BUILD_PLATFORMS=linux/amd64,linux/arm64" >> $GITHUB_ENV
           fi
 
-      - name: Print github.ref_name
+      - name: Set image name
+        run: echo "IMAGE_NAME=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/yaffa" >> $GITHUB_ENV
+
+      - name: Print build info
         run: |
           echo "github.event_name is ${{ github.event_name }}"
-          echo "github.ref_name is ${{ env.DOCKER_VERSION_TAG }}"
+          echo "version tag is ${{ env.DOCKER_VERSION_TAG }}"
           echo "platforms is ${{ env.BUILD_PLATFORMS }}"
+          echo "image is ${{ env.IMAGE_NAME }}"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -72,8 +76,8 @@ jobs:
           platforms: ${{ env.BUILD_PLATFORMS }}
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/yaffa:${{ env.DOCKER_VERSION_TAG }}
-            ${{ env.DOCKER_VERSION_TAG != 'test' && format('ghcr.io/{0}/yaffa:latest', github.repository_owner) || '' }}
+            ${{ env.IMAGE_NAME }}:${{ env.DOCKER_VERSION_TAG }}
+            ${{ env.DOCKER_VERSION_TAG != 'test' && format('{0}:latest', env.IMAGE_NAME) || '' }}
           build-args: |
             BRANCH=main
           cache-from: type=local,src=/tmp/.buildx-cache
