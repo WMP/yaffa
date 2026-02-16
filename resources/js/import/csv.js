@@ -6,11 +6,13 @@
 import 'datatables.net-bs5';
 // Import dataTable helper functions
 import * as dataTableHelpers from './../components/dataTableHelper'
-import {toFormattedCurrency, toIsoDateString} from '../helpers';
+import {toFormattedCurrency, toIsoDateString, loadSelect2Language} from '../helpers';
 
 // Import RRule library for handling schedules
 import {RRule} from 'rrule';
-import 'select2';
+import select2 from 'select2';
+select2();
+loadSelect2Language(window.YAFFA.language);
 import 'jquery-csv';
 
 window.transactions = [];

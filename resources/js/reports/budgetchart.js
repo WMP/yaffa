@@ -8,7 +8,10 @@ import 'jstree';
 import 'jstree/src/themes/default/style.css'
 
 import 'datatables.net-bs5';
-import 'select2';
+import select2 from 'select2';
+select2();
+import { loadSelect2Language } from '../helpers';
+loadSelect2Language(window.YAFFA.language);
 
 const accountSelector = '#accountList';
 const treeSelector = '#categoryTree';
