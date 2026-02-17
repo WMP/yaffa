@@ -25,7 +25,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: |
           BRANCH=$(echo "${{ github.event.inputs.source_branch }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
-          DATE=$(date +%Y%m%d)
+          DATE=$(date +%Y%m%d-%H%M)
           echo "DOCKER_VERSION_TAG=${BRANCH}-${DATE}" >> $GITHUB_ENV
           echo "SOURCE_BRANCH=${{ github.event.inputs.source_branch }}" >> $GITHUB_ENV
 
