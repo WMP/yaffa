@@ -1,0 +1,82 @@
+Full key	en	hu	fr	pl	Namespace	Group	Key	Source file
+default_assets.account_groups.bank_accounts	Bank accounts	Bankszámlák	Comptes bancaires	Konta bankowe		default_assets	account_groups.bank_accounts	{locale}/default_assets.php
+default_assets.account_groups.cash	Cash	Készpénz	Espèces	Gotówka		default_assets	account_groups.cash	{locale}/default_assets.php
+default_assets.account_groups.credits	Credits	Hitelek	Crédits	Kredyty		default_assets	account_groups.credits	{locale}/default_assets.php
+default_assets.account_groups.loans	Loans	Kölcsönök	Prêts	Pożyczki		default_assets	account_groups.loans	{locale}/default_assets.php
+default_assets.account_groups.savings_and_investments	Savings and investments	Megtakarítások és befektetések	Épargne et investissements	Oszczędności i inwestycje		default_assets	account_groups.savings_and_investments	{locale}/default_assets.php
+default_assets.accounts.cash_reserve	Cash reserve	Készpénztartalék	Réserve de trésorerie	Rezerwa gotówkowa		default_assets	accounts.cash_reserve	{locale}/default_assets.php
+default_assets.accounts.credit_card	Credit card	Hitelkártya	Carte de crédit	Karta kredytowa		default_assets	accounts.credit_card	{locale}/default_assets.php
+default_assets.accounts.investment_account	Investment account	Befektetési számla	compte d'investissement	Konto inwestycyjne		default_assets	accounts.investment_account	{locale}/default_assets.php
+default_assets.accounts.loan	Loan	Kölcsön	Prêt	Pożyczka		default_assets	accounts.loan	{locale}/default_assets.php
+default_assets.accounts.other_bank_account	Other bank account	Más bankszámla	Autre compte bancaire	Inne konto bankowe		default_assets	accounts.other_bank_account	{locale}/default_assets.php
+default_assets.accounts.primary_bank_account	Primary bank account	Elsődleges bankszámla	Compte bancaire principal	Główne konto bankowe		default_assets	accounts.primary_bank_account	{locale}/default_assets.php
+default_assets.accounts.wallet	Wallet	Pénztárca	Portefeuille	Portfel		default_assets	accounts.wallet	{locale}/default_assets.php
+default_assets.categories.bonuses	Bonuses	Bónuszok	Bonus	Premie		default_assets	categories.bonuses	{locale}/default_assets.php
+default_assets.categories.books_and_supplies	Books and supplies	Könyvek és kellékek	Livres et fournitures	Książki i artykuły papiernicze		default_assets	categories.books_and_supplies	{locale}/default_assets.php
+default_assets.categories.car_insurance	Car insurance	Autó biztosítás	Assurance auto	Ubezpieczenie samochodu		default_assets	categories.car_insurance	{locale}/default_assets.php
+default_assets.categories.car_payments	Car payments	Autó kiadások	Mensualités de voiture	Opłaty samochodowe		default_assets	categories.car_payments	{locale}/default_assets.php
+default_assets.categories.child_allowance	Child allowance	Gyerektámogatás	Allocation familiale	Zasiłek na dziecko		default_assets	categories.child_allowance	{locale}/default_assets.php
+default_assets.categories.clothing	Clothing	Ruházat	Vêtements	Odzież		default_assets	categories.clothing	{locale}/default_assets.php
+default_assets.categories.courses_and_training	Courses and training	Tanfolyamok és képzések	Cours et formations	Kursy i szkolenia		default_assets	categories.courses_and_training	{locale}/default_assets.php
+default_assets.categories.credit_card	Credit card	Hitelkártya	Carte de crédit	Karta kredytowa		default_assets	categories.credit_card	{locale}/default_assets.php
+default_assets.categories.debt_repayment	Debt repayment	Adósság visszafizetés	Remboursement de la dette	Spłata długu		default_assets	categories.debt_repayment	{locale}/default_assets.php
+default_assets.categories.dining_out	Dining out	Étterem	Dîner au restaurant	Jedzenie poza domem		default_assets	categories.dining_out	{locale}/default_assets.php
+default_assets.categories.disability_insurance	Disability insurance	Rokkantbiztosítás	Assurance invalidité	Ubezpieczenie inwalidzkie		default_assets	categories.disability_insurance	{locale}/default_assets.php
+default_assets.categories.doctor_visits	Doctor visits	Orvosok	Visites chez le médecin	Wizyty u lekarza		default_assets	categories.doctor_visits	{locale}/default_assets.php
+default_assets.categories.education_and_development	Education and development	Oktatás és fejlesztés	Éducation et développement	Edukacja i rozwój		default_assets	categories.education_and_development	{locale}/default_assets.php
+default_assets.categories.electricity	Electricity	Villany	Électricité	Elektryczność		default_assets	categories.electricity	{locale}/default_assets.php
+default_assets.categories.entertainment	Entertainment	Szórakozás	Divertissement	Rozrywka		default_assets	categories.entertainment	{locale}/default_assets.php
+default_assets.categories.entertainment_and_leisure	Entertainment and leisure	Szórakozás és szabadidő	Divertissements et loisirs	Rozrywka i wypoczynek		default_assets	categories.entertainment_and_leisure	{locale}/default_assets.php
+default_assets.categories.events	Events	Események	Événements	Wydarzenia		default_assets	categories.events	{locale}/default_assets.php
+default_assets.categories.fines	Fines	Pénzbírságok	Amendes	Grzywny		default_assets	categories.fines	{locale}/default_assets.php
+default_assets.categories.food	Food	Élelmiszer	Nourriture	Jedzenie		default_assets	categories.food	{locale}/default_assets.php
+default_assets.categories.freelance_work	Freelance work	Szabadúszó munka	Travail indépendant	Praca freelancera		default_assets	categories.freelance_work	{locale}/default_assets.php
+default_assets.categories.fuel	Fuel	Üzemanyag	Carburant	Paliwo		default_assets	categories.fuel	{locale}/default_assets.php
+default_assets.categories.gas_and_heating	Gas and heating	Gáz és fűtés	Gaz et chauffage	Gaz i ogrzewanie		default_assets	categories.gas_and_heating	{locale}/default_assets.php
+default_assets.categories.gifts_and_donations	Gifts and donations	Ajándékok és adományok	Dons et donations	Prezenty i darowizny		default_assets	categories.gifts_and_donations	{locale}/default_assets.php
+default_assets.categories.government_benefits	Government benefits	Kormányzati juttatások	Avantages gouvernementaux	Świadczenia rządowe		default_assets	categories.government_benefits	{locale}/default_assets.php
+default_assets.categories.groceries	Groceries	Élelmiszerboltok	Épiceries	Artykuły spożywcze		default_assets	categories.groceries	{locale}/default_assets.php
+default_assets.categories.health_insurance	Health insurance	Egészségbiztosítás	Assurance maladie	Ubezpieczenie zdrowotne		default_assets	categories.health_insurance	{locale}/default_assets.php
+default_assets.categories.healthcare	Healthcare	Egészségügy	Soins de santé	Opieka zdrowotna		default_assets	categories.healthcare	{locale}/default_assets.php
+default_assets.categories.hobbies_and_activities	Hobbies and activities	Hobbik és kikapcsolódás	Loisirs et activités	Hobby i aktywności		default_assets	categories.hobbies_and_activities	{locale}/default_assets.php
+default_assets.categories.home_improvements	Home improvements	Lakberendezés	Améliorations domiciliaires	Ulepszenia domu		default_assets	categories.home_improvements	{locale}/default_assets.php
+default_assets.categories.home_insurance	Home insurance	Lakásbiztosítás	Assurance habitation	Ubezpieczenie mieszkaniowe		default_assets	categories.home_insurance	{locale}/default_assets.php
+default_assets.categories.household_products	Household products	Háztartási termékek	Produits ménagers	Produkty gospodarstwa domowego		default_assets	categories.household_products	{locale}/default_assets.php
+default_assets.categories.housing	Housing	Lakhatás	Logement	Mieszkanie		default_assets	categories.housing	{locale}/default_assets.php
+default_assets.categories.insurance	Insurance	Biztosítás	Assurance	Ubezpieczenie		default_assets	categories.insurance	{locale}/default_assets.php
+default_assets.categories.internet_cable	Internet and cable	Internet és TV	Internet et câble	Internet i telewizja kablowa		default_assets	categories.internet_cable	{locale}/default_assets.php
+default_assets.categories.legal_fees	Legal fees	Ügyvédi költségek	Frais juridiques	Opłaty prawne		default_assets	categories.legal_fees	{locale}/default_assets.php
+default_assets.categories.life_insurance	Life insurance	Életbiztosítás	Assurance-vie	Ubezpieczenie na życie		default_assets	categories.life_insurance	{locale}/default_assets.php
+default_assets.categories.loans	Loans	Hitelek	Prêts	Pożyczki		default_assets	categories.loans	{locale}/default_assets.php
+default_assets.categories.main_job	Main job	Fő munka	Emploi principal	Główne zajęcie		default_assets	categories.main_job	{locale}/default_assets.php
+default_assets.categories.maintenance_and_repairs	Maintenance and repairs	Karbantartás és javítás	Entretien et réparations	Konserwacja i naprawy		default_assets	categories.maintenance_and_repairs	{locale}/default_assets.php
+default_assets.categories.medications	Medications	Gyógyszerek	Médicaments	Leki		default_assets	categories.medications	{locale}/default_assets.php
+default_assets.categories.miscellaneous	Miscellaneous	Egyéb	Divers	Różne		default_assets	categories.miscellaneous	{locale}/default_assets.php
+default_assets.categories.mortgage_overpayments	Mortgage overpayments	Jelzáloghitel túlfizetések	Remboursements hypothécaires en trop	Nadpłaty kredytu hipotecznego		default_assets	categories.mortgage_overpayments	{locale}/default_assets.php
+default_assets.categories.other_income	Other income	Egyéb bevétel	Autres revenus	Inne dochody		default_assets	categories.other_income	{locale}/default_assets.php
+default_assets.categories.parking	Parking	Parkolás	Parking	Parking		default_assets	categories.parking	{locale}/default_assets.php
+default_assets.categories.personal_care	Personal care	Személyes higiénia	Soins personnels	Higiena osobista		default_assets	categories.personal_care	{locale}/default_assets.php
+default_assets.categories.personal_loans	Personal loans	Személyi kölcsönök	Prêts personnels	Pożyczki osobiste		default_assets	categories.personal_loans	{locale}/default_assets.php
+default_assets.categories.pet_care	Pet care	Kisállat gondozás	Soins des animaux de compagnie	Opieka nad zwierzętami		default_assets	categories.pet_care	{locale}/default_assets.php
+default_assets.categories.property_taxes	Property taxes	Ingatlanadók	Impôts fonciers	Podatki od nieruchomości		default_assets	categories.property_taxes	{locale}/default_assets.php
+default_assets.categories.public_transport	Public transport	Tömegközlekedés	Transports en commun	Transport publiczny		default_assets	categories.public_transport	{locale}/default_assets.php
+default_assets.categories.rent	Rent	Bérlés	Louer	Czynsz		default_assets	categories.rent	{locale}/default_assets.php
+default_assets.categories.rent_and_mortgage	Rent and Mortgage	Bérlet és jelzálog	Loyer et hypothèque	Czynsz i kredyt hipoteczny		default_assets	categories.rent_and_mortgage	{locale}/default_assets.php
+default_assets.categories.rental_income	Rental income	Bérleti díjak	Revenus locatifs	Dochody z wynajmu		default_assets	categories.rental_income	{locale}/default_assets.php
+default_assets.categories.repairs_maintenance	Repairs and maintenance	Javítások és karbantartások	Réparations et entretien	Naprawy i konserwacja		default_assets	categories.repairs_maintenance	{locale}/default_assets.php
+default_assets.categories.salary	Salary	Fizetés	Salaire	Wynagrodzenie		default_assets	categories.salary	{locale}/default_assets.php
+default_assets.categories.school_and_university_fees	School and university fees	Iskolai és egyetemi díjak	Frais de scolarité et d'université	Opłaty szkolne i uniwersyteckie		default_assets	categories.school_and_university_fees	{locale}/default_assets.php
+default_assets.categories.side_job	Side job	Mellékállás	Travail à temps partiel	Praca dodatkowa		default_assets	categories.side_job	{locale}/default_assets.php
+default_assets.categories.social_assistance	Social assistance	Szociális juttatás	Aide sociale	Pomoc społeczna		default_assets	categories.social_assistance	{locale}/default_assets.php
+default_assets.categories.student_loans	Student loans	Diákhitel	Prêts étudiants	Pożyczki studenckie		default_assets	categories.student_loans	{locale}/default_assets.php
+default_assets.categories.subscriptions	Subscriptions	Előfizetések	Abonnements	Subskrypcje		default_assets	categories.subscriptions	{locale}/default_assets.php
+default_assets.categories.transportation	Transportation	Közlekedés	Transport	Transport		default_assets	categories.transportation	{locale}/default_assets.php
+default_assets.categories.utilities	Utilities	Közművek	Services publics	Media		default_assets	categories.utilities	{locale}/default_assets.php
+default_assets.categories.vacation_and_travel	Vacation and travel	Nyaralás és utazás	Vacances et voyages	Wakacje i podróże		default_assets	categories.vacation_and_travel	{locale}/default_assets.php
+default_assets.categories.vehicle_maintenance	Vehicle maintenance	Járművek karbantartása	Entretien des véhicules	Konserwacja pojazdów		default_assets	categories.vehicle_maintenance	{locale}/default_assets.php
+default_assets.categories.vision_and_dental_care	Vision and dental care	Szemészet és fogászat	Soins de la vue et soins dentaires	Pielęgnacja wzroku i zębów		default_assets	categories.vision_and_dental_care	{locale}/default_assets.php
+default_assets.categories.water	Water	Víz	Eau	Woda		default_assets	categories.water	{locale}/default_assets.php
+default_assets.categories.water_sewer	Water and sewer	Víz és csatorna	Eau et assainissement	Woda i kanalizacja		default_assets	categories.water_sewer	{locale}/default_assets.php
+default_assets.investment_groups.bonds	Bonds	Kötvények	Obligations	Obligacje		default_assets	investment_groups.bonds	{locale}/default_assets.php
+default_assets.investment_groups.other	Other	Egyéb	Autre	Inne		default_assets	investment_groups.other	{locale}/default_assets.php
+default_assets.investment_groups.stocks	Stocks	Részvények	Actions	Akcje		default_assets	investment_groups.stocks	{locale}/default_assets.php

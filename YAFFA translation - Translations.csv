@@ -1,0 +1,876 @@
+Full key,en,pl,hu,fr,Namespace,Group,Key,Source file
+*::*. < No default category > , < No default category > , < Brak domyślnej kategorii > , < Nincs alapértelmezett kategória >,< Aucune catégorie par défaut >,*,*, < No default category > ,{locale}.json
+*::*. < No price provider > , < No price provider > , < Brak dostawcy cen > , < Nincs adatszolgáltató >,< Aucun fournisseur de prix >,*,*, < No price provider > ,{locale}.json
+*::*.(No subject),(No subject),(Brak tematu), (Nincs tárgy),(Sans sujet),*,*,(No subject),{locale}.json
+"*::*.:type is in use, cannot be deleted",":type is in use, cannot be deleted",":type jest w użyciu, nie można usunąć",":type használatban van, nem törölhető",":type est utilisé, ne peut pas être supprimé",*,*,":type is in use, cannot be deleted",{locale}.json
+*::*.A fresh verification link has been sent to your email address.,A fresh verification link has been sent to your email address.,Nowy link weryfikacyjny został wysłany na Twój adres e-mail.,Egy friss ellenőrző linket küldtünk az e-mail címedre.,Un nouveau lien de vérification a été envoyé à votre adresse électronique.,*,*,A fresh verification link has been sent to your email address.,{locale}.json
+*::*.Accept recommendation and set it as default category for payee,Accept recommendation and set it as default category for payee,Zaakceptuj rekomendację i ustaw jako domyślną kategorię dla odbiorcy,Ajánlás elfogadása és beállítása alapértelmezett kategóriaként a kedvezményezett számára,Accepter la recommandation et la définir comme catégorie par défaut pour le bénéficiaire,*,*,Accept recommendation and set it as default category for payee,{locale}.json
+*::*.Account,Account,Konto,Számla,Compte,*,*,Account,{locale}.json
+*::*.Account Groups,Account Groups,Grupy kont,Számla Csoportok,Groupes de comptes,*,*,Account Groups,{locale}.json
+*::*.Account added,Account added,Konto dodane,Számla létrehozva,Compte ajouté,*,*,Account added,{locale}.json
+*::*.Account deleted,Account deleted,Konto usunięte,Számla törölve,Compte supprimé,*,*,Account deleted,{locale}.json
+*::*.Account details,Account details,Szczegóły konta,Számla részletek,Détails du compte,*,*,Account details,{locale}.json
+"*::*.Account details for "":account""","Account details for "":account""","Szczegóły konta dla "":account""",""":account"" számla részletei",Détails du compte pour « :account »,*,*,"Account details for "":account""",{locale}.json
+*::*.Account from,Account from,Z konta,Erről a számláról,Compte de,*,*,Account from,{locale}.json
+*::*.Account group,Account group,Grupa kont,Számla csoport,Groupe de comptes,*,*,Account group,{locale}.json
+*::*.Account group added,Account group added,Dodano grupę kont,Számla csoport létrehozva,Groupe de comptes ajouté,*,*,Account group added,{locale}.json
+*::*.Account group deleted,Account group deleted,Usunięto grupę kont,Számla csoport törölve,Groupe de comptes supprimé,*,*,Account group deleted,{locale}.json
+"*::*.Account group is in use, cannot be deleted","Account group is in use, cannot be deleted","Grupa kont jest w użyciu, nie można jej usunąć","A számla csoport használatban van, nem törölhető",Le groupe de comptes est utilisé et ne peut pas être supprimé.,*,*,"Account group is in use, cannot be deleted",{locale}.json
+*::*.Account group updated,Account group updated,Zaktualizowano grupę kont,Számla csoport frissítve,Groupe de comptes mis à jour,*,*,Account group updated,{locale}.json
+*::*.Account groups,Account groups,Grupy kont,Számla csoportok,Groupes de comptes,*,*,Account groups,{locale}.json
+*::*.Account groups serve as an organizational tool to streamline your financial overview.,Account groups serve as an organizational tool to streamline your financial overview.,Grupy kont służą jako narzędzie organizacyjne do usprawnienia przeglądu finansów.,A számlacsoportok szervezési eszközként szolgálnak a pénzügyi áttekintés egyszerűsítéséhez.,Les groupes de comptes servent d'outil d'organisation pour simplifier votre vue d'ensemble financière.,*,*,Account groups serve as an organizational tool to streamline your financial overview.,{locale}.json
+*::*.Account history,Account history,Historia konta,Számla történet,Historique du compte,*,*,Account history,{locale}.json
+*::*.Account scope,Account scope,Zakres konta,Számla szűkítés,Étendue du compte,*,*,Account scope,{locale}.json
+*::*.Account summary calculations are in progress.,Account summary calculations are in progress.,Trwa obliczanie podsumowania konta.,A számlaösszesítő számításai folyamatban vannak.,Le calcul du récapitulatif de compte est en cours.,*,*,Account summary calculations are in progress.,{locale}.json
+*::*.Account to,Account to,Na konto,Erre a számlára,Compte à,*,*,Account to,{locale}.json
+*::*.Account updated,Account updated,Konto zaktualizowane,Számla frissítve,Compte mis à jour,*,*,Account updated,{locale}.json
+*::*.Accounts,Accounts,Konta,Számlák,Comptes,*,*,Accounts,{locale}.json
+*::*.Action after saving,Action after saving,Czynność po zapisaniu,Mentés utáni teendő,Action après enregistrement,*,*,Action after saving,{locale}.json
+*::*.Actions,Actions,Akcje,Műveletek,Actes,*,*,Actions,{locale}.json
+*::*.Active,Active,Aktywny,Aktív,Actif,*,*,Active,{locale}.json
+*::*.Actual,Actual,Rzeczywisty,Tény,Réel,*,*,Actual,{locale}.json
+*::*.Add Currency Rate,Add Currency Rate,Dodaj kurs waluty,Árfolyam hozzáadása,Ajouter le taux de change,*,*,Add Currency Rate,{locale}.json
+*::*.Add Investment Price,Add Investment Price,Dodaj cenę inwestycji,,Ajouter le taux de change,*,*,Add Investment Price,{locale}.json
+*::*.Add a category,Add a category,Dodaj kategorię,Kategória hozzáadása,Ajouter une catégorie,*,*,Add a category,{locale}.json
+*::*.Add a currency,Add a currency,Dodaj walutę,Pénznem hozzáadása,Ajouter une devise,*,*,Add a currency,{locale}.json
+*::*.Add a new payee,Add a new payee,Dodaj nowego odbiorcę,Új kedvezményezett hozzáadása,Ajouter un nouveau bénéficiaire,*,*,Add a new payee,{locale}.json
+*::*.Add a payee,Add a payee,Dodaj odbiorcę,Kedvezményezett hozzáadása,Ajouter un bénéficiaire,*,*,Add a payee,{locale}.json
+*::*.Add account group,Add account group,Dodaj grupę kont,Számla csoport hozzáadása,Ajouter un groupe de comptes,*,*,Add account group,{locale}.json
+*::*.Add an account,Add an account,Dodaj konto,Számla hozzáadása,Ajouter un compte,*,*,Add an account,{locale}.json
+*::*.Add an account group,Add an account group,Dodaj grupę kont,Számla csoport hozzáadása,Ajouter un groupe de comptes,*,*,Add an account group,{locale}.json
+*::*.Add currency,Add currency,Dodaj walutę,Pénznem hozzáadása,Ajouter une devise,*,*,Add currency,{locale}.json
+*::*.Add investment group,Add investment group,Dodaj grupę inwestycyjną,Befektetési csoport hozzáadása,Ajouter un groupe d'investissement,*,*,Add investment group,{locale}.json
+*::*.Add new account,Add new account,Dodaj nowe konto,Új számla,Ajouter un nouveau compte,*,*,Add new account,{locale}.json
+*::*.Add new category,Add new category,Dodaj nową kategorię,Új kategória,Ajouter une nouvelle catégorie,*,*,Add new category,{locale}.json
+*::*.Add new investment,Add new investment,Dodaj nową inwestycję,Új befektetés,Ajouter de nouveaux investissements,*,*,Add new investment,{locale}.json
+*::*.Add new investment price,Add new investment price,Dodaj nową cenę inwestycji,Új befektetési ár hozzáadása,Ajouter un nouveau prix d'investissement,*,*,Add new investment price,{locale}.json
+*::*.Add new payee,Add new payee,Dodaj nowego odbiorcę,Új üzlet,Ajouter un nouveau bénéficiaire,*,*,Add new payee,{locale}.json
+*::*.Add new rate,Add new rate,Dodaj nowy kurs,Új árfolyam hozzáadása,Ajouter un nouveau tarif,*,*,Add new rate,{locale}.json
+*::*.Add new transaction,Add new transaction,Dodaj nową transakcję,Új tranzakció,Ajouter une nouvelle transaction,*,*,Add new transaction,{locale}.json
+*::*.Add shares,Add shares,Dodaj udziały,Részvény hozzáadás,Ajouter des actions,*,*,Add shares,{locale}.json
+*::*.Add tag,Add tag,Dodaj tag,Címke hozzáadása,Ajouter une étiquette,*,*,Add tag,{locale}.json
+*::*.Add transaction,Add transaction,,Tranzakció hozzáadása,Ajouter une transaction,*,*,Add transaction,{locale}.json
+*::*.Add your first transaction,Add your first transaction,,Első tranzakció hozzáadása,Ajoutez votre première transaction,*,*,Add your first transaction,{locale}.json
+*::*.Added quantity,Added quantity,,Hozzáadott mennyiség,quantité ajoutée,*,*,Added quantity,{locale}.json
+*::*.Adjust and enter instance,Adjust and enter instance,,Példány beállítása és megadása,Ajuster et saisir l'instance,*,*,Adjust and enter instance,{locale}.json
+*::*.After merging,After merging,,Egyesítés után,Après la fusion,*,*,After merging,{locale}.json
+*::*.Already handled,Already handled,,Már kezelve,Déjà traité,*,*,Already handled,{locale}.json
+*::*.Amount,Amount,,Összeg,Montant,*,*,Amount,{locale}.json
+*::*.Amount from,Amount from,,Összeg innen,Montant de,*,*,Amount from,{locale}.json
+*::*.Amount to,Amount to,,Összeg,Montant à,*,*,Amount to,{locale}.json
+*::*.Amounts,Amounts,,Összegek,Montants,*,*,Amounts,{locale}.json
+*::*.An error occurred,An error occurred,,Hiba történt,Une erreur s'est produite.,*,*,An error occurred,{locale}.json
+*::*.An error occurred. Please try again later.,An error occurred. Please try again later.,,"Hiba történt. Kérjük, próbálja meg később.",Une erreur s'est produite. Veuillez réessayer plus tard.,*,*,An error occurred. Please try again later.,{locale}.json
+*::*.Annualized ROI,Annualized ROI,,Évesített megtérülés,Retour sur investissement annualisé,*,*,Annualized ROI,{locale}.json
+*::*.Any,Any,,Bármi,N'importe lequel,*,*,Any,{locale}.json
+*::*.Apply filters,Apply filters,,Szűrők alkalmazása,Appliquer les filtres,*,*,Apply filters,{locale}.json
+*::*.Are you looking for any of these payees?,Are you looking for any of these payees?,Keresel valamelyik kedvezményezettet ezek közül?,Recherchez-vous l'un de ces bénéficiaires?,*,*,Are you looking for any of these payees?,{locale}.json
+*::*.Are you sure to abandon this form?,Are you sure to abandon this form?,Biztosan elhagyod ezt az űrlapot?,Êtes-vous sûr de vouloir abandonner ce formulaire?,*,*,Are you sure to abandon this form?,{locale}.json
+*::*.Are you sure to want to delete this item?,Are you sure to want to delete this item?,Biztosan törlöd ezt az elemet?,Êtes-vous sûr de vouloir supprimer cet élément?,*,*,Are you sure to want to delete this item?,{locale}.json
+*::*.Are you sure to want to reprocess this email? Current data will be overwritten.,Are you sure to want to reprocess this email? Current data will be overwritten.,Biztosan újra feldolgozza ezt az e-mailt? A jelenlegi adatok felülírásra kerülnek.,Êtes-vous sûr de vouloir retraiter ce courriel? Les données actuelles seront écrasées.,*,*,Are you sure to want to reprocess this email? Current data will be overwritten.,{locale}.json
+*::*.Are you sure you want to discard any changes?,Are you sure you want to discard any changes?,Biztosan elveti a módosításokat?,Êtes-vous sûr de vouloir annuler toutes les modifications?,*,*,Are you sure you want to discard any changes?,{locale}.json
+*::*.Are you sure you want to merge these categories?,Are you sure you want to merge these categories?,Biztosan egyesíteni szeretné ezeket a kategóriákat?,Êtes-vous sûr de vouloir fusionner ces catégories?,*,*,Are you sure you want to merge these categories?,{locale}.json
+*::*.Are you sure you want to merge these payees?,Are you sure you want to merge these payees?,Biztosan egyesíteni szeretné ezeket a kedvezményezetteket?,Êtes-vous sûr de vouloir fusionner ces bénéficiaires?,*,*,Are you sure you want to merge these payees?,{locale}.json
+"*::*.Are you sure you want to set this currency as the default one?\n\nWhile this action is reversible, it starts a process that may take a while to complete.","Are you sure you want to set this currency as the default one?\n\nWhile this action is reversible, it starts a process that may take a while to complete.","Biztosan ezt a pénznemet szeretnéd alapértelmezettként beállítani?\n\nBár ez a művelet visszafordítható, elindít egy folyamatot, amelynek befejezése eltarthat egy ideig.","Êtes-vous sûr de vouloir définir cette devise comme devise par défaut?\n\nBien que cette action soit réversible, elle lance un processus qui peut prendre un certain temps à se terminer.",*,*,"Are you sure you want to set this currency as the default one?\n\nWhile this action is reversible, it starts a process that may take a while to complete.",{locale}.json
+"*::*.Are you sure, you want to change the transaction type? Some data might get lost.","Are you sure, you want to change the transaction type? Some data might get lost.","Biztos benne, hogy módosítani szeretné a tranzakció típusát? Előfordulhat, hogy egyes adatok elvesznek.",Êtes-vous sûr de vouloir modifier le type de transaction? Des données pourraient être perdues.,*,*,"Are you sure, you want to change the transaction type? Some data might get lost.",{locale}.json
+*::*.Assets,Assets,,Eszközök,Actifs,*,*,Assets,{locale}.json
+*::*.Assign remaining amount to this item,Assign remaining amount to this item,,Fennmaradó összeg hozzárendelése,Attribuez le montant restant à cet article,*,*,Assign remaining amount to this item,{locale}.json
+*::*.Automatic recording,Automatic recording,,Automatikus felvétel,Enregistrement automatique,*,*,Automatic recording,{locale}.json
+*::*.Automatic update,Automatic update,,Automatikus frissítés,Mise à jour automatique,*,*,Automatic update,{locale}.json
+*::*.Automation,Automation,,Automatizálás,Automation,*,*,Automation,{locale}.json
+*::*.Base currency,Base currency,,Elsődleges pénznem,Monnaie de base,*,*,Base currency,{locale}.json
+*::*.Base currency cannot be deleted,Base currency cannot be deleted,,Az elsődleges pénznem nem törölhető,La devise de base ne peut pas être supprimée,*,*,Base currency cannot be deleted,{locale}.json
+*::*.Base currency changed,Base currency changed,,Az elsődleges pénznem módosítva,La monnaie de base a changé,*,*,Base currency changed,{locale}.json
+*::*.Base currency is not set,Base currency is not set,,Az alappénznem nincs beállítva,La devise de base n'est pas définie.,*,*,Base currency is not set,{locale}.json
+*::*.Basic,Basic,,Egyszerű,Basique,*,*,Basic,{locale}.json
+"*::*.Before proceeding, please check your email for a verification link.","Before proceeding, please check your email for a verification link.","Mielőtt folytatná, kérjük, ellenőrizze az e-mailjeit, hogy kapott-e ellenőrző linket.","Avant de continuer, veuillez vérifier votre boîte mail pour trouver un lien de vérification.",*,*,"Before proceeding, please check your email for a verification link.",{locale}.json
+*::*.Budget,Budget,,Költségvetés,Budget,*,*,Budget,{locale}.json
+*::*.Budget chart,Budget chart,,Költségvetési táblázat,Tableau budgétaire,*,*,Budget chart,{locale}.json
+*::*.Budget inflation,Budget inflation,,Költségvetési infláció,Inflation budgétaire,*,*,Budget inflation,{locale}.json
+"*::*.Budget is calculated using your base currency, unless you define an account with an other currency.","Budget is calculated using your base currency, unless you define an account with an other currency.","A költségvetés az alappénznemed alapján kerül kiszámításra, kivéve, ha más pénznemet használó számlát ad meg.","Le budget est calculé en utilisant votre devise de base, sauf si vous définissez un compte dans une autre devise.",*,*,"Budget is calculated using your base currency, unless you define an account with an other currency.",{locale}.json
+*::*.Buy,Buy,,Vétel,Acheter,*,*,Buy,{locale}.json
+*::*.Buying cost,Buying cost,,Vásárlási költség,coût d'achat,*,*,Buying cost,{locale}.json
+*::*.Cached monthly summaries need to be recalculated. This may take a while. Please be patient.,Cached monthly summaries need to be recalculated. This may take a while. Please be patient.,,"A gyorsítótárazott havi összesítőket újra kell számolni. Ez eltarthat egy ideig. Kérjük, legyen türelmes.",Les récapitulatifs mensuels mis en cache doivent être recalculés. Cela peut prendre un certain temps. Veuillez patienter.,*,*,Cached monthly summaries need to be recalculated. This may take a while. Please be patient.,{locale}.json
+*::*.Cancel,Cancel,,Mégsem,Annuler,*,*,Cancel,{locale}.json
+*::*.Cannot merge a parent category into a child category.,Cannot merge a parent category into a child category.,Nem lehet szülő kategóriát gyermek kategóriával egyesíteni.,Impossible de fusionner une catégorie parente avec une catégorie enfant.,*,*,Cannot merge a parent category into a child category.,{locale}.json
+*::*.Cash flow,Cash flow,,Pénzforgalom,Des flux de trésorerie,*,*,Cash flow,{locale}.json
+*::*.Cash flow value,Cash flow value,,Cash flow érték,valeur des flux de trésorerie,*,*,Cash flow value,{locale}.json
+*::*.Categories,Categories,,Kategóriák,Catégories,*,*,Categories,{locale}.json
+*::*.Categories merged,Categories merged,,Kategóriák egyesítve,Catégories fusionnées,*,*,Categories merged,{locale}.json
+*::*.Category,Category,,Kategória,Catégorie,*,*,Category,{locale}.json
+*::*.Category active state changed,Category active state changed,,A kategória aktív állapota megváltozott,L'état actif de la catégorie a changé.,*,*,Category active state changed,{locale}.json
+*::*.Category added,Category added,,Kategória létrehozva,Catégorie ajoutée,*,*,Category added,{locale}.json
+*::*.Category deleted,Category deleted,,Kategória törölve,Catégorie supprimée,*,*,Category deleted,{locale}.json
+"*::*.Category is in use, cannot be deleted","Category is in use, cannot be deleted","A kategória használatban van, nem törölhető",Cette catégorie est utilisée et ne peut pas être supprimée.,*,*,"Category is in use, cannot be deleted",{locale}.json
+*::*.Category not found,Category not found,,Nem található kategória,Catégorie introuvable,*,*,Category not found,{locale}.json
+*::*.Category preferences,Category preferences,,Kategóriabeállítások,Préférences de catégorie,*,*,Category preferences,{locale}.json
+*::*.Category to be merged,Category to be merged,,Összevonandó kategória,Catégorie à fusionner,*,*,Category to be merged,{locale}.json
+*::*.Category updated,Category updated,,Kategória frissítve,Catégorie mise à jour,*,*,Category updated,{locale}.json
+*::*.Change Password,Change Password,,Jelszó Megváltoztatása,Changer le mot de passe,*,*,Change Password,{locale}.json
+*::*.Child,Child,,Gyerek,Enfant,*,*,Child,{locale}.json
+*::*.Clear selection,Clear selection,,Kijelölés törlése,Sélection claire,*,*,Clear selection,{locale}.json
+*::*.Click here to sign in,Click here to sign in,,Kattints ide a bejelentkezéshez,Cliquez ici pour vous connecter,*,*,Click here to sign in,{locale}.json
+*::*.Clone,Clone,,Másol,Cloner,*,*,Clone,{locale}.json
+*::*.Clone existing transaction,Clone existing transaction,,Tranzakció másolása,Cloner une transaction existante,*,*,Clone existing transaction,{locale}.json
+*::*.Clone scheduled transaction and close base item,Clone scheduled transaction and close base item,,Ütemezett tranzakció klónozása és alaptétel lezárása,Cloner la transaction planifiée et fermer l'élément de base,*,*,Clone scheduled transaction and close base item,{locale}.json
+*::*.Clone transaction,Clone transaction,,Klón tranzakció,Transaction clonée,*,*,Clone transaction,{locale}.json
+*::*.Close,Close,,Bezár,Fermer,*,*,Close,{locale}.json
+*::*.Closed accounts are <strong>hidden</strong>,Closed accounts are <strong>hidden</strong>,,A lezárt számlák <strong>rejtettek</strong>,Les comptes fermés sont <strong>masqués</strong>,*,*,Closed accounts are <strong>hidden</strong>,{locale}.json
+*::*.Closed accounts are <strong>included</strong>,Closed accounts are <strong>included</strong>,,A lezárt számlák <strong>beleértve</strong>,Les comptes clôturés sont <strong>inclus</strong>,*,*,Closed accounts are <strong>included</strong>,{locale}.json
+*::*.Collapse all items,Collapse all items,,Az összes elem összecsukása,Réduire tous les éléments,*,*,Collapse all items,{locale}.json
+*::*.Comment,Comment,,Megjegyzés,Commentaire,*,*,Comment,{locale}.json
+*::*.Commission,Commission,,Jutalék,Commission,*,*,Commission,{locale}.json
+*::*.Commissions,Commissions,,Jutalékok,Commissions,*,*,Commissions,{locale}.json
+*::*.Confirm new password,Confirm new password,,Új jelszó megerősítése,Confirmer le nouveau mot de passe,*,*,Confirm new password,{locale}.json
+*::*.Confirm password,Confirm password,,Jelszó megerősítése,Confirmez le mot de passe,*,*,Confirm password,{locale}.json
+*::*.Congratulations! Keep using YAFFA. You can dismiss this widget.,Congratulations! Keep using YAFFA. You can dismiss this widget.,,Gratulálunk! Használd tovább a YAFFA-t. Elrejtheted ezt a widgetet.,Félicitations! Continuez à utiliser YAFFA. Vous pouvez fermer ce widget.,*,*,Congratulations! Keep using YAFFA. You can dismiss this widget.,{locale}.json
+"*::*.Controls how numbers, dates, currencies are formatted.","Controls how numbers, dates, currencies are formatted.","A YAFFA által használ szám, dátum és pénznem formátum.","Contrôle le formatage des nombres, des dates et des devises.",*,*,"Controls how numbers, dates, currencies are formatted.",{locale}.json
+*::*.Controls the language used in YAFFA.,Controls the language used in YAFFA.,,A YAFFA megjelenési nyelve.,Contrôle la langue utilisée dans YAFFA.,*,*,Controls the language used in YAFFA.,{locale}.json
+*::*.Count,Count,,Gróf,Compter,*,*,Count,{locale}.json
+*::*.Create an account to start using YAFFA,Create an account to start using YAFFA,,A YAFFA használatához hozz létre egy számlát,Créez un compte pour commencer à utiliser YAFFA,*,*,Create an account to start using YAFFA,{locale}.json
+*::*.Create from existing values,Create from existing values,,Létrehozás meglévő értékekből,Créer à partir de valeurs existantes,*,*,Create from existing values,{locale}.json
+*::*.Currencies,Currencies,,Pénznemek,devises,*,*,Currencies,{locale}.json
+*::*.Currency,Currency,,Pénznem,Devise,*,*,Currency,{locale}.json
+*::*.Currency added,Currency added,,Pénznem létrehozva,Devise ajoutée,*,*,Currency added,{locale}.json
+*::*.Currency deleted,Currency deleted,,Pénznem törölve,Monnaie supprimée,*,*,Currency deleted,{locale}.json
+"*::*.Currency is in use, cannot be deleted","Currency is in use, cannot be deleted","A pénznem használatban van, nem törölhető","La devise est utilisée, elle ne peut pas être supprimée.",*,*,"Currency is in use, cannot be deleted",{locale}.json
+*::*.Currency rate added,Currency rate added,,Árfolyam hozzáadva,Taux de change ajouté,*,*,Currency rate added,{locale}.json
+*::*.Currency rate deleted,Currency rate deleted,,Árfolyam törölve,Taux de change supprimé,*,*,Currency rate deleted,{locale}.json
+*::*.Currency rate updated,Currency rate updated,,Árfolyam frissítve,Taux de change mis à jour,*,*,Currency rate updated,{locale}.json
+*::*.Currency rate values,Currency rate values,,Árfolyam értékek,taux de change,*,*,Currency rate values,{locale}.json
+*::*.Currency rates,Currency rates,,Valuta árfolyamok,taux de change,*,*,Currency rates,{locale}.json
+*::*.Currency updated,Currency updated,,Pénznem frissítve,Mise à jour de la devise,*,*,Currency updated,{locale}.json
+*::*.Current Password,Current Password,,Mostani Jelszó,Mot de passe actuel,*,*,Current Password,{locale}.json
+*::*.Current assets,Current assets,,Forgóeszközök,Actifs courants,*,*,Current assets,{locale}.json
+*::*.Current balance with investments,Current balance with investments,,Jelenlegi egyenleg befektetésekkel,Solde actuel des investissements,*,*,Current balance with investments,{locale}.json
+*::*.Current cash value,Current cash value,,Jelenlegi pénzérték,valeur marchande actuelle,*,*,Current cash value,{locale}.json
+*::*.Customize,Customize,,Testreszabás,Personnaliser,*,*,Customize,{locale}.json
+*::*.Customize YAFFA,Customize YAFFA,,YAFFA testreszabása,Personnaliser YAFFA,*,*,Customize YAFFA,{locale}.json
+*::*.Daily,Daily,,Naponta,Tous les jours,*,*,Daily,{locale}.json
+*::*.Dashboard,Dashboard,,Áttekintés,Tableau de bord,*,*,Dashboard,{locale}.json
+*::*.Database error:,Database error:,,Adatbázis hiba:,Erreur de base de données:,*,*,Database error:,{locale}.json
+*::*.Date,Date,,Dátum,Date,*,*,Date,{locale}.json
+*::*.Date from,Date from,,Dátum ettől,Dater de,*,*,Date from,{locale}.json
+*::*.Date to,Date to,,Dátum eddig,Date à,*,*,Date to,{locale}.json
+*::*.Default,Default,,Alapértelmezett,Défaut,*,*,Default,{locale}.json
+*::*.Default category,Default category,,Alapértelmezett kategória,Catégorie par défaut,*,*,Default category,{locale}.json
+*::*.Delete,Delete,,Törlés,Supprimer,*,*,Delete,{locale}.json
+*::*.Delete email,Delete email,,E-mail törlése,Supprimer l'e-mail,*,*,Delete email,{locale}.json
+*::*.Delete merged category,Delete merged category,,Egyesített kategória törlése,Supprimer la catégorie fusionnée,*,*,Delete merged category,{locale}.json
+*::*.Delete merged payee,Delete merged payee,,Egyesített kedvezményezett törlése,Supprimer le bénéficiaire fusionné,*,*,Delete merged payee,{locale}.json
+*::*.Deleting rate...,Deleting rate...,,Árfolyam törlése...,Taux de suppression...,*,*,Deleting rate...,{locale}.json
+*::*.Deleting transaction #:transactionId,Deleting transaction #:transactionId,,Tranzakció törlése #:transactionId,Suppression de la transaction n° :transactionId,*,*,Deleting transaction #:transactionId,{locale}.json
+*::*.Deposit,Deposit,,Bevétel,Dépôt,*,*,Deposit,{locale}.json
+*::*.Details,Details,,Részletek,Détails,*,*,Details,{locale}.json
+*::*.Details of transaction #:transaction,Details of transaction #:transaction,,Tranzakció részletei #:transaction,Détails de la transaction n° :transaction,*,*,Details of transaction #:transaction,{locale}.json
+*::*.Dismiss,Dismiss,,Eltűntet,Rejeter,*,*,Dismiss,{locale}.json
+*::*.Dividend,Dividend,,Osztalék,Dividende,*,*,Dividend,{locale}.json
+*::*.Do you have an account?,Do you have an account?,Van már fiókod?,Avez-vous un compte?,*,*,Do you have an account?,{locale}.json
+*::*.Don't show category recommendations for this payee any more,Don't show category recommendations for this payee any more,,Ne mutasson többé kategória-ajánlásokat ehhez a kedvezményezetthez,Ne plus afficher de recommandations de catégories pour ce bénéficiaire,*,*,Don't show category recommendations for this payee any more,{locale}.json
+*::*.E-Mail Address,Email,,E-mail cím,E-mail,*,*,E-Mail Address,{locale}.json
+*::*.Edit,Edit,,Szerkesztés,Modifier,*,*,Edit,{locale}.json
+*::*.Edit Currency Rate,Edit Currency Rate,,Árfolyam szerkesztése,Modifier le taux de change,*,*,Edit Currency Rate,{locale}.json
+*::*.Edit Investment Price,Edit Investment Price,,,,*,*,Edit Investment Price,{locale}.json
+*::*.Edit and create new schedule,Edit and create new schedule,,Szerkesztés és új ütemterv létrehozása,Modifier et créer un nouvel horaire,*,*,Edit and create new schedule,{locale}.json
+*::*.Edit and insert instance,Edit and insert instance,,Példány szerkesztése és beszúrása,Modifier et insérer une instance,*,*,Edit and insert instance,{locale}.json
+*::*.Edit payee,Edit payee,,Kedvezményezett szerkesztése,Modifier le bénéficiaire,*,*,Edit payee,{locale}.json
+*::*.Edit transaction,Edit transaction,,Tranzakció szerkesztése,Modifier la transaction,*,*,Edit transaction,{locale}.json
+*::*.Email,Email address,,Email cím,Adresse email,*,*,Email,{locale}.json
+*::*.Email address verified,Email address verified,,E-mail cím ellenőrizve,Adresse e-mail vérifiée,*,*,Email address verified,{locale}.json
+*::*.Email deleted,Email deleted,,E-mail törölve,Courriel supprimé,*,*,Email deleted,{locale}.json
+*::*.Email received by YAFFA,Email received by YAFFA,,A YAFFA által kapott e-mail,Courriel reçu par YAFFA,*,*,Email received by YAFFA,{locale}.json
+*::*.Emails received by YAFFA,Emails received by YAFFA,,A YAFFA által fogadott e-mailek,Courriels reçus par YAFFA,*,*,Emails received by YAFFA,{locale}.json
+*::*.End date,End date,,Befejezési dátum,Date de fin,*,*,End date,{locale}.json
+*::*.End date for YAFFA,End date for YAFFA,,YAFFA befejező dátum,Date de fin pour YAFFA,*,*,End date for YAFFA,{locale}.json
+*::*.English,English,,Angol,Anglais,*,*,English,{locale}.json
+*::*.Enter instance,Enter instance,,Példány megadása,Saisissez l'instance,*,*,Enter instance,{locale}.json
+*::*.Enter schedule instance,Enter schedule instance,,Ütemezési példány megadása,Saisissez l'instance de planification,*,*,Enter schedule instance,{locale}.json
+*::*.Enter scheduled transaction instance,Enter scheduled transaction instance,,Ütemezett tranzakciópéldány megadása,Saisir l'instance de transaction planifiée,*,*,Enter scheduled transaction instance,{locale}.json
+*::*.Error,Error,,Hiba,Erreur,*,*,Error,{locale}.json
+*::*.Error changing investment active state,Error changing investment active state,,Hiba történt a befektetés aktív állapotának módosításakor,Erreur lors du changement d'état actif de l'investissement,*,*,Error changing investment active state,{locale}.json
+*::*.Error changing tag active state,Error changing tag active state,,Hiba a címke aktív állapotának módosításakor,Erreur lors du changement d'état actif de l'étiquette,*,*,Error changing tag active state,{locale}.json
+*::*.Error deleting transaction (#:transactionId): :error,Error deleting transaction (#:transactionId): :error,,Hiba a tranzakció törlésekor (#:transactionId): :error,Erreur lors de la suppression de la transaction (#:transactionId): :error,*,*,Error deleting transaction (#:transactionId): :error,{locale}.json
+*::*.Error skipping transaction (#:transactionId): :error,Error skipping transaction (#:transactionId): :error,,Hiba a tranzakció kihagyásakor (#:transactionId): :error,Erreur lors de l'omission de la transaction (#:transactionId): :error,*,*,Error skipping transaction (#:transactionId): :error,{locale}.json
+*::*.Error while changing account active state.,Error while changing account active state.,,Hiba történt a számla aktív állapotának módosításakor.,Erreur lors de la modification de l'état actif du compte.,*,*,Error while changing account active state.,{locale}.json
+*::*.Error while changing category active state.,Error while changing category active state.,,Hiba történt a kategória aktív állapotának módosításakor.,Erreur lors du changement d'état actif de la catégorie.,*,*,Error while changing category active state.,{locale}.json
+*::*.Error while fetching account balance data,Error while fetching account balance data,,Hiba történt a számlaegyenleg adatok lekérésekor,Erreur lors de la récupération des données du solde du compte,*,*,Error while fetching account balance data,{locale}.json
+*::*.Error while retrieving data,Error while retrieving data,,Hiba az adatok lekérésekor,Erreur lors de la récupération des données,*,*,Error while retrieving data,{locale}.json
+*::*.Error while trying to delete account,Error while trying to delete account,,Hiba történt a számla törlése közben,Erreur lors de la tentative de suppression du compte,*,*,Error while trying to delete account,{locale}.json
+*::*.Error while trying to delete account group: ,Error while trying to delete account group: ,,Hiba történt a számla csoport törlése közben:,Erreur lors de la tentative de suppression du groupe de comptes:,*,*,Error while trying to delete account group: ,{locale}.json
+*::*.Error while trying to delete category: ,Error while trying to delete category: ,,Hiba történt a kategória törlése közben:,Erreur lors de la tentative de suppression de la catégorie:,*,*,Error while trying to delete category: ,{locale}.json
+*::*.Error while trying to delete email,Error while trying to delete email,,Hiba történt az e-mail törlése közben,Erreur lors de la tentative de suppression de l'e-mail,*,*,Error while trying to delete email,{locale}.json
+*::*.Error while trying to delete investment,Error while trying to delete investment,,Hiba történt a befektetés törlése közben,Erreur lors de la tentative de suppression de l'investissement,*,*,Error while trying to delete investment,{locale}.json
+*::*.Error while trying to delete investment group: ,Error while trying to delete investment group: ,,Hiba a befektetési csoport törlése közben:,Erreur lors de la tentative de suppression du groupe d'investissement:,*,*,Error while trying to delete investment group: ,{locale}.json
+*::*.Error while trying to delete payee,Error while trying to delete payee,,Hiba történt a kedvezményezett törlése közben,Erreur lors de la tentative de suppression du bénéficiaire,*,*,Error while trying to delete payee,{locale}.json
+*::*.Estimated end value,Estimated end value,,Becsült végérték,valeur finale estimée,*,*,Estimated end value,{locale}.json
+*::*.Exchange rate,Exchange rate,,Árfolyam,Taux de change,*,*,Exchange rate,{locale}.json
+*::*.Excluded categories for payee,Excluded categories for payee,,Kizárt kategóriák a kedvezményezett számára,Catégories exclues pour le bénéficiaire,*,*,Excluded categories for payee,{locale}.json
+*::*.Expand all items,Expand all items,,Az összes elem kibontása,Développer tous les éléments,*,*,Expand all items,{locale}.json
+*::*.Expand items with data,Expand items with data,,Elemek kibontása adatokkal,Développer les éléments avec des données,*,*,Expand items with data,{locale}.json
+*::*.Extra,Extra,,Külön,Supplémentaire,*,*,Extra,{locale}.json
+*::*.Extracted data,Extracted data,,Kivont adatok,Données extraites,*,*,Extracted data,{locale}.json
+*::*.Failed to change base currency,Failed to change base currency,,Nem sikerült módosítani az alappénznemet,Échec du changement de la devise de base,*,*,Failed to change base currency,{locale}.json
+*::*.Failed to delete rate,Failed to delete rate,,Árfolyam törlése sikertelen,Échec de la suppression du taux,*,*,Failed to delete rate,{locale}.json
+*::*.Failed to load missing rates,Failed to load missing rates,,Hiányzó árfolyamok betöltése sikertelen,Impossible de charger les taux manquants,*,*,Failed to load missing rates,{locale}.json
+*::*.File,File,,Fájl,Déposer,*,*,File,{locale}.json
+*::*.Filters,Filters,,Szűrők,Filtres,*,*,Filters,{locale}.json
+*::*.Finalize draft transaction,Finalize draft transaction,,Vázlat tranzakció véglegesítése,Finaliser le projet de transaction,*,*,Finalize draft transaction,{locale}.json
+*::*.Finalize transaction,Finalize transaction,,Tranzakció véglegesítése,Finaliser la transaction,*,*,Finalize transaction,{locale}.json
+*::*.Find transactions,Find transactions,,Tranzakció keresése,Trouver des transactions,*,*,Find transactions,{locale}.json
+*::*.First available data,First available data,,Első elérhető adat,Premières données disponibles,*,*,First available data,{locale}.json
+*::*.First transaction,First transaction,,Első tranzakció,Première transaction,*,*,First transaction,{locale}.json
+*::*.Forgot Your Password?,Forgot Your Password?,,Elfelejtetted a jelszavad?,Mot de passe oublié?,*,*,Forgot Your Password?,{locale}.json
+*::*.Frequency,Frequency,,Gyakoriság,Fréquence,*,*,Frequency,{locale}.json
+*::*.From,From,,Tól,Depuis,*,*,From,{locale}.json
+*::*.Go to account,Go to account,,Ugrás a számlához,Accéder au compte,*,*,Go to account,{locale}.json
+*::*.Go to investment,Go to investment,,Menj a befektetéshez,Accédez à la section investissement,*,*,Go to investment,{locale}.json
+*::*.Go to transaction,Go to transaction,,Ugrás a tranzakcióhoz,Accéder à la transaction,*,*,Go to transaction,{locale}.json
+*::*.Group,Group,,Csoport,Groupe,*,*,Group,{locale}.json
+*::*.Guided tour,Guided tour,,Ismertető lépések,Visite guidée,*,*,Guided tour,{locale}.json
+*::*.HTML,HTML view,,HTML nézet,vue HTML,*,*,HTML,{locale}.json
+*::*.Handled,Handled,,Kezelt,Géré,*,*,Handled,{locale}.json
+*::*.Has similar transaction,Has similar transaction,,Hasonló tranzakciót folytat,A une transaction similaire,*,*,Has similar transaction,{locale}.json
+*::*.Have at least one account added,Have at least one account added,,Legalább egy számla hozzáadva,Avoir au moins un compte ajouté,*,*,Have at least one account added,{locale}.json
+*::*.Have at least one account group added,Have at least one account group added,,Legalább egy számla csoport hozzáadása szükséges,Avoir au moins un groupe de comptes ajouté,*,*,Have at least one account group added,{locale}.json
+*::*.Have at least one currency added,Have at least one currency added,,Legalább egy pénznemet hozzá kell adni,Ajoutez au moins une devise,*,*,Have at least one currency added,{locale}.json
+*::*.Have some categories added,Have some categories added,,Hozzáadtam néhány kategóriát,J'ai ajouté quelques catégories.,*,*,Have some categories added,{locale}.json
+*::*.Have some payees added,Have some payees added,,Hozzáadtak néhány kedvezményezettet,Ajouter des bénéficiaires,*,*,Have some payees added,{locale}.json
+*::*.Have your base currency set,Have your base currency set,,Beállított alappénznemet,Définissez votre devise de base,*,*,Have your base currency set,{locale}.json
+*::*.Hide,Hide,,Elrejt,Cacher,*,*,Hide,{locale}.json
+"*::*.Hide this recommendation, but it might be displayed later","Hide this recommendation, but it might be displayed later","Rejtse el ezt az ajánlást, de később megjelenhet","Masquer cette recommandation, mais elle pourrait s'afficher ultérieurement.",*,*,"Hide this recommendation, but it might be displayed later",{locale}.json
+*::*.Home,Home,,Kezdő oldal,Accueil,*,*,Home,{locale}.json
+*::*.How long would you like YAFFA to calculate forecasts.,How long would you like YAFFA to calculate forecasts.,,A dátum ameddig a YAFFA kiszámítsa az előrejelzéseket.,Combien de temps souhaitez-vous que YAFFA consacre aux prévisions?,*,*,How long would you like YAFFA to calculate forecasts.,{locale}.json
+*::*.Hungarian,Hungarian,,Magyar,Hongrois,*,*,Hungarian,{locale}.json
+"*::*.I accept the <a href="":toslink"" target=""_blank"">terms of service</a>","I accept the <a href="":toslink"" target=""_blank"">terms of service</a>","Elfogadom a szolgáltatás <a href="":toslink"" target=""_blank"">használati feltételeit</a>","J'accepte les <a href="":toslink"" target=""_blank"">conditions d'utilisation</a>",*,*,"I accept the <a href="":toslink"" target=""_blank"">terms of service</a>",{locale}.json
+*::*.ISIN number,ISIN number,,ISIN szám,Numéro ISIN,*,*,ISIN number,{locale}.json
+*::*.ISO Code,ISO Code,,ISO kód,Code ISO,*,*,ISO Code,{locale}.json
+*::*.Id,Id,,Id,Identifiant,*,*,Id,{locale}.json
+*::*.Identified transactions,Identified transactions,,Azonosított tranzakciók,Transactions identifiées,*,*,Identified transactions,{locale}.json
+"*::*.If next date is empty, then this schedule is considered to be finished","If next date is empty, then this schedule is considered to be finished","Ha a következő dátum üres, akkor az ütemterv befejezettnek tekintendő.","Si la prochaine date est vide, ce planning est considéré comme terminé.",*,*,"If next date is empty, then this schedule is considered to be finished",{locale}.json
+*::*.If you did not receive the email,If you did not receive the email,,Ha nem kaptad meg az e-mailt,Si vous n'avez pas reçu l'e-mail,*,*,If you did not receive the email,{locale}.json
+*::*.Import CSV,Import CSV,,CSV importálása,Importer un fichier CSV,*,*,Import CSV,{locale}.json
+*::*.Import alias,Import alias,,Alias ​​importálása,Alias ​​d'importation,*,*,Import alias,{locale}.json
+*::*.Import transactions,Import transactions,,Tranzakciók importálása,Transactions d'importation,*,*,Import transactions,{locale}.json
+*::*.Inactive,Inactive,,Inaktív,Inactif,*,*,Inactive,{locale}.json
+*::*.Interest yield,Interest yield,,Hozam,rendement des intérêts,*,*,Interest yield,{locale}.json
+*::*.Interval,Interval,,Intervallum,Intervalle,*,*,Interval,{locale}.json
+*::*.Investment,Investment,,Befektetés,Investissement,*,*,Investment,{locale}.json
+*::*.Investment Groups,Investment Groups,,Befektetés Csoportok,Groupes d'investissement,*,*,Investment Groups,{locale}.json
+*::*.Investment added,Investment added,,Befektetés létrehozva,Investissement ajouté,*,*,Investment added,{locale}.json
+*::*.Investment deleted,Investment deleted,,Befektetés törölve,Investissement supprimé,*,*,Investment deleted,{locale}.json
+*::*.Investment details,Investment details,,Befektetési részletek,Détails de l'investissement,*,*,Investment details,{locale}.json
+*::*.Investment group,Investment group,,Befektetési csoport,Groupe d'investissement,*,*,Investment group,{locale}.json
+*::*.Investment group added,Investment group added,,Befektetési csoport hozzáadva,Le groupe d'investissement a ajouté,*,*,Investment group added,{locale}.json
+*::*.Investment group deleted,Investment group deleted,,Befektetési csoport törölve,Groupe d'investissement supprimé,*,*,Investment group deleted,{locale}.json
+"*::*.Investment group is in use, cannot be deleted","Investment group is in use, cannot be deleted","A befektetési csoport használatban van, nem törölhető",Le groupe d'investissement est utilisé et ne peut pas être supprimé.,*,*,"Investment group is in use, cannot be deleted",{locale}.json
+*::*.Investment group updated,Investment group updated,,Befektetési csoport frissítve,Le groupe d'investissement a mis à jour,*,*,Investment group updated,{locale}.json
+*::*.Investment groups,Investment groups,,Befektetés csoportok,Groupes d'investissement,*,*,Investment groups,{locale}.json
+*::*.Investment groups serve as an organizational tool to streamline your investment overview.,Investment groups serve as an organizational tool to streamline your investment overview.,,A befektetési csoportok szervezeti eszközként szolgálnak a befektetési áttekintés egyszerűsítésére.,Les groupes d'investissement servent d'outil d'organisation pour simplifier votre vue d'ensemble de vos investissements.,*,*,Investment groups serve as an organizational tool to streamline your investment overview.,{locale}.json
+*::*.Investment income,Investment income,,Befektetési jövedelem,Revenus de placement,*,*,Investment income,{locale}.json
+"*::*.Investment is in use, cannot be deleted","Investment is in use, cannot be deleted","A befektetés használatban van, nem törölhető",L'investissement est en cours et ne peut être supprimé.,*,*,"Investment is in use, cannot be deleted",{locale}.json
+*::*.Investment payment,Investment payment,,Befektetési kifizetés,Paiement d'investissement,*,*,Investment payment,{locale}.json
+*::*.Investment price,Investment price,,Befektetés árfolyam,Prix d'investissement,*,*,Investment price,{locale}.json
+*::*.Investment price added,Investment price added,,Befektetés árfolyam rögzítve,Prix d'investissement ajouté,*,*,Investment price added,{locale}.json
+*::*.Investment price deleted,Investment price deleted,,Befektetés árfolyam törölve,Prix de l'investissement supprimé,*,*,Investment price deleted,{locale}.json
+*::*.Investment price history,Investment price history,,Befektetés árfolyam történet,Historique des prix d'investissement,*,*,Investment price history,{locale}.json
+*::*.Investment price updated,Investment price updated,,Befektetés árfolyam frissítve,Prix de l'investissement mis à jour,*,*,Investment price updated,{locale}.json
+*::*.Investment price values,Investment price values,,,*,*,Investment price values,{locale}.json
+*::*.Investment prices of :name,Investment prices of :name,,:name árfolyam adatai,Prix d'investissement pour :name,*,*,Investment prices of :name,{locale}.json
+*::*.Investment prices successfully downloaded from :date,Investment prices successfully downloaded from :date,,Befektetési árak sikeresen letöltve innen: :date,Prix des investissements téléchargés avec succès depuis :date,*,*,Investment prices successfully downloaded from :date,{locale}.json
+*::*.Investment timeline,Investment timeline,,Befektetési ütemterv,Calendrier d'investissement,*,*,Investment timeline,{locale}.json
+*::*.Investment updated,Investment updated,,Befektetési adatok frissítése,Mise à jour des investissements,*,*,Investment updated,{locale}.json
+*::*.Investment value,Investment value,,Befektetési érték,valeur d'investissement,*,*,Investment value,{locale}.json
+*::*.Investments,Investments,,Befektetések,Investissements,*,*,Investments,{locale}.json
+*::*.It has subcategories assigned.,It has subcategories assigned.,,Hozzárendelt alkategóriákkal rendelkezik.,Elle comporte des sous-catégories.,*,*,It has subcategories assigned.,{locale}.json
+*::*.It is already used in transactions.,It is already used in transactions.,,Már használják tranzakciókban.,Il est déjà utilisé dans les transactions.,*,*,It is already used in transactions.,{locale}.json
+*::*.It is used as default category by some payees.,It is used as default category by some payees.,,Néhány kedvezményezett alapértelmezett kategóriaként használja.,Elle est utilisée comme catégorie par défaut par certains bénéficiaires.,*,*,It is used as default category by some payees.,{locale}.json
+*::*.It is used as not preferred category by some payees.,It is used as not preferred category by some payees.,,Egyes kedvezményezettek nem preferált kategóriaként használják.,Certains bénéficiaires l'utilisent comme catégorie non privilégiée.,*,*,It is used as not preferred category by some payees.,{locale}.json
+*::*.It is used as preferred category by some payees.,It is used as preferred category by some payees.,,Egyes kedvezményezettek előnyben részesített kategóriájaként használják.,Elle est utilisée comme catégorie privilégiée par certains bénéficiaires.,*,*,It is used as preferred category by some payees.,{locale}.json
+*::*.Language,Language,,Nyelv,Langue,*,*,Language,{locale}.json
+*::*.Language selectors,Language selectors,,Nyelvválasztók,sélecteurs de langue,*,*,Language selectors,{locale}.json
+*::*.Last available data,Last available data,,Utolsó elérhető adat,Dernières données disponibles,*,*,Last available data,{locale}.json
+*::*.Last known rate,Last known rate,,Utolsó ismert árfolyam,dernier taux connu,*,*,Last known rate,{locale}.json
+*::*.Last quantity,Last quantity,,Utolsó mennyiség,Dernière quantité,*,*,Last quantity,{locale}.json
+*::*.Last transaction,Last transaction,,Utolsó tranzakció,Dernière transaction,*,*,Last transaction,{locale}.json
+*::*.Latest owned value,Latest owned value,,Legutóbbi saját érték,dernière valeur détenue,*,*,Latest owned value,{locale}.json
+*::*.Latest price,Latest price,,Legújabb ár,Prix actuel,*,*,Latest price,{locale}.json
+*::*.Latest rate from base currency,Latest rate from base currency,,Legutóbbi árfolyam az alapdevizától,Dernier taux de change par rapport à la devise de base,*,*,Latest rate from base currency,{locale}.json
+*::*.Latest rate to base currency,Latest rate to base currency,,Legutóbbi árfolyam az alapdevizához viszonyítva,Dernier taux de change par rapport à la devise de base,*,*,Latest rate to base currency,{locale}.json
+*::*.Learn more,Learn more,,Tudj meg többet!,Apprendre encore plus,*,*,Learn more,{locale}.json
+*::*.Linked transaction,Linked transaction,,Kapcsolt tranzakció,Transaction liée,*,*,Linked transaction,{locale}.json
+*::*.List and manage investment prices,List and manage investment prices,,Befektetés árfolyamok listázása és kezelése,Lister et gérer les prix des investissements,*,*,List and manage investment prices,{locale}.json
+*::*.List of currencies,List of currencies,,Valuták listája,Liste des devises,*,*,List of currencies,{locale}.json
+*::*.List of investments,List of investments,,Befektetések listája,Liste des investissements,*,*,List of investments,{locale}.json
+*::*.Load account transaction history,Load account transaction history,,Számla tranzakciós előzményeinek betöltése,Historique des transactions du compte,*,*,Load account transaction history,{locale}.json
+*::*.Load data,Load data,,Adatok betöltése,Charger les données,*,*,Load data,{locale}.json
+*::*.Load missing investment prices,Load missing investment prices,,,*,*,Load missing investment prices,{locale}.json
+*::*.Load missing rates,Load missing rates,,Hiányzó árfolyamok betöltése,Charger les taux manquants,*,*,Load missing rates,{locale}.json
+*::*.Load new currency rates,Load new currency rates,,Új valutaárfolyamok betöltése,Charger les nouveaux taux de change,*,*,Load new currency rates,{locale}.json
+*::*.Load new price data,Load new price data,,Új áradatok betöltése,Charger les nouvelles données de prix,*,*,Load new price data,{locale}.json
+*::*.Loading missing rates...,Loading missing rates...,,Hiányzó árfolyamok betöltése...,Chargement des taux manquants...,*,*,Loading missing rates...,{locale}.json
+*::*.Locale,Locale,,Nyelvi beállítás,Lieu,*,*,Locale,{locale}.json
+*::*.Login,Login,,Bejelentkezés,Se connecter,*,*,Login,{locale}.json
+*::*.Logout,Logout,,Kilépés,Déconnexion,*,*,Logout,{locale}.json
+*::*.Make this the end date,Make this the end date,,Legyen ez a befejező dátum,Faites de cette date la date de fin,*,*,Make this the end date,{locale}.json
+*::*.Make this the start date,Make this the start date,,Legyen ez a kezdő dátum,Définissez cette date comme date de début,*,*,Make this the start date,{locale}.json
+*::*.Mark as handled,Mark as handled,,Megjelölés kezeltként,Marquer comme traité,*,*,Mark as handled,{locale}.json
+*::*.Maybe later,Maybe later,,Talán máskor,Peut-être plus tard,*,*,Maybe later,{locale}.json
+*::*.Merge categories,Merge categories,,Kategóriák egyesítése,Fusionner les catégories,*,*,Merge categories,{locale}.json
+*::*.Merge into an other category,Merge into an other category,,Egy másik kategóriába való beillesztés,Fusionner avec une autre catégorie,*,*,Merge into an other category,{locale}.json
+*::*.Merge into an other payee,Merge into an other payee,,Egy másik kedvezményezettel való egyesülés,Fusionner avec un autre bénéficiaire,*,*,Merge into an other payee,{locale}.json
+*::*.Merge payees,Merge payees,,Kedvezményezettek egyesítése,Fusionner les bénéficiaires,*,*,Merge payees,{locale}.json
+*::*.Missing rates loaded successfully,Missing rates loaded successfully,,Hiányzó árfolyamok sikeresen betöltve,Taux manquants chargés avec succès,*,*,Missing rates loaded successfully,{locale}.json
+*::*.Modify account,Modify account,,Számla módosítása,Modifier le compte,*,*,Modify account,{locale}.json
+*::*.Modify account group,Modify account group,,Számla csoport módosítása,Modifier le groupe de comptes,*,*,Modify account group,{locale}.json
+*::*.Modify category,Modify category,,Kategória módosítása,Modifier la catégorie,*,*,Modify category,{locale}.json
+*::*.Modify currency,Modify currency,,Pénznem módosítása,Modifier la devise,*,*,Modify currency,{locale}.json
+*::*.Modify existing transaction,Modify existing transaction,,Tranzakció módosítása,Modifier une transaction existante,*,*,Modify existing transaction,{locale}.json
+*::*.Modify investment,Modify investment,,Befektetés módosítása,Modifier l'investissement,*,*,Modify investment,{locale}.json
+*::*.Modify investment group,Modify investment group,,Befektetési csoport módosítása,Modifier le groupe d'investissement,*,*,Modify investment group,{locale}.json
+*::*.Modify investment price,Modify investment price,,Befektetési ár módosítása,Modifier le prix de l'investissement,*,*,Modify investment price,{locale}.json
+*::*.Modify payee,Modify payee,,Kedvezményezett módosítása,Modifier le bénéficiaire,*,*,Modify payee,{locale}.json
+*::*.Modify tag,Modify tag,,Címke módosítása,Modifier l'étiquette,*,*,Modify tag,{locale}.json
+*::*.Monthly,Monthly,,Havonta,Mensuel,*,*,Monthly,{locale}.json
+*::*.Monthly balance change,Monthly balance change,,Havi egyenlegváltozás,Changement de solde mensuel,*,*,Monthly balance change,{locale}.json
+*::*.Monthly change,Monthly change,,Havi változás,Changement mensuel,*,*,Monthly change,{locale}.json
+*::*.Monthly overview for top-level categories,Monthly overview for top-level categories,,Havi áttekintés a legfelső szintű kategóriákról,Aperçu mensuel des principales catégories,*,*,Monthly overview for top-level categories,{locale}.json
+*::*.Moving average,Moving average,,Mozgóátlag,moyenne mobile,*,*,Moving average,{locale}.json
+*::*.My profile,My profile,,Profilom,Mon profil,*,*,My profile,{locale}.json
+*::*.Name,Name,,Név,Nom,*,*,Name,{locale}.json
+*::*.Never show this widget,Never show this widget,,Ablak végleges elrejtése,Ne jamais afficher ce widget,*,*,Never show this widget,{locale}.json
+*::*.Never used,Never used,,Soha nem használt,Jamais utilisé,*,*,Never used,{locale}.json
+*::*.New Password,New Password,,Új Jelszó,Nouveau mot de passe,*,*,New Password,{locale}.json
+*::*.New account,New account,,Új számla,Nouveau compte,*,*,New account,{locale}.json
+*::*.New account group,New account group,,Új számla csoport,Nouveau groupe de comptes,*,*,New account group,{locale}.json
+*::*.New assets,New assets,,Új eszközök,Nouveaux actifs,*,*,New assets,{locale}.json
+*::*.New category,New category,,Új kategória,Nouvelle catégorie,*,*,New category,{locale}.json
+*::*.New currency,New currency,,Új pénznem,Nouvelle monnaie,*,*,New currency,{locale}.json
+*::*.New deposit,New deposit,,Új bevétel,Nouveau dépôt,*,*,New deposit,{locale}.json
+*::*.New investment,New investment,,Új befektetés,Nouvel investissement,*,*,New investment,{locale}.json
+*::*.New investment group,New investment group,,Új befektetés csoport,Nouveau groupe d'investissement,*,*,New investment group,{locale}.json
+*::*.New investment transaction,New investment transaction,,Új befektetési tranzakció,Nouvelle transaction d'investissement,*,*,New investment transaction,{locale}.json
+*::*.New payee,New payee,,Új üzlet,Nouveau bénéficiaire,*,*,New payee,{locale}.json
+*::*.New scheduled investment transaction,New scheduled investment transaction,,Új ütemezett befektetési tranzakció,Nouvelle transaction d'investissement programmée,*,*,New scheduled investment transaction,{locale}.json
+*::*.New scheduled transaction,New scheduled transaction,,Új ütemezett tranzakció,Nouvelle transaction programmée,*,*,New scheduled transaction,{locale}.json
+"*::*.New scheduled, investment transaction","New scheduled, investment transaction","Új, ütemezett befektetési tranzakció",Nouvelle opération d'investissement programmée,*,*,"New scheduled, investment transaction",{locale}.json
+"*::*.New scheduled, standard transaction","New scheduled, standard transaction","Új ütemezett, standard tranzakció",Nouvelle transaction standard programmée,*,*,"New scheduled, standard transaction",{locale}.json
+*::*.New standard transaction,New standard transaction,,Új normál tranzakció,Nouvelle transaction standard,*,*,New standard transaction,{locale}.json
+*::*.New tag,New tag,,Új címke,Nouvelle étiquette,*,*,New tag,{locale}.json
+*::*.New transaction,New transaction,,Új tranzakció,Nouvelle tranzakció,*,*,New transaction,{locale}.json
+*::*.New transaction item,New transaction item,,Új tétel,Nouvel élément de transaction,*,*,New transaction item,{locale}.json
+*::*.New transfer,New transfer,,Új átvezetés,Nouveau transfert,*,*,New transfer,{locale}.json
+*::*.New withdrawal,New withdrawal,,Új kiadás,Nouveau retrait,*,*,New withdrawal,{locale}.json
+*::*.Next date,Next date,,Következő dátum,Prochaine date,*,*,Next date,{locale}.json
+*::*.Next month,Next month,,Következő hónap,Mois prochain,*,*,Next month,{locale}.json
+*::*.No,No,,Nem,Non,*,*,No,{locale}.json
+*::*.No account groups found,No account groups found,,Nem található számla csoport,Aucun groupe de comptes trouvé,*,*,No account groups found,{locale}.json
+*::*.No accounts found,No accounts found,,Nem található számla,Aucun compte trouvé,*,*,No accounts found,{locale}.json
+*::*.No category assigned,No category assigned,,Nincs hozzárendelve kategória,Aucune catégorie attribuée,*,*,No category assigned,{locale}.json
+*::*.No currencies found,No currencies found,,Nem találhatók pénznemek,Aucune devise trouvée,*,*,No currencies found,{locale}.json
+*::*.No data,No data,,Nincs adat,Aucune donnée,*,*,No data,{locale}.json
+*::*.No data available,No data available,,Nincs elérhető adat,Aucune donnée disponible,*,*,No data available,{locale}.json
+*::*.No investment groups found,No investment groups found,,Nem található befektetési csoport,Aucun groupe d'investissement trouvé,*,*,No investment groups found,{locale}.json
+*::*.No items added,No items added,,Nincsenek tételek hozzáadva,Aucun article ajouté,*,*,No items added,{locale}.json
+*::*.No price provider configured for this investment,No price provider configured for this investment,,,*,*,No price provider configured for this investment,{locale}.json
+*::*.No transactions,No transactions,,Nincsenek tranzakciók,Aucune transaction,*,*,No transactions,{locale}.json
+"*::*.No, thanks","No, thanks","Köszönöm, nem",Non merci,*,*,"No, thanks",{locale}.json
+*::*.None,None,,Semmi,Aucun,*,*,None,{locale}.json
+*::*.Not allocated,Not allocated,,Nem felosztott,Non attribué,*,*,Not allocated,{locale}.json
+*::*.Not available,Not available,,Nem elérhető,Pas disponible,*,*,Not available,{locale}.json
+*::*.Not set,Not set,,Nincs megadva,Non défini,*,*,Not set,{locale}.json
+*::*.Number of records,Number of records,,Rekordok száma,Nombre d'enregistrements,*,*,Number of records,{locale}.json
+"*::*.OK, let's do it!","OK, let's do it!","Rendben, mehet!","OK, allons-y!",*,*,"OK, let's do it!",{locale}.json
+*::*.Open,Open,,Nyitott,Ouvrir,*,*,Open,{locale}.json
+*::*.Opening balance,Opening balance,,Nyitó egyenleg,Solde d'ouverture,*,*,Opening balance,{locale}.json
+*::*.Overview,Overview,,Áttekintés,Aperçu,*,*,Overview,{locale}.json
+*::*.Owned quantity,Owned quantity,,Birtokolt mennyiség,quantité possédée,*,*,Owned quantity,{locale}.json
+*::*.Parent,Parent,,Szülő,Mère,*,*,Parent,{locale}.json
+*::*.Parent category,Parent category,,Szülő kategória,Catégorie parente,*,*,Parent category,{locale}.json
+*::*.Parent or children,Parent or children,,Szülő vagy gyerek,Parent ou enfants,*,*,Parent or children,{locale}.json
+*::*.Password,Password,,Jelszó,Mot de passe,*,*,Password,{locale}.json
+*::*.Password changed successfully.,Password changed successfully.,,A jelszó sikeresen megváltozott.,Mot de passe modifié avec succès.,*,*,Password changed successfully.,{locale}.json
+*::*.Payee,Payee,,Üzlet,Bénéficiaire,*,*,Payee,{locale}.json
+*::*.Payee added,Payee added,,Üzlet létrehozva,Le bénéficiaire a ajouté,*,*,Payee added,{locale}.json
+*::*.Payee deleted,Payee deleted,,Üzlet törölve,Bénéficiaire supprimé,*,*,Payee deleted,{locale}.json
+*::*.Payee details,Payee details,,Üzlet részletei,Détails du bénéficiaire,*,*,Payee details,{locale}.json
+"*::*.Payee is in use, cannot be deleted","Payee is in use, cannot be deleted","Az üzlet nem törölhető, mert használatban van","Le bénéficiaire est utilisé, il ne peut pas être supprimé.",*,*,"Payee is in use, cannot be deleted",{locale}.json
+*::*.Payee to be merged,Payee to be merged,,Kedvezményezett összevonása,Bénéficiaire à fusionner,*,*,Payee to be merged,{locale}.json
+*::*.Payee updated,Payee updated,,Üzlet módosítva,Mise à jour du bénéficiaire,*,*,Payee updated,{locale}.json
+*::*.Payees,Payees,,Üzletek,Bénéficiaires,*,*,Payees,{locale}.json
+*::*.Payees merged,Payees merged,,Kedvezményezettek egyesültek,Bénéficiaires fusionnés,*,*,Payees merged,{locale}.json
+*::*.Please confirm your password before continuing.,Please confirm your password before continuing.,,"Kérjük, erősítse meg jelszavát a folytatás előtt.",Veuillez confirmer votre mot de passe avant de continuer.,*,*,Please confirm your password before continuing.,{locale}.json
+*::*.Please select an action,Please select an action,,"Kérjük, válasszon egy műveletet",Veuillez sélectionner une action,*,*,Please select an action,{locale}.json
+*::*.Please select categories to be merged,Please select categories to be merged,,"Kérjük, válassza ki az egyesítendő kategóriákat",Veuillez sélectionner les catégories à fusionner.,*,*,Please select categories to be merged,{locale}.json
+*::*.Please select different categories to be merged,Please select different categories to be merged,,"Kérjük, válasszon ki különböző kategóriákat az egyesítéshez",Veuillez sélectionner les différentes catégories à fusionner.,*,*,Please select different categories to be merged,{locale}.json
+*::*.Please select different payees to be merged,Please select different payees to be merged,,"Kérjük, válasszon ki különböző kedvezményezetteket az összevonáshoz",Veuillez sélectionner les différents bénéficiaires à fusionner.,*,*,Please select different payees to be merged,{locale}.json
+*::*.Please select payees to be merged,Please select payees to be merged,,"Kérjük, válassza ki az egyesítendő kedvezményezetteket",Veuillez sélectionner les bénéficiaires à fusionner.,*,*,Please select payees to be merged,{locale}.json
+*::*.Preferred categories for payee,Preferred categories for payee,,Kedvezményezett által előnyben részesített kategóriák,Catégories privilégiées pour le bénéficiaire,*,*,Preferred categories for payee,{locale}.json
+*::*.Previous month,Previous month,,Előző hónap,Le mois précédent,*,*,Previous month,{locale}.json
+*::*.Previous month to date,Previous month to date,,Előző hónap a mai napig,Le mois précédent à ce jour,*,*,Previous month to date,{locale}.json
+*::*.Price,Price,,Ár,Prix,*,*,Price,{locale}.json
+*::*.Price provider,Price provider,,Adatszolgáltató,Fournisseur de prix,*,*,Price provider,{locale}.json
+*::*.Process email again,Process email again,,E-mail újbóli feldolgozása,Traiter à nouveau l'e-mail,*,*,Process email again,{locale}.json
+*::*.Processed,Processed,,Feldolgozott,Traité,*,*,Processed,{locale}.json
+*::*.Properties,Properties,,Tulajdonságok,Propriétés,*,*,Properties,{locale}.json
+*::*.Quantity,Quantity,,Mennyiség,Quantité,*,*,Quantity,{locale}.json
+*::*.Quantity history,Quantity history,,Mennyiségi előzmények,Historique des quantités,*,*,Quantity history,{locale}.json
+*::*.Quick actions,Quick actions,,Gyors műveletek,Actions rapides,*,*,Quick actions,{locale}.json
+*::*.Quick create,Quick create,,Gyors létrehozás,Création rapide,*,*,Quick create,{locale}.json
+*::*.Quick view,Quick view,,Gyorsnézet,Aperçu rapide,*,*,Quick view,{locale}.json
+*::*.ROI,ROI,,Megtérülés,retour sur investissement,*,*,ROI,{locale}.json
+*::*.Rate,Rate,,Árfolyam,Taux,*,*,Rate,{locale}.json
+*::*.Rates,Rates,,Árak,Tarifs,*,*,Rates,{locale}.json
+*::*.Recalculate monthly cached data,Recalculate monthly cached data,,Havi gyorsítótárazott adatok újraszámítása,Recalculer les données mensuelles mises en cache,*,*,Recalculate monthly cached data,{locale}.json
+*::*.Received at,Received at,,Érkezés dátuma:,Reçu à,*,*,Received at,{locale}.json
+*::*.Received email,Received email,,Beérkezett e-mail,Courriel reçu,*,*,Received email,{locale}.json
+*::*.Received emails,Received emails,,Beérkezett e-mailek,Courriels reçus,*,*,Received emails,{locale}.json
+*::*.Reconciled,Reconciled,,Ellenőrzött,Réconciliés,*,*,Reconciled,{locale}.json
+*::*.Register,Register,,Regisztráció,S'inscrire,*,*,Register,{locale}.json
+*::*.Register a new account,Register a new account,,Új fiók regisztrációja,Créer un nouveau compte,*,*,Register a new account,{locale}.json
+*::*.Reload,Reload,,Újratöltés,Recharger,*,*,Reload,{locale}.json
+*::*.Remaining amount to,Remaining amount to,,Fennmaradó összeg,Montant restant à,*,*,Remaining amount to,{locale}.json
+*::*.Remember Me,Remember Me!,,Jegyezz meg!,Souviens-toi de moi!,*,*,Remember Me,{locale}.json
+*::*.Remove shares,Remove shares,,Részvény eltávolítás,Supprimer les actions,*,*,Remove shares,{locale}.json
+*::*.Remove transaction item,Remove transaction item,,Tétel törlése,Supprimer l'élément de transaction,*,*,Remove transaction item,{locale}.json
+*::*.Removed quantity,Removed quantity,,Eltávolított mennyiség,Quantité supprimée,*,*,Removed quantity,{locale}.json
+*::*.Reports,Reports,,Jelentések,Rapports,*,*,Reports,{locale}.json
+*::*.Reset Password,Reset Password,,Jelszó visszaállítása,Réinitialiser le mot de passe,*,*,Reset Password,{locale}.json
+*::*.Result,Result,,Eredmény,Résultat,*,*,Result,{locale}.json
+*::*.Results,Results,,Eredmények,Résultats,*,*,Results,{locale}.json
+*::*.Results for search term:,Results for search term:,,Eredmények a keresési kifejezésre:,Résultats pour le terme de recherche:,*,*,Results for search term:,{locale}.json
+*::*.Review currency settings,Review currency settings,,Pénznembeállítások áttekintése,Vérifier les paramètres de devise,*,*,Review currency settings,{locale}.json
+*::*.Right click on a transaction to open a context menu with actions.,Right click on a transaction to open a context menu with actions.,,Kattintson jobb gombbal egy tranzakcióra a műveleteket tartalmazó helyi menü megnyitásához.,Faites un clic droit sur une transaction pour ouvrir un menu contextuel proposant des actions.,*,*,Right click on a transaction to open a context menu with actions.,{locale}.json
+*::*.Running total,Running total,,Futó összesen,Total cumulé,*,*,Running total,{locale}.json
+*::*.Save,Save,,Mentés,Sauvegarder,*,*,Save,{locale}.json
+*::*.Saved successfully,Saved successfully,,Sikeresen elmentve,Sauvegarde réussie,*,*,Saved successfully,{locale}.json
+*::*.Schedule,Schedule,,Ütemezés,Calendrier,*,*,Schedule,{locale}.json
+*::*.Schedule instance skipped.,Schedule instance skipped.,,Ütemezési példány kihagyva.,Instance planifiée ignorée.,*,*,Schedule instance skipped.,{locale}.json
+*::*.Schedule instance skipped. This schedule has ended.,Schedule instance skipped. This schedule has ended.,,Ütemezési példány kihagyva. Ez az ütemezés véget ért.,Instance planifiée ignorée. Cette planification est terminée.,*,*,Schedule instance skipped. This schedule has ended.,{locale}.json
+*::*.Schedule settings,Schedule settings,,Ütemezési beállítások,Paramètres de planification,*,*,Schedule settings,{locale}.json
+*::*.Scheduled,Scheduled,,Ütemezett,Programmé,*,*,Scheduled,{locale}.json
+*::*.Scheduled and budgeted transactions,Scheduled and budgeted transactions,,Ütemezett és költségvetésbe foglalt tranzakciók,Transactions planifiées et budgétées,*,*,Scheduled and budgeted transactions,{locale}.json
+*::*.Scheduled and budgeted transactions for selected categories,Scheduled and budgeted transactions for selected categories,,Ütemezett és költségvetésbe foglalt tranzakciók kiválasztott kategóriákhoz,Transactions planifiées et budgétées pour certaines catégories,*,*,Scheduled and budgeted transactions for selected categories,{locale}.json
+*::*.Scheduled transaction instances,Scheduled transaction instances,,Ütemezett tranzakciós példányok,Instances de transaction planifiées,*,*,Scheduled transaction instances,{locale}.json
+*::*.Scheduled transactions,Scheduled transactions,,Ütemezett tranzakciók,Transactions programmées,*,*,Scheduled transactions,{locale}.json
+*::*.Schedules and budgets,Schedules and budgets,,Ütemtervek és költségvetések,Calendriers et budgets,*,*,Schedules and budgets,{locale}.json
+*::*.Search,Search,,Keresés,Recherche,*,*,Search,{locale}.json
+*::*.Search results,Search results,,Találatok,Résultats de la recherche,*,*,Search results,{locale}.json
+*::*.Search...,Search...,,Keresés...,Recherche...,*,*,Search...,{locale}.json
+*::*.Select account,Select account,,Válassz számlát,Sélectionner un compte,*,*,Select account,{locale}.json
+*::*.Select account to open,Select account to open,,Ugrás egy számlához,Sélectionnez le compte à ouvrir,*,*,Select account to open,{locale}.json
+*::*.Select all,Select all,,Összes kijelölése,Tout sélectionner,*,*,Select all,{locale}.json
+*::*.Select categories to display,Select categories to display,,Válassza ki a megjelenítendő kategóriákat,Sélectionnez les catégories à afficher,*,*,Select categories to display,{locale}.json
+*::*.Select categories to merge,Select categories to merge,,Válasszon kategóriákat az egyesítéshez,Sélectionnez les catégories à fusionner,*,*,Select categories to merge,{locale}.json
+*::*.Select category,Select category,,Válassz kategóriát,Sélectionner une catégorie,*,*,Select category,{locale}.json
+*::*.Select category to be merged,Select category to be merged,,Válassza ki az egyesítendő kategóriát,Sélectionnez la catégorie à fusionner,*,*,Select category to be merged,{locale}.json
+*::*.Select category to be merged into,Select category to be merged into,,"Válassza ki az egyesíteni kívánt kategóriát",Sélectionnez la catégorie à fusionner.,*,*,Select category to be merged into,{locale}.json
+*::*.Select date,Select date,,Dátum kiválasztása,Sélectionnez une date,*,*,Select date,{locale}.json
+*::*.Select investment,Select investment,,Válassz befektetést,Investissements sélectionnés,*,*,Select investment,{locale}.json
+*::*.Select payee,Select payee,,Válassz üzletet,Sélectionner le bénéficiaire,*,*,Select payee,{locale}.json
+*::*.Select payee to be merged,Select payee to be merged,,Válassza ki az egyesítendő kedvezményezettet,Sélectionner le bénéficiaire à fusionner,*,*,Select payee to be merged,{locale}.json
+*::*.Select payee to be merged into,Select payee to be merged into,,"Válassza ki a kedvezményezettet, akivel egyesíteni szeretné",Sélectionnez le bénéficiaire à fusionner dans,*,*,Select payee to be merged into,{locale}.json
+*::*.Select payees to merge,Select payees to merge,,Válassza ki az egyesítendő kedvezményezetteket,Sélectionnez les bénéficiaires à fusionner,*,*,Select payees to merge,{locale}.json
+*::*.Select preset,Select preset,,Dátum tartomány választása,Sélectionnez le préréglage,*,*,Select preset,{locale}.json
+*::*.Select tag(s),Select tag(s),,Válaszz címké(ke)t,Sélectionner une ou plusieurs étiquettes,*,*,Select tag(s),{locale}.json
+*::*.Selected,Selected,,Kiválasztott,Choisi,*,*,Selected,{locale}.json
+*::*.Sell,Sell,,Eladás,Vendre,*,*,Sell,{locale}.json
+*::*.Selling revenue,Selling revenue,,Értékesítési bevétel,revenus de vente,*,*,Selling revenue,{locale}.json
+*::*.Send Password Reset Link,Send Password Reset Link,,Jelszó Visszaállítási Link Küldése,Envoyer le lien de réinitialisation du mot de passe,*,*,Send Password Reset Link,{locale}.json
+*::*.Set as default,Set as default,,Beállítás alapértelmezettként,Définir comme valeur par défaut,*,*,Set as default,{locale}.json
+*::*.Set merged category to inactive,Set merged category to inactive,,Az egyesített kategória inaktívra állítása,Définir la catégorie fusionnée comme inactive,*,*,Set merged category to inactive,{locale}.json
+*::*.Set merged payee to inactive,Set merged payee to inactive,,Az egyesített kedvezményezett inaktívvá tétele,Désactiver le bénéficiaire fusionné,*,*,Set merged payee to inactive,{locale}.json
+*::*.Settings,Settings,,Beállítások,Paramètres,*,*,Settings,{locale}.json
+*::*.Show,Show,,Mutat,Montrer,*,*,Show,{locale}.json
+*::*.Show account monthly history,Show account monthly history,,Számla havi előzményeinek megjelenítése,Afficher l'historique mensuel du compte,*,*,Show account monthly history,{locale}.json
+*::*.Show all transactions,Show all transactions,,Összes tranzakció megjelenítése,Afficher toutes les transactions,*,*,Show all transactions,{locale}.json
+*::*.Show details,Show details,,Részletek megjelenítése,Afficher les détails,*,*,Show details,{locale}.json
+*::*.Show item details,Show item details,,Elem részleteinek megjelenítése,Afficher les détails de l'article,*,*,Show item details,{locale}.json
+*::*.Show on same axis,Show on same axis,,Mutasd ugyanazon a tengelyen,Afficher sur le même axe,*,*,Show on same axis,{locale}.json
+*::*.Show reconciled only,Show reconciled only,,Csak egyeztetett elemek megjelenítése,Afficher uniquement les éléments réconciliés,*,*,Show reconciled only,{locale}.json
+*::*.Show transactions,Show transactions,,Tranzakciók megjelenítése,Afficher les transactions,*,*,Show transactions,{locale}.json
+*::*.Show uncleared only,Show uncleared only,,Csak a nem törölteket mutassa,Afficher uniquement les éléments non effacés,*,*,Show uncleared only,{locale}.json
+*::*.Sign In,Sign In,,Belépés,Se connecter,*,*,Sign In,{locale}.json
+*::*.Sign in to start your session,Sign in to start your session,,Lépj be a kezdéshez,Connectez-vous pour démarrer votre session,*,*,Sign in to start your session,{locale}.json
+*::*.Skip current schedule,Skip current schedule,,Aktuális ütemterv kihagyása,Passer au programme actuel,*,*,Skip current schedule,{locale}.json
+*::*.Skip instance,Skip instance,,Példány kihagyása,Ignorer l'instance,*,*,Skip instance,{locale}.json
+*::*.Skip schedule instance,Skip schedule instance,,Ütemezési példány kihagyása,Ignorer l'instance de planification,*,*,Skip schedule instance,{locale}.json
+*::*.Skipping schedule instance for transaction #:transactionId,Skipping schedule instance for transaction #:transactionId,,Ütemezési példány kihagyása a következő tranzakcióhoz: #:transactionId,Ignorer l'instance planifiée pour la transaction #:transactionId,*,*,Skipping schedule instance for transaction #:transactionId,{locale}.json
+*::*.Something failed,Something failed,,Valami nem sikerült,Quelque chose a échoué,*,*,Something failed,{locale}.json
+*::*.Split transaction,Split transaction,,Felosztott tranzakció,Transaction fractionnée,*,*,Split transaction,{locale}.json
+*::*.Standard,Standard,,Általános,Standard,*,*,Standard,{locale}.json
+*::*.Start date,Start date,,Kezdő dátum,Date de début,*,*,Start date,{locale}.json
+*::*.Start date for YAFFA,Start date for YAFFA,,YAFFA kezdő dátum,Date de début pour YAFFA,*,*,Start date for YAFFA,{locale}.json
+*::*.Starting assets,Starting assets,,Kezdő eszközök,Actifs de départ,*,*,Starting assets,{locale}.json
+*::*.Subject,Subject,,Téma,Sujet,*,*,Subject,{locale}.json
+*::*.Success,Success,,Siker,Succès,*,*,Success,{locale}.json
+*::*.Switch to monthly view,Switch to monthly view,,Váltás havi nézetre,Passer à l'affichage mensuel,*,*,Switch to monthly view,{locale}.json
+*::*.Switch to yearly view,Switch to yearly view,,Váltás éves nézetre,Passer à l'affichage annuel,*,*,Switch to yearly view,{locale}.json
+*::*.Symbol,Symbol,,Szimbólum,Symbole,*,*,Symbol,{locale}.json
+*::*.TBD,TBD,,TBD,À déterminer,*,*,TBD,{locale}.json
+*::*.Tag,Tag,,Címke,Étiqueter,*,*,Tag,{locale}.json
+*::*.Tag added,Tag added,,Címke létrehozva,Étiquette ajoutée,*,*,Tag added,{locale}.json
+*::*.Tag deleted,Tag deleted,,Címke törölve,Étiquette supprimée,*,*,Tag deleted,{locale}.json
+*::*.Tag updated,Tag updated,,Címke frissítve,Étiquette mise à jour,*,*,Tag updated,{locale}.json
+*::*.Tags,Tags,,Címkék,Étiquettes,*,*,Tags,{locale}.json
+*::*.Target account,Target account,,Célfiók,Compte cible,*,*,Target account,{locale}.json
+*::*.Tax,Tax,,Adó,Impôt,*,*,Tax,{locale}.json
+*::*.Taxes,Taxes,,Adók,Impôts,*,*,Taxes,{locale}.json
+*::*.Temporarily hide this widget,Temporarily hide this widget,,Ablak átmeneti bezárása,Masquer temporairement ce widget,*,*,Temporarily hide this widget,{locale}.json
+*::*.Terms of service,Terms of service,,Szolgáltatási feltételek,Conditions d'utilisation,*,*,Terms of service,{locale}.json
+*::*.Text,Text view,,Szöveges nézet,Affichage du texte,*,*,Text,{locale}.json
+*::*.The :attribute must be unchecked.,The :attribute must be unchecked.,,A(z) :attribute-nak nem szabad bejelölnie.,L'attribut :attribute doit être décoché.,*,*,The :attribute must be unchecked.,{locale}.json
+"*::*.The currency that is generally used in reports, charts and summaries. You can add several other currencies to fit your needs, and change this setting later.","The currency that is generally used in reports, charts and summaries. You can add several other currencies to fit your needs, and change this setting later.","A jelentésekben, diagramokban és összefoglalókban általában használt pénznem. Számos más pénznemet is hozzáadhatsz, és később módosíthatod ezt a beállítást.","La devise généralement utilisée dans les rapports, graphiques et synthèses. Vous pouvez ajouter d'autres devises selon vos besoins et modifier ce paramètre ultérieurement.",*,*,"The currency that is generally used in reports, charts and summaries. You can add several other currencies to fit your needs, and change this setting later.",{locale}.json
+"*::*.The earliest date YAFFA uses to retrieve currency exchange rates and investment prices. You can record transactions to earlier dates, if needed.","The earliest date YAFFA uses to retrieve currency exchange rates and investment prices. You can record transactions to earlier dates, if needed.","A legkorábbi dátum amikortól a YAFFA lekérdezi a valutaárfolyamokat és a befektetés árakat. Szükség esetén felvehetsz ennél korábbi dátummal is tranzakciókat.","Il s'agit de la date la plus ancienne utilisée par YAFFA pour récupérer les taux de change et les prix des investissements. Vous pouvez enregistrer des transactions antérieures, si nécessaire.",*,*,"The earliest date YAFFA uses to retrieve currency exchange rates and investment prices. You can record transactions to earlier dates, if needed.",{locale}.json
+*::*.The language has been updated. Please refresh the page to see the changes.,The language has been updated. Please refresh the page to see the changes.,,A nyelv frissült. Kérjük, frissítse az oldalt a változások megtekintéséhez.,La langue a été mise à jour. Veuillez actualiser la page pour voir les modifications.,*,*,The language has been updated. Please refresh the page to see the changes.,{locale}.json
+*::*.The monthly summary for this account entity is being updated.,The monthly summary for this account is being updated.,,A számla havi összesítője frissül.,Le récapitulatif mensuel de ce compte est en cours de mise à jour.,*,*,The monthly summary for this account entity is being updated.,{locale}.json
+*::*.The transaction is automatically entered on the next date.,The transaction is automatically entered on the next date.,,A tranzakció automatikusan rögzítésre kerül a következő napon.,La transaction sera automatiquement enregistrée à la date suivante.,*,*,The transaction is automatically entered on the next date.,{locale}.json
+*::*.There is no data to show on this chart.,There is no data to show on this chart.,,Nincsenek megjeleníthető adatok ezen a diagramon.,Aucune donnée n'est disponible pour ce graphique.,*,*,There is no data to show on this chart.,{locale}.json
+*::*.There was an error while getting account data: ,There was an error while getting account data: ,,Hiba történt a számla adatok lekérésekor:,Une erreur s'est produite lors de la récupération des données du compte:,*,*,There was an error while getting account data: ,{locale}.json
+*::*.There were some problems with your input.,There were some problems with your input.,,Voltak problémák a beviteleddel.,Votre saisie a rencontré quelques problèmes.,*,*,There were some problems with your input.,{locale}.json
+*::*.These settings cannot be changed after saving the transaction.,These settings cannot be changed after saving the transaction.,,A tranzakció mentése után ezek a beállítások nem módosíthatók.,Ces paramètres ne peuvent plus être modifiés après l'enregistrement de la transaction.,*,*,These settings cannot be changed after saving the transaction.,{locale}.json
+*::*.This account cannot be deleted.,This account cannot be deleted.,,Ezt a számlát nem lehet törölni,Ce compte ne peut pas être supprimé.,*,*,This account cannot be deleted.,{locale}.json
+*::*.This account entity is not an account.,This account entity is not an account.,,Ez a számlanititás nem számla.,Cette entité de compte n'est pas un compte.,*,*,This account entity is not an account.,{locale}.json
+*::*.This account group cannot be deleted because it is still in use.,This account group cannot be deleted because it is still in use.,,"Ez a számla csoport nem törölhető, mert még használatban van.",Ce groupe de comptes ne peut pas être supprimé car il est toujours utilisé.,*,*,This account group cannot be deleted because it is still in use.,{locale}.json
+*::*.This account group cannot be deleted.,This account group cannot be deleted.,,Ezt a számla csoportot nem lehet törölni.,Ce groupe de comptes ne peut pas être supprimé.,*,*,This account group cannot be deleted.,{locale}.json
+*::*.This action cannot be undone. Proceed with caution.,This action cannot be undone. Proceed with caution.,,Ezt a műveletet nem lehet visszavonni. Légy körültekintő!,Cette action est irréversible. Procédez avec prudence.,*,*,This action cannot be undone. Proceed with caution.,{locale}.json
+*::*.This category cannot be deleted.,This category cannot be deleted.,,Ez a kategória nem törölhető.,Cette catégorie ne peut pas être supprimée.,*,*,This category cannot be deleted.,{locale}.json
+*::*.This investment cannot be deleted.,This investment cannot be deleted.,,Ez a befektetés nem törölhető.,Cet investissement ne peut être supprimé.,*,*,This investment cannot be deleted.,{locale}.json
+*::*.This investment group cannot be deleted because it is still in use.,This investment group cannot be deleted because it is still in use.,,"Ez a befektetési csoport nem törölhető, mert még használatban van.",Ce groupe d'investissement ne peut pas être supprimé car il est toujours en activité.,*,*,This investment group cannot be deleted because it is still in use.,{locale}.json
+*::*.This investment group cannot be deleted.,This investment group cannot be deleted.,,Ez a befektetés csoport nem törölhető.,Ce groupe d'investissement ne peut pas être supprimé.,*,*,This investment group cannot be deleted.,{locale}.json
+*::*.This month,This month,,Ez a hónap,Ce mois-ci,*,*,This month,{locale}.json
+*::*.This month to date,This month to date,,Ez a hónap a mai napig,Ce mois-ci à ce jour,*,*,This month to date,{locale}.json
+*::*.This page can load slowly based on the number of transactions.,This page can load slowly based on the number of transactions.,,Ez az oldal a tranzakciók számától függően lassan töltődhet be.,Le chargement de cette page peut être lent en fonction du nombre de transactions.,*,*,This page can load slowly based on the number of transactions.,{locale}.json
+*::*.This payee cannot be deleted.,This payee cannot be deleted.,,Ez a kedvezményezett nem törölhető.,Ce bénéficiaire ne peut pas être supprimé.,*,*,This payee cannot be deleted.,{locale}.json
+*::*.This quarter,This quarter,,Ez a negyedév,Ce trimestre,*,*,This quarter,{locale}.json
+*::*.This quarter to date,This quarter to date,,Ez a negyedév a mai napig,Ce trimestre à ce jour,*,*,This quarter to date,{locale}.json
+*::*.This year,This year,,Ez az év,Cette année,*,*,This year,{locale}.json
+*::*.This year to date,This year to date,,Ez az év mostanáig,Cette année à ce jour,*,*,This year to date,{locale}.json
+*::*.Tip on your payee!,Tip on your payee!,,Javaslat az üzlethez!,Donnez un pourboire à votre bénéficiaire !,*,*,Tip on your payee!,{locale}.json
+*::*.To,To,,Címzett,À,*,*,To,{locale}.json
+*::*.Total allocated,Total allocated,,Felosztott összeg,Total alloué,*,*,Total allocated,{locale}.json
+*::*.Total amount,Total amount,,Teljes összeg,Montant total,*,*,Total amount,{locale}.json
+*::*.Total cashflow value,Total cashflow value,,Teljes pénzáram értéke,Valeur totale des flux de trésorerie,*,*,Total cashflow value,{locale}.json
+*::*.Total value,Total value,,Teljes érték,Valeur totale,*,*,Total value,{locale}.json
+*::*.Transaction,Transaction,,Tranzakció,Transaction,*,*,Transaction,{locale}.json
+*::*.Transaction added.,Transaction added.,,Tranzakció hozzáadva.,Transaction ajoutée.,*,*,Transaction added.,{locale}.json
+*::*.Transaction deleted (#:transactionId),Transaction deleted (#:transactionId),,Tranzakció törölve (#:transactionId),Transaction supprimée (#:transactionId),*,*,Transaction deleted (#:transactionId),{locale}.json
+*::*.Transaction details,Transaction details,,Tranzakció részletei,Détails de la transaction,*,*,Transaction details,{locale}.json
+*::*.Transaction filters,Transaction filters,,Tranzakciószűrők,Filtres de transaction,*,*,Transaction filters,{locale}.json
+*::*.Transaction history,Transaction history,,Tranzakcióelőzmények,Historique des transactions,*,*,Transaction history,{locale}.json
+*::*.Transaction instance skipped (#:transactionId),Transaction instance skipped (#:transactionId),,Tranzakciópéldány kihagyva (#:transactionId),Instance de transaction ignorée (#:transactionId),*,*,Transaction instance skipped (#:transactionId),{locale}.json
+*::*.Transaction items,Transaction items,,Tranzakció tételek,Articles de transaction,*,*,Transaction items,{locale}.json
+*::*.Transaction items are disabled for this transaction type,Transaction items are disabled for this transaction type,,A tranzakciós tételek le vannak tiltva ennél a tranzakciótípusnál,Les éléments de transaction sont désactivés pour ce type de transaction.,*,*,Transaction items are disabled for this transaction type,{locale}.json
+*::*.Transaction schedule instance skipped,Transaction schedule instance skipped,,Tranzakcióütemezési példány kihagyva,Instance de planification des transactions ignorée,*,*,Transaction schedule instance skipped,{locale}.json
+*::*.Transaction type,Transaction type,,Tranzakció típusa,Type de transaction,*,*,Transaction type,{locale}.json
+*::*.Transactions,Transactions,,Tranzakciók,Transactions,*,*,Transactions,{locale}.json
+*::*.Transactions by criteria,Transactions by criteria,,Tranzakciók kritériumok szerint,Transactions par critères,*,*,Transactions by criteria,{locale}.json
+*::*.Transfer,Transfer,,Átvezetés,Transfert,*,*,Transfer,{locale}.json
+*::*.Transfer from :account,Transfer from :account,,Utalás innen: :account,Transfert depuis :account,*,*,Transfer from :account,{locale}.json
+*::*.Transfer from :account_from to :account_to,Transfer from :account_from to :account_to,,Átutalás :account_from számláról :account_to számlára,Transfert de :account_from vers :account_to,*,*,Transfer from :account_from to :account_to,{locale}.json
+*::*.Transfer to :account,Transfer to :account,,Utalás ide: :account,Virement vers :account,*,*,Transfer to :account,{locale}.json
+*::*.Type,Type,,Típus,Taper,*,*,Type,{locale}.json
+*::*.Unavailable,Unavailable,,Nem elérhető,Indisponible,*,*,Unavailable,{locale}.json
+*::*.Uncleared,Uncleared,,Tisztázatlan,Non débloqué,*,*,Uncleared,{locale}.json
+*::*.Unmatched rows,Unmatched rows,,Nem egyező sorok,Lignes non appariées,*,*,Unmatched rows,{locale}.json
+*::*.Update,Update,,Frissítés,Mise à jour,*,*,Update,{locale}.json
+*::*.Update base schedule,Update base schedule,,Alapütemterv frissítése,Mise à jour du calendrier de base,*,*,Update base schedule,{locale}.json
+*::*.Update user settings,Update user settings,,Felhasználói beállítások módosítása,Mettre à jour les paramètres utilisateur,*,*,Update user settings,{locale}.json
+*::*.Use these controls to narrow down the list of transactions.,Use these controls to narrow down the list of transactions.,,Ezekkel a vezérlőkkel szűkítheti a tranzakciók listáját.,Utilisez ces commandes pour affiner la liste des transactions.,*,*,Use these controls to narrow down the list of transactions.,{locale}.json
+*::*.User limit reached,User limit reached,,Elérte a felhasználói korlátot,Limite d'utilisateurs atteinte,*,*,User limit reached,{locale}.json
+*::*.User settings updated,User settings updated,,Felhasználói beállítások frissítve,Paramètres utilisateur mis à jour,*,*,User settings updated,{locale}.json
+*::*.Validation failed. Please check the form for errors.,Validation failed. Please check the form for errors.,,"Az ellenőrzés sikertelen. Kérjük, ellenőrizze az űrlapot hibák szempontjából.",La validation a échoué. Veuillez vérifier le formulaire pour détecter d'éventuelles erreurs.,*,*,Validation failed. Please check the form for errors.,{locale}.json
+*::*.Value,Value,,Érték,Valeur,*,*,Value,{locale}.json
+*::*.Verification link sent!,Verification link sent!,,Ellenőrző link elküldve!,Lien de vérification envoyé!,*,*,Verification link sent!,{locale}.json
+*::*.Verify Your Email Address,Verify Your Email Address,,E-mail címének ellenőrzése,Vérifiez votre adresse e-mail,*,*,Verify Your Email Address,{locale}.json
+*::*.View details,View details,,Részletek megtekintése,Voir les détails,*,*,View details,{locale}.json
+*::*.View investment details,View investment details,,Befektetési részletek megtekintése,Consultez les détails de l'investissement,*,*,View investment details,{locale}.json
+*::*.View investment price list,View investment price list,,Befektetési árlista megtekintése,Consultez la liste des prix d'investissement,*,*,View investment price list,{locale}.json
+*::*.View the guided tour for this page,View the guided tour for this page,,Az oldalhoz tartozó útmutató megtekintése,Consultez la visite guidée de cette page.,*,*,View the guided tour for this page,{locale}.json
+*::*.View transaction,View transaction,,Tranzakció megtekintése,Voir la transaction,*,*,View transaction,{locale}.json
+*::*.View transactions,View transactions,,Tranzakciók megtekintése,Consulter les transactions,*,*,View transactions,{locale}.json
+*::*.Warning,Warning,,Figyelmeztetés,Avertissement,*,*,Warning,{locale}.json
+*::*.We recommend completing the following steps to have a great experience with YAFFA.,We recommend completing the following steps to have a great experience with YAFFA.,,A YAFFA-val való nagyszerű élmény érdekében javasoljuk a következő lépések végrehajtását.,Nous vous recommandons de suivre les étapes suivantes pour profiter pleinement de votre expérience avec YAFFA.,*,*,We recommend completing the following steps to have a great experience with YAFFA.,{locale}.json
+*::*.Weekly,Weekly,,Hetente,Hebdomadaire,*,*,Weekly,{locale}.json
+*::*.Welcome to YAFFA!,Welcome to YAFFA!,,Üdvözlünk a YAFFA-ban!,Bienvenue à YAFFA!,*,*,Welcome to YAFFA!,{locale}.json
+*::*.Welcome to your YAFFA dashboard!,Welcome to your YAFFA dashboard!,,Üdvözlünk a YAFFA irányítópulton!,Bienvenue sur votre tableau de bord YAFFA!,*,*,Welcome to your YAFFA dashboard!,{locale}.json
+*::*.Where to merge category,Where to merge category,,Hol lehet egyesíteni a kategóriát,Où fusionner les catégories,*,*,Where to merge category,{locale}.json
+*::*.Where to merge payee,Where to merge payee,,Hol lehet egyesíteni a kedvezményezettet?,Où fusionner les bénéficiaires,*,*,Where to merge payee,{locale}.json
+*::*.With forecast,With forecast,,Előrejelzéssel,Avec des prévisions,*,*,With forecast,{locale}.json
+*::*.Withdraw,Withdraw,,Kiadás,Retirer,*,*,Withdraw,{locale}.json
+*::*.Withdrawal,Withdrawal,,Kiadás,Retrait,*,*,Withdrawal,{locale}.json
+*::*.Without forecast,Without forecast,,Előrejelzés nélkül,Sans prévision,*,*,Without forecast,{locale}.json
+"*::*.YAFFA can create some accounts, currencies and categories for a convenient start. You can customize these anytime.","YAFFA can create some accounts, currencies and categories for a convenient start. You can customize these anytime.","A YAFFA létre tud hozni néhány számlát, pénznemet, kategóriát a kényelmes kezdéshez. Bármikor testre szabhatod.","YAFFA vous permet de créer des comptes, des devises et des catégories pour une prise en main facile. Vous pouvez les personnaliser à tout moment.",*,*,"YAFFA can create some accounts, currencies and categories for a convenient start. You can customize these anytime.",{locale}.json
+*::*.YAFFA is an easy to use personal finance tracker.,YAFFA is an easy to use personal finance tracker.,,Egy könnyen használható személyes pénzügyi alkalmazás,YAFFA est un outil de suivi des finances personnelles facile à utiliser.,*,*,YAFFA is an easy to use personal finance tracker.,{locale}.json
+*::*.Yearly,Yearly,,Évente,Annuel,*,*,Yearly,{locale}.json
+*::*.Yes,Yes,,Igen,Oui,*,*,Yes,{locale}.json
+*::*.You can create new account groups to organize your accounts.,You can create new account groups to organize your accounts.,,Új számla csoportokat hozhatsz létre a számláid rendszerezéséhez.,Vous pouvez créer de nouveaux groupes de comptes pour organiser vos comptes.,*,*,You can create new account groups to organize your accounts.,{locale}.json
+*::*.You can create new investment groups to organize your investments.,You can create new investment groups to organize your investments.,,Új befektetési csoportokat hozhat létre befektetései rendszerezéséhez.,Vous pouvez créer de nouveaux groupes d'investissement pour organiser vos placements.,*,*,You can create new investment groups to organize your investments.,{locale}.json
+*::*.You can dismiss this widget to hide it forever.,You can dismiss this widget to hide it forever.,,Örökre eltűntetheted ezt az ablakot.,Vous pouvez fermer ce widget pour le masquer définitivement.,*,*,You can dismiss this widget to hide it forever.,{locale}.json
+*::*.You cannot change schedule settings for this type of action,You cannot change schedule settings for this type of action,,Az ilyen típusú művelet ütemezési beállításait nem módosíthatja.,Vous ne pouvez pas modifier les paramètres de planification pour ce type d'action.,*,*,You cannot change schedule settings for this type of action,{locale}.json
+*::*.You cannot merge a parent category into a child category.,You cannot merge a parent category into a child category.,,Nem lehet szülőkategóriát gyermekkategóriával egyesíteni.,Vous ne pouvez pas fusionner une catégorie parente dans une catégorie enfant.,*,*,You cannot merge a parent category into a child category.,{locale}.json
+*::*.You cannot register new users.,You cannot register new users.,,Új felhasználókat nem lehet regisztrálni.,Vous ne pouvez pas enregistrer de nouveaux utilisateurs.,*,*,You cannot register new users.,{locale}.json
+*::*.Your changes have been saved!,Your changes have been saved!,,A módosításokat mentettük!,Vos modifications ont été enregistrées !,*,*,Your changes have been saved!,{locale}.json
+*::*.Zoom in,Zoom in,,Nagyítás,Zoomer,*,*,Zoom in,{locale}.json
+*::*.account,account,,számla,compte,*,*,account,{locale}.json
+*::*.account.requirement.accountGroup,"Before creating an account, please add at least one account group. E.g. cash, bank accounts, savings, etc. Account groups help to organize your accounts.","Számla létrehozása előtt adj hozzá legalább egy számlacsoportot. Pl. készpénz, bankszámlák, megtakarítások stb. A számlacsoportok segítenek a számlák rendszerezésében.","Avant de créer un compte, veuillez ajouter au moins un groupe de comptes. Par exemple: espèces, comptes bancaires, épargne, etc. Les groupes de comptes permettent de mieux organiser vos comptes.",*,*,account.requirement.accountGroup,{locale}.json
+*::*.account.requirement.currency,"Before creating an account, please add at least one currency. Accounts must have a currency assigned.","Számla létrehozása előtt adj hozzá legalább egy pénznemet. A számlákhoz hozzá kell rendelni egy pénznemet.","Avant de créer un compte, veuillez ajouter au moins une devise. Un compte doit obligatoirement être associé à une devise.",*,*,account.requirement.currency,{locale}.json
+*::*.amount to,amount to,,összeg,montant à,*,*,amount to,{locale}.json
+*::*.callback.cloneTransaction,Clone this transaction,,Másold ezt a tranzakciót,Cloner cette transaction,*,*,callback.cloneTransaction,{locale}.json
+*::*.callback.newTransaction,New transaction,,Új tranzakció,Nouvelle transaction,*,*,callback.newTransaction,{locale}.json
+*::*.callback.returnToDashboard,Return to dashboard,,Kezdőoldalra,Retour au tableau de bord,*,*,callback.returnToDashboard,{locale}.json
+*::*.callback.returnToPreviousPage,Back to previous page,,Előző oldalra,Retour à la page précédente,*,*,callback.returnToPreviousPage,{locale}.json
+*::*.callback.returnToPrimaryAccount,Open selected account,,Kiválasztott számlához,Ouvrir le compte sélectionné,*,*,callback.returnToPrimaryAccount,{locale}.json
+*::*.callback.returnToSecondaryAccount,Open target account,,Cél számlához,Ouvrir le compte cible,*,*,callback.returnToSecondaryAccount,{locale}.json
+*::*.callback.showTransaction,Show this transaction,,Mutasd ezt a tranzakciót,Afficher cette transaction,*,*,callback.showTransaction,{locale}.json
+*::*.click here to request another,click here to request another,,kattints ide egy másik kéréséhez,cliquez ici pour en demander un autre,*,*,click here to request another,{locale}.json
+*::*.commission,commission,,jutalék,commission,*,*,commission,{locale}.json
+*::*.dividend,dividend,,osztalék,dividende,*,*,dividend,{locale}.json
+*::*.inactive,inactive,,inaktív,inactif,*,*,inactive,{locale}.json
+*::*.investment,investment,,befektetés,investissement,*,*,investment,{locale}.json
+*::*.investment.requirement.currency,"Before creating an investment, please add at least one currency. Investments must have a currency assigned.","Befektetés létrehozása előtt kérjük, adjon hozzá legalább egy pénznemet. A befektetésekhez hozzá kell rendelni egy pénznemet.","Avant de créer un investissement, veuillez ajouter au moins une devise. Tout investissement doit être associé à une devise.",*,*,investment.requirement.currency,{locale}.json
+*::*.investment.requirement.investmentGroup,"Before creating an investment, please add at least one investment group. E.g. stocks, bonds, etc. Investment groups help to organize your investments.","Befektetés létrehozása előtt kérjük, adjon hozzá legalább egy befektetési csoportot. Pl. részvények, kötvények stb. A befektetési csoportok segítenek a befektetések rendszerezésében.","Avant de créer un investissement, veuillez ajouter au moins un groupe d'investissement (par exemple, actions, obligations, etc.). Les groupes d'investissement permettent d'organiser vos placements.",*,*,investment.requirement.investmentGroup,{locale}.json
+*::*.price,price,,ár,prix,*,*,price,{locale}.json
+*::*.quantity,quantity,,mennyiség,quantité,*,*,quantity,{locale}.json
+*::*.sandbox.login.credentials,<strong>Email:</strong> demo@yaffa.cc <strong>Password:</strong> demo,<strong>Email-cím:</strong> demo@yaffa.cc <strong>Jelszó:</strong> demo,<strong>Courriel:</strong> demo@yaffa.cc <strong>Mot de passe:</strong> demo,*,*,sandbox.login.credentials,{locale}.json
+*::*.sandbox.login.fill,Login with demo credentials,,Belépés a demo fiókba,Connectez-vous avec les identifiants de démonstration,*,*,sandbox.login.fill,{locale}.json
+*::*.sandbox.login.info,You can create a new account for testing by registering. Feel free to use a disposable email address or fake credential. You can also explore existing demo data using the credentials below.,Regisztrálj és készíts egy saját fiókot a teszteléshez. Használj eldobható email címet és bármilyen kitalált adatot. Ismerd meg a demo adatokat az alábbi belépési adatokkal.,Vous pouvez créer un nouveau compte de test en vous inscrivant. N'hésitez pas à utiliser une adresse e-mail jetable ou de faux identifiants. Vous pouvez également explorer les données de démonstration existantes en utilisant les identifiants ci-dessous.,*,*,sandbox.login.info,{locale}.json
+*::*.sandbox.reset.info,"Until that, feel free to look around and make any changes.","A törlésig nézz körül és próbálj ki bármilyen funkciót.","En attendant, n'hésitez pas à regarder autour de vous et à apporter des modifications.",*,*,sandbox.reset.info,{locale}.json
+*::*.sandbox.reset.timer,The data in this sandbox environment is regularly cleared. Time until next reset: :days days and :hours hours.,"A teszt környezetben az adatok rendszeresen visszaállításra kerülnek. Idő a következő törlésig :days nap, :hours óra.",Les données de cet environnement de test sont régulièrement effacées. Prochaine réinitialisation :days jours et :hours heures.,*,*,sandbox.reset.timer,{locale}.json
+*::*.schedule count,schedule count,,ütemezett számláló,nombre de jours de planification,*,*,schedule count,{locale}.json
+*::*.schedule end date,schedule end date,,ütemezés befejezési dátuma,date de fin prévue,*,*,schedule end date,{locale}.json
+*::*.schedule frequency,schedule frequency,,menetrend gyakorisága,fréquence de planification,*,*,schedule frequency,{locale}.json
+*::*.schedule inflation,schedule inflation,,ütemterv infláció,inflation des horaires,*,*,schedule inflation,{locale}.json
+*::*.schedule interval,schedule interval,,ütemezési intervallum,intervalle de planification,*,*,schedule interval,{locale}.json
+*::*.schedule next date,schedule next date,,következő dátum ütemezése,programmer la prochaine date,*,*,schedule next date,{locale}.json
+*::*.schedule start date,schedule start date,,ütemezés kezdési dátuma,date de début prévue,*,*,schedule start date,{locale}.json
+*::*.standard,standard,,általános,standard,*,*,standard,{locale}.json
+*::*.tax,tax,,adó,impôt,*,*,tax,{locale}.json
+*::*.transaction,transaction,,tranzakció,transaction,*,*,transaction,{locale}.json
+*::*.transaction.requirement.account,"Before creating a transaction, please add at least one account. This can be a bank account, a wallet, etc.","Tranzakció létrehozása előtt kérjük, adjon hozzá legalább egy számlát. Ez lehet bankszámla, pénztárca stb.","Avant de créer une transaction, veuillez ajouter au moins un compte. Il peut s'agir d'un compte bancaire, d'un portefeuille électronique, etc.",*,*,transaction.requirement.account,{locale}.json
+*::*.transactions,transactions,,tranzakciók,transactions,*,*,transactions,{locale}.json
+auth.failed,Invalid login credentials.,,Helytelen belépési adatok.,Identifiants de connexion invalides.,,auth,failed,{locale}/auth.php
+auth.password,,,,,,auth,password,{locale}/auth.php
+auth.throttle,,,,,,auth,throttle,{locale}/auth.php
+default_assets.account_groups.bank_accounts,Bank accounts,,Bankszámlák,Comptes bancaires,,default_assets,account_groups.bank_accounts,{locale}/default_assets.php
+default_assets.account_groups.cash,Cash,,Készpénz,Espèces,,default_assets,account_groups.cash,{locale}/default_assets.php
+default_assets.account_groups.credits,Credits,,Hitelek,Crédits,,default_assets,account_groups.credits,{locale}/default_assets.php
+default_assets.account_groups.loans,Loans,,Kölcsönök,Prêts,,default_assets,account_groups.loans,{locale}/default_assets.php
+default_assets.account_groups.savings_and_investments,Savings and investments,,Megtakarítások és befektetések,Épargne et investissements,,default_assets,account_groups.savings_and_investments,{locale}/default_assets.php
+default_assets.accounts.cash_reserve,Cash reserve,,Készpénztartalék,Réserve de trésorerie,,default_assets,accounts.cash_reserve,{locale}/default_assets.php
+default_assets.accounts.credit_card,Credit card,,Hitelkártya,Carte de crédit,,default_assets,accounts.credit_card,{locale}/default_assets.php
+default_assets.accounts.investment_account,Investment account,,Befektetési számla,compte d'investissement,,default_assets,accounts.investment_account,{locale}/default_assets.php
+default_assets.accounts.loan,Loan,,Kölcsön,Prêt,,default_assets,accounts.loan,{locale}/default_assets.php
+default_assets.accounts.other_bank_account,Other bank account,,Más bankszámla,Autre compte bancaire,,default_assets,accounts.other_bank_account,{locale}.php
+default_assets.accounts.primary_bank_account,Primary bank account,,Elsődleges bankszámla,Compte bancaire principal,,default_assets,accounts.primary_bank_account,{locale}/default_assets.php
+default_assets.accounts.wallet,Wallet,,Pénztárca,Portefeuille,,default_assets,accounts.wallet,{locale}/default_assets.php
+default_assets.categories.bonuses,Bonuses,,Bónuszok,Bonus,,default_assets,categories.bonuses,{locale}/default_assets.php
+default_assets.categories.books_and_supplies,Books and supplies,,Könyvek és kellékek,Livres et fournitures,,default_assets,categories.books_and_supplies,{locale}/default_assets.php
+default_assets.categories.car_insurance,Car insurance,,Autó biztosítás,Assurance auto,,default_assets,categories.car_insurance,{locale}/default_assets.php
+default_assets.categories.car_payments,Car payments,,Autó kiadások,Mensualités de voiture,,default_assets,categories.car_payments,{locale}/default_assets.php
+default_assets.categories.child_allowance,Child allowance,,Gyerektámogatás,Allocation familiale,,default_assets,categories.child_allowance,{locale}/default_assets.php
+default_assets.categories.clothing,Clothing,,Ruházat,Vêtements,,default_assets,categories.clothing,{locale}/default_assets.php
+default_assets.categories.courses_and_training,Courses and training,,Tanfolyamok és képzések,Cours et formations,,default_assets,categories.courses_and_training,{locale}/default_assets.php
+default_assets.categories.credit_card,Credit card,,Hitelkártya,Carte de crédit,,default_assets,categories.credit_card,{locale}/default_assets.php
+default_assets.categories.debt_repayment,Debt repayment,,Adósság visszafizetés,Remboursement de la dette,,default_assets,categories.debt_repayment,{locale}/default_assets.php
+default_assets.categories.dining_out,Dining out,,Étterem,Dîner au restaurant,,default_assets,categories.dining_out,{locale}/default_assets.php
+default_assets.categories.disability_insurance,Disability insurance,,Rokkantbiztosítás,Assurance invalidité,,default_assets,categories.disability_insurance,{locale}/default_assets.php
+default_assets.categories.doctor_visits,Doctor visits,,Orvosok,Visites chez le médecin,,default_assets,categories.doctor_visits,{locale}/default_assets.php
+default_assets.categories.education_and_development,Education and development,,Oktatás és fejlesztés,Éducation et développement,,default_assets,categories.education_and_development,{locale}/default_assets.php
+default_assets.categories.electricity,Electricity,,Villany,Électricité,,default_assets,categories.electricity,{locale}/default_assets.php
+default_assets.categories.entertainment,Entertainment,,Szórakozás,Divertissement,,default_assets,categories.entertainment,{locale}/default_assets.php
+default_assets.categories.entertainment_and_leisure,Entertainment and leisure,,Szórakozás és szabadidő,Divertissements et loisirs,,default_assets,categories.entertainment_and_leisure,{locale}.php
+default_assets.categories.events,Events,,Események,Événements,,default_assets,categories.events,{locale}/default_assets.php
+default_assets.categories.fines,Fines,,Pénzbírságok,Amendes,,default_assets,categories.fines,{locale}/default_assets.php
+default_assets.categories.food,Food,,Élelmiszer,Nourriture,,default_assets,categories.food,{locale}/default_assets.php
+default_assets.categories.freelance_work,Freelance work,,Szabadúszó munka,Travail indépendant,,default_assets,categories.freelance_work,{locale}/default_assets.php
+default_assets.categories.fuel,Fuel,,Üzemanyag,Carburant,,default_assets,categories.fuel,{locale}/default_assets.php
+default_assets.categories.gas_and_heating,Gas and heating,,Gáz és fűtés,Gaz et chauffage,,default_assets,categories.gas_and_heating,{locale}/default_assets.php
+default_assets.categories.gifts_and_donations,Gifts and donations,,Ajándékok és adományok,Dons et donations,,default_assets,categories.gifts_and_donations,{locale}/default_assets.php
+default_assets.categories.government_benefits,Government benefits,,Kormányzati juttatások,Avantages gouvernementaux,,default_assets,categories.government_benefits,{locale}/default_assets.php
+default_assets.categories.groceries,Groceries,,Élelmiszerboltok,Épiceries,,default_assets,categories.groceries,{locale}/default_assets.php
+default_assets.categories.health_insurance,Health insurance,,Egészségbiztosítás,Assurance maladie,,default_assets,categories.health_insurance,{locale}/default_assets.php
+default_assets.categories.healthcare,Healthcare,,Egészségügy,Soins de santé,,default_assets,categories.healthcare,{locale}/default_assets.php
+default_assets.categories.hobbies_and_activities,Hobbies and activities,,Hobbik és kikapcsolódás,Loisirs et activités,,default_assets,categories.hobbies_and_activities,{locale}.php
+default_assets.categories.home_improvements,Home improvements,,Lakberendezés,Améliorations domiciliaires,,default_assets,categories.home_improvements,{locale}/default_assets.php
+default_assets.categories.home_insurance,Home insurance,,Lakásbiztosítás,Assurance habitation,,default_assets,categories.home_insurance,{locale}/default_assets.php
+default_assets.categories.household_products,Household products,,Háztartási termékek,Produits ménagers,,default_assets,categories.household_products,{locale}/default_assets.php
+default_assets.categories.housing,Housing,,Lakhatás,Logement,,default_assets,categories.housing,{locale}/default_assets.php
+default_assets.categories.insurance,Insurance,,Biztosítás,Assurance,,default_assets,categories.insurance,{locale}/default_assets.php
+default_assets.categories.internet_cable,Internet and cable,,Internet és TV,Internet et câble,,default_assets,categories.internet_cable,{locale}/default_assets.php
+default_assets.categories.legal_fees,Legal fees,,Ügyvédi költségek,Frais juridiques,,default_assets,categories.legal_fees,{locale}/default_assets.php
+default_assets.categories.life_insurance,Life insurance,,Életbiztosítás,Assurance-vie,,default_assets,categories.life_insurance,{locale}/default_assets.php
+default_assets.categories.loans,Loans,,Hitelek,Prêts,,default_assets,categories.loans,{locale}/default_assets.php
+default_assets.categories.main_job,Main job,,Fő munka,Emploi principal,,default_assets,categories.main_job,{locale}/default_assets.php
+default_assets.categories.maintenance_and_repairs,Maintenance and repairs,,Karbantartás és javítás,Entretien et réparations,,default_assets,categories.maintenance_and_repairs,{locale}.php
+default_assets.categories.medications,Medications,,Gyógyszerek,Médicaments,,default_assets,categories.medications,{locale}/default_assets.php
+default_assets.categories.miscellaneous,Miscellaneous,,Egyéb,Divers,,default_assets,categories.miscellaneous,{locale}/default_assets.php
+default_assets.categories.mortgage_overpayments,Mortgage overpayments,,Jelzáloghitel túlfizetések,Remboursements hypothécaires en trop,,default_assets,categories.mortgage_overpayments,{locale}.php
+default_assets.categories.other_income,Other income,,Egyéb bevétel,Autres revenus,,default_assets,categories.other_income,{locale}/default_assets.php
+default_assets.categories.parking,Parking,,Parkolás,Parking,,default_assets,categories.parking,{locale}/default_assets.php
+default_assets.categories.personal_care,Personal care,,Személyes higiénia,Soins personnels,,default_assets,categories.personal_care,{locale}/default_assets.php
+default_assets.categories.personal_loans,Personal loans,,Személyi kölcsönök,Prêts personnels,,default_assets,categories.personal_loans,{locale}/default_assets.php
+default_assets.categories.pet_care,Pet care,,Kisállat gondozás,Soins des animaux de compagnie,,default_assets,categories.pet_care,{locale}/default_assets.php
+default_assets.categories.property_taxes,Property taxes,,Ingatlanadók,Impôts fonciers,,default_assets,categories.property_taxes,{locale}/default_assets.php
+default_assets.categories.public_transport,Public transport,,Tömegközlekedés,Transports en commun,,default_assets,categories.public_transport,{locale}.php
+default_assets.categories.rent,Rent,,Bérlés,Louer,,default_assets,categories.rent,{locale}/default_assets.php
+default_assets.categories.rent_and_mortgage,Rent and Mortgage,,Bérlet és jelzálog,Loyer et hypothèque,,default_assets,categories.rent_and_mortgage,{locale}.php
+default_assets.categories.rental_income,Rental income,,Bérleti díjak,Revenus locatifs,,default_assets,categories.rental_income,{locale}.php
+default_assets.categories.repairs_maintenance,Repairs and maintenance,,Javítások és karbantartások,Réparations et entretien,,default_assets,categories.repairs_maintenance,{locale}.php
+default_assets.categories.salary,Salary,,Fizetés,Salaire,,default_assets,categories.salary,{locale}/default_assets.php
+default_assets.categories.school_and_university_fees,School and university fees,,Iskolai és egyetemi díjak,Frais de scolarité et d'université,,default_assets,categories.school_and_university_fees,{locale}.php
+default_assets.categories.side_job,Side job,,Mellékállás,Travail à temps partiel,,default_assets,categories.side_job,{locale}/default_assets.php
+default_assets.categories.social_assistance,Social assistance,,Szociális juttatás,Aide sociale,,default_assets,categories.social_assistance,{locale}.php
+default_assets.categories.student_loans,Student loans,,Diákhitel,Prêts étudiants,,default_assets,categories.student_loans,{locale}/default_assets.php
+default_assets.categories.subscriptions,Subscriptions,,Előfizetések,Abonnements,,default_assets,categories.subscriptions,{locale}/default_assets.php
+default_assets.categories.transportation,Transportation,,Közlekedés,Transport,,default_assets,categories.transportation,{locale}/default_assets.php
+default_assets.categories.utilities,Utilities,,Közművek,Services publics,,default_assets,categories.utilities,{locale}/default_assets.php
+default_assets.categories.vacation_and_travel,Vacation and travel,,Nyaralás és utazás,Vacances et voyages,,default_assets,categories.vacation_and_travel,{locale}.php
+default_assets.categories.vehicle_maintenance,Vehicle maintenance,,Járművek karbantartása,Entretien des véhicules,,default_assets,categories.vehicle_maintenance,{locale}.php
+default_assets.categories.vision_and_dental_care,Vision and dental care,,Szemészet és fogászat,Soins de la vue et soins dentaires,,default_assets,categories.vision_and_dental_care,{locale}.php
+default_assets.categories.water,Water,,Víz,Eau,,default_assets,categories.water,{locale}/default_assets.php
+default_assets.categories.water_sewer,Water and sewer,,Víz és csatorna,Eau et assainissement,,default_assets,categories.water_sewer,{locale}/default_assets.php
+default_assets.investment_groups.bonds,Bonds,,Kötvények,Obligations,,default_assets,investment_groups.bonds,{locale}/default_assets.php
+default_assets.investment_groups.other,Other,,Egyéb,Autre,,default_assets,investment_groups.other,{locale}/default_assets.php
+default_assets.investment_groups.stocks,Stocks,,Részvények,Actions,,default_assets,investment_groups.stocks,{locale}/default_assets.php
+default_assets.tags.todo,TODO,,TENNIVALÓ,FAIRE,,default_assets,tags.todo,{locale}/default_assets.php
+pagination.next,,,Következő &raquo;,Suivant &raqu;,,pagination,next,{locale}/pagination.php
+pagination.previous,,,&laquo; Előző,&laquo;Précédent,,pagination,previous,{locale}/pagination.php
+passwords.reset,,,,,,,passwords,reset,{locale}/passwords.php
+passwords.sent,,,,,,,passwords,sent,{locale}/passwords.php
+passwords.throttled,,,,,,,passwords,throttled,{locale}/passwords.php
+passwords.token,,,,,,,passwords,token,{locale}/passwords.php
+passwords.user,,,,,,,passwords,user,{locale}/passwords.php
+validation.accepted,The :attribute must be accepted.,,A(z) :attribútumot el kell fogadni.,L'attribut :attribute doit être accepté.,,validation,accepted,{locale}/validation.php
+validation.accepted_if,,"Az :attribute mezőt el kell fogadni, ha az :other értéke :value.",Le champ :attribute doit être accepté lorsque :other est :value.,,validation,accepted_if,{locale}/validation.php
+validation.active_url,The :attribute is not a valid URL.,,A(z) :attribute nem érvényes URL-cím.,L'attribut :attribute n'est pas une URL valide.,,validation,active_url,{locale}/validation.php
+validation.after,The :attribute must be a date after :date.,,A(z) :attribute értékének a :date utáni dátumnak kell lennie.,L'attribut :attribute doit être une date postérieure à :date.,,validation,after,{locale}/validation.php
+validation.after_or_equal,The :attribute must be a date after or equal to :date.,,A(z) :attribute dátumának a :date paraméternél későbbinek vagy azzal egyenlőnek kell lennie.,L'attribut :attribute doit être une date postérieure ou égale à :date.,,validation,after_or_equal,{locale}/validation.php
+validation.alpha,The :attribute may only contain letters.,,Az :attribútum csak betűket tartalmazhat.,L'attribut :attribute ne peut contenir que des lettres.,,validation,alpha,{locale}/validation.php
+validation.alpha_dash,"The :attribute may only contain letters, numbers, dashes and underscores.","Az :attribute csak betűket, számokat, kötőjeleket és aláhúzásjeleket tartalmazhat.","L'attribut :attribute ne peut contenir que des lettres, des chiffres, des tirets et des traits de soulignement.",,validation,alpha_dash,{locale}.php
+validation.alpha_num,The :attribute may only contain letters and numbers.,,Az :attribútum csak betűket és számokat tartalmazhat.,L'attribut :attribute ne peut contenir que des lettres et des chiffres.,,validation,alpha_num,{locale}.php
+validation.any_of,,,A(z) :attribute mező érvénytelen.,Le champ :attribute est invalide.,,validation,any_of,{locale}.php
+validation.array,The :attribute must be an array.,,A :attribute-nak tömbnek kell lennie.,L'attribut :attribute doit être un tableau.,,validation,array,{locale}.php
+validation.attributes.config.opening_balance,opening balance,,nyitó egyenleg,solde d'ouverture,,validation,attributes.config.opening_balance,{locale}.php
+validation.attributes.name,name,,név,nom,,validation,attributes.name,{locale}.php
+validation.attributes.tos,terms of service,,felhasználási feltételek,conditions d'utilisation,,validation,attributes.tos,{locale}.php
+validation.before,The :attribute must be a date before :date.,,A(z) :attribute paraméternek a(z) :date előtti dátumnak kell lennie.,L'attribut :attribute doit être une date antérieure à :date.,,validation,before,{locale}.php
+validation.before_or_equal,The :attribute must be a date before or equal to :date.,,A(z) :attribute dátumának a :date paraméternél korábbinak vagy azzal egyenlőnek kell lennie.,L'attribut :attribute doit être une date antérieure ou égale à :date.,,validation,before_or_equal,{locale}.php
+validation.between.array,The :attribute must have between :min and :max items.,,Az :attribute tulajdonságnak :min és :max közötti számú elemet kell tartalmaznia.,L'attribut :attribute doit avoir entre :min et :max éléments.,,validation,between.array,{locale}.php
+validation.between.file,The :attribute must be between :min and :max kilobytes.,,A(z) :attribute méretének :min és :max kilobájt között kell lennie.,L'attribut :attribute doit être compris entre :min et :max kilobytes.,,validation,between.file,{locale}.php
+validation.between.numeric,The :attribute must be between :min and :max.,,A(z) :attribute értékének :min és :max között kell lennie.,L'attribut :attribute doit être compris entre :min et :max.,,validation,between.numeric,{locale}.php
+validation.between.string,The :attribute must be between :min and :max characters.,,A(z) :attribute paraméternek :min és :max karakterek között kell lennie.,L'attribut :attribute doit comporter entre :min et :max caractères.,,validation,between.string,{locale}.php
+validation.boolean,,,Az :attribute mezőnek igaznak vagy hamisnak kell lennie.,Le champ :attribute doit être vrai ou faux.,,validation,boolean,{locale}.php
+validation.can,,,A(z) :attribute mező nem engedélyezett értéket tartalmaz.,Le champ :attribute contient une valeur non autorisée.,,validation,can,{locale}.php
+validation.confirmed,The :attribute confirmation does not match.,,A(z) :attribute megerősítése nem egyezik.,La confirmation de l'attribut :attribute ne correspond pas.,,validation,confirmed,{locale}.php
+validation.contains,,,A(z) :attribute mezőből hiányzik egy kötelező érték.,Le champ :attribute ne contient pas de valeur obligatoire.,,validation,contains,{locale}.php
+validation.current_password,,,A jelszó helytelen.,,,validation,current_password,{locale}.php
+validation.date,The :attribute is not a valid date.,,A(z) :attribute nem érvényes dátum.,L'attribut :attribute ne correspond pas à une date valide.,,validation,date,{locale}.php
+validation.date_equals,The :attribute must be a date equal to :date.,,A(z) :attribute paraméternek egy :date paraméterrel megegyező dátumnak kell lennie.,L'attribut :attribute doit être une date égale à :date.,,validation,date_equals,{locale}.php
+validation.date_format,The :attribute does not match the format :format.,,A(z) :attribute nem egyezik a(z) :format formátummal.,L'attribut :attribute ne correspond pas au format :format.,,validation,date_format,{locale}.php
+validation.decimal,,,Az :attribute mezőben :decimal tizedesjegyeknek kell lenniük.,Le champ :attribute doit avoir :decimal décimales.,,validation,decimal,{locale}.php
+validation.declined,,,Az :attribute mezőt el kell utasítani.,Le champ :attribute doit être refusé.,,validation,declined,{locale}.php
+validation.declined_if,,"Az :attribute mezőt el kell utasítani, ha az :other értéke :value.",Le champ :attribute doit être refusé lorsque :other est :value.,,validation,declined_if,{locale}.php
+validation.different,The :attribute and :other must be different.,,A(z) :attribute és a(z) :other paramétereknek eltérőnek kell lenniük.,Les attributs :attribute et :other doivent être différents.,,validation,different,{locale}.php
+validation.digits,The :attribute must be :digits digits.,,A(z) :attribute értékének :digits számjegyből kell állnia.,L'attribut :attribute doit être :digits chiffres.,,validation,digits,{locale}.php
+validation.digits_between,The :attribute must be between :min and :max digits.,,A(z) :attribute paraméternek :min és :max számjegyek között kell lennie.,L'attribut :attribute doit être compris entre :min et :max chiffres.,,validation,digits_between,{locale}.php
+validation.dimensions,The :attribute has invalid image dimensions.,,A(z) :attribute érvénytelen képméretekkel rendelkezik.,L'attribut :attribute a des dimensions d'image invalides.,,validation,dimensions,{locale}.php
+validation.distinct,,,A(z) :attribute mezőben ismétlődő érték található.,Le champ :attribute contient une valeur en double.,,validation,distinct,{locale}.php
+validation.doesnt_contain,,,Az :attribute mező nem tartalmazhatja a következők egyikét sem: :values.,Le champ :attribute ne doit contenir aucun des éléments suivants : :values.,,validation,doesnt_contain,{locale}.php
+validation.doesnt_end_with,,,Az :attribute mező nem végződhet a következők egyikével: :values.,Le champ :attribute ne doit pas se terminer par l'un des éléments suivants : :values.,,validation,doesnt_end_with,{locale}.php
+validation.doesnt_start_with,,,Az :attribute mező nem kezdődhet a következők egyikével: :values.,Le champ :attribute ne doit pas commencer par l'un des éléments suivants : :values.,,validation,doesnt_start_with,{locale}.php
+validation.email,The :attribute must be a valid email address.,,A(z) :attribútumnak érvényes e-mail címnek kell lennie.,L'attribut :attribute doit être une adresse e-mail valide.,,validation,email,{locale}.php
+validation.encoding,The :attribute field must be encoded in :encoding.,,Az :attribute mezőt :encoding formátumban kell kódolni.,Le champ :attribute doit être encodé en :encoding.,,validation,encoding,{locale}.php
+validation.ends_with,The :attribute must end with one of the following: :values.,,Az :attribute tulajdonságnak a következők egyikével kell végződnie: :values.,L'attribut :attribute doit se terminer par l'une des valeurs suivantes : :values.,,validation,ends_with,{locale}.php
+validation.enum,,,A kiválasztott :attribute érvénytelen.,L'attribut sélectionné :attribute est invalide.,,validation,enum,{locale}.php
+validation.exists,,,A kiválasztott :attribute érvénytelen.,L'attribut sélectionné :attribute est invalide.,,validation,exists,{locale}.php
+validation.extensions,,,Az :attribute mezőnek a következő kiterjesztések egyikével kell rendelkeznie: :values.,Le champ :attribute doit avoir l'une des extensions suivantes : :values.,,validation,extensions,{locale}.php
+validation.file,The :attribute must be a file.,,A :attribútumnak egy fájlnak kell lennie.,L'attribut :attribute doit être un fichier.,,validation,file,{locale}.php
+validation.filled,,,Az :attribute mezőnek tartalmaznia kell egy értéket.,Le champ :attribute doit avoir une valeur.,,validation,filled,{locale}.php
+validation.gt.array,The :attribute must have more than :value items.,,Az :attribute tulajdonságnak több mint :value elemmel kell rendelkeznie.,L'attribut :attribute doit avoir plus d'éléments :value.,,validation,gt.array,{locale}.php
+validation.gt.file,The :attribute must be greater than :value kilobytes.,,"A(z) :attribute értékének nagyobbnak kell lennie, mint :value kilobájt.",La valeur de l'attribut (:attribute) doit être supérieure à celle de la valeur (:value) en kilo-octets.,,validation,gt.file,{locale}.php
+validation.gt.numeric,The :attribute must be greater than :value.,,"A(z) :attribute értékének nagyobbnak kell lennie, mint a(z) :value érték.",L'attribut :attribute doit être supérieur à :value.,,validation,gt.numeric,{locale}.php
+validation.gt.string,,,"A(z) :attribute karakternek nagyobbnak kell lennie, mint :value karakter.",L'attribut doit comporter plus de caractères que la valeur.,,validation,gt.string,{locale}.php
+validation.gte.array,The :attribute must have :value items or more.,,A(z) :attribute tulajdonságnak legalább :value elemmel kell rendelkeznie.,L'attribut :attribute doit avoir au moins deux éléments :value.,,validation,gte.array,{locale}.php
+validation.gte.file,The :attribute must be greater than or equal :value kilobytes.,,"A(z) :attribute értékének nagyobbnak vagy egyenlőnek kell lennie, mint :value kilobájt.",L'attribut :attribute doit être supérieur ou égal à :value kilobytes.,,validation,gte.file,{locale}.php
+validation.gte.numeric,The :attribute must be greater than or equal :value.,,"A(z) :attribute értékének nagyobbnak vagy egyenlőnek kell lennie, mint a :value.",L'attribut :attribute doit être supérieur ou égal à :value.,,validation,gte.numeric,{locale}.php
+validation.gte.string,,,"A(z) :attribute karakternek nagyobbnak vagy egyenlőnek kell lennie, mint :value karakter.",L'attribut :attribute doit avoir une valeur supérieure ou égale à :value.,,validation,gte.string,{locale}.php
+validation.hex_color,,,Az :attribute mezőnek érvényes hexadecimális színnek kell lennie.,Le champ :attribute doit être une couleur hexadécimale valide.,,validation,hex_color,{locale}.php
+validation.image,The :attribute must be an image.,,A(z) :attribútumnak képnek kell lennie.,L'attribut :attribute doit être une image.,,validation,image,{locale}.php
+validation.in,,,A kiválasztott :attribute érvénytelen.,L'attribut sélectionné :attribute est invalide.,,validation,in,{locale}.php
+validation.in_array,The :attribute field does not exist in :other.,,A(z) :attribute mező nem létezik az :other paraméterben.,Le champ :attribute n'existe pas dans :other.,,validation,in_array,{locale}.php
+validation.in_array_keys,,,Az :attribute mezőnek a következő kulcsok közül legalább egyet tartalmaznia kell: :values.,Le champ :attribute doit contenir au moins une des clés suivantes : :values.,,validation,in_array_keys,{locale}.php
+validation.integer,The :attribute must be an integer.,,A :attribútumnak egész számnak kell lennie.,L'attribut :attribute doit être un entier.,,validation,integer,{locale}.php
+validation.json,The :attribute must be a valid JSON string.,,A(z) :attribute tulajdonságnak érvényes JSON karakterláncnak kell lennie.,L'attribut :attribute doit être une chaîne JSON valide.,,validation,json,{locale}.php
+validation.list,,,Az :attribute mezőnek listának kell lennie.,Le champ :attribute doit être une liste.,,validation,list,{locale}.php
+validation.lowercase,,,Az :attribute mezőnek kisbetűsnek kell lennie.,Le champ :attribute doit être en minuscules.,,validation,lowercase,{locale}.php
+validation.lt.array,The :attribute must have less than :value items.,,"A(z) :attribute tulajdonságnak kevesebb, mint :value elemet kell tartalmaznia.",L'attribut :attribute doit avoir moins d'éléments :value.,,validation,lt.array,{locale}.php
+validation.lt.file,The :attribute must be less than :value kilobytes.,,"A(z) :attribute értékének kisebbnek kell lennie, mint :value kilobájt.",L'attribut :attribute doit être inférieur à :value kilobytes.,,validation,lt.file,{locale}.php
+validation.lt.numeric,The :attribute must be less than :value.,,"A(z) :attribute értékének kisebbnek kell lennie, mint a(z) :value.",L'attribut :attribute doit être inférieur à la valeur :value.,,validation,lt.numeric,{locale}.php
+validation.lt.string,,,"A(z) :attribute karakterszámának kevesebbnek kell lennie, mint :value karakter.",L'attribut :attribute doit contenir moins de caractères que la valeur :value.,,validation,lt.string,{locale}.php
+validation.lte.array,The :attribute must not have more than :value items.,,Az :attribute nem tartalmazhat több mint :value elemet.,L'attribut :attribute ne doit pas contenir plus de :value éléments.,,validation,lte.array,{locale}.php
+validation.lte.file,The :attribute must be less than or equal :value kilobytes.,,"A(z) :attribute értékének kisebbnek vagy egyenlőnek kell lennie, mint :value kilobájt.",L'attribut :attribute doit être inférieur ou égal à :value kilobytes.,,validation,lte.file,{locale}.php
+validation.lte.numeric,The :attribute must be less than or equal :value.,,"A(z) :attribute értékének kisebbnek vagy egyenlőnek kell lennie, mint :value.",L'attribut :attribute doit être inférieur ou égal à :value.,,validation,lte.numeric,{locale}.php
+validation.lte.string,,,"A(z) :attribute karakterszámának kisebbnek vagy egyenlőnek kell lennie, mint :value karakter.",L'attribut :attribute doit avoir un nombre de caractères inférieur ou égal à :value.,,validation,lte.string,{locale}.php
+validation.max.array,The :attribute may not have more than :max items.,,Az :attribute nem tartalmazhat :max-nál több elemet.,L'attribut :attribute ne peut pas contenir plus de :max éléments.,,validation,max.array,{locale}.php
+validation.max.file,The :attribute may not be greater than :max kilobytes.,,"Az :attribute nem lehet nagyobb, mint :max kilobájt.",,,validation,max.file,{locale}.php
+validation.max.numeric,The :attribute may not be greater than :max.,,"Az :attribute nem lehet nagyobb, mint :max.",,,validation,max.numeric,{locale}.php
+validation.max.string,,,"A(z) :attribute nem lehet hosszabb, mint :max karakter.",,,validation,max.string,{locale}.php
+validation.max_digits,,,Az :attribute mező nem tartalmazhat :max számjegynél többet.,Le champ :attribute ne doit pas contenir plus de :max chiffres.,,validation,max_digits,{locale}.php
+validation.mimes,The :attribute must be a file of type: :values.,,A(z) :attribute tulajdonságnak egy :values ​​típusú fájlnak kell lennie.,L'attribut :attribute doit être un fichier de type : :values.,,validation,mimes,{locale}.php
+validation.mimetypes,The :attribute must be a file of type: :values.,,A(z) :attribute tulajdonságnak egy :values ​​típusú fájlnak kell lennie.,L'attribut :attribute doit être un fichier de type : :values.,,validation,mimetypes,{locale}.php
+validation.min.array,The :attribute must have at least :min items.,,A(z) :attribute tulajdonságnak legalább :min elemet kell tartalmaznia.,L'attribut :attribute doit avoir au moins :min éléments.,,validation,min.array,{locale}.php
+validation.min.file,The :attribute must be at least :min kilobytes.,,A(z) :attribute tulajdonságnak legalább :min kilobájt méretűnek kell lennie.,L'attribut :attribute doit être d'au moins :min kilooctets.,,validation,min.file,{locale}.php
+validation.min.numeric,The :attribute must be at least :min.,,A(z) :attribute tulajdonságnak legalább :min értékűnek kell lennie.,L'attribut :attribute doit être au moins :min.,,validation,min.numeric,{locale}.php
+validation.min.string,The :attribute must be at least :min characters.,,A(z) :attribute mezőnek legalább :min karakter hosszúságúnak kell lennie.,L'attribut :attribute doit comporter au moins :min caractères.,,validation,min.string,{locale}.php
+validation.min_digits,,,Az :attribute mezőnek legalább :min számjegyet kell tartalmaznia.,Le champ :attribute doit avoir au moins :min chiffres.,,validation,min_digits,{locale}.php
+validation.missing,,,A(z) :attribute mezőnek hiányoznia kell.,Le champ :attribute doit être manquant.,,validation,missing,{locale}.php
+validation.missing_if,,"A(z) :attribute mezőnek hiányoznia kell, ha a :other értéke :value.",Le champ :attribute doit être absent lorsque :other est :value.,,validation,missing_if,{locale}.php
+validation.missing_unless,,"Az :attribute mezőnek hiányoznia kell, kivéve, ha az :other nem :value.",Le champ :attribute doit être absent sauf si :other est :value.,,validation,missing_unless,{locale}.php
+validation.missing_with,,"A(z) :attribute mezőnek hiányoznia kell, ha a(z) :values ​​jelen van.",Le champ :attribute doit être absent lorsque :values ​​est présent.,,validation,missing_with,{locale}.php
+validation.missing_with_all,,"Az :attribute mezőnek hiányoznia kell, ha :values ​​értékek vannak jelen.",Le champ :attribute doit être absent lorsque :values ​​est présent.,,validation,missing_with_all,{locale}.php
+validation.multiple_of,,,Az :attribute mezőnek a :value többszörösének kell lennie.,Le champ :attribute doit être un multiple de :value.,,validation,multiple_of,{locale}.php
+validation.not_in,,,A kiválasztott :attribute érvénytelen.,L'attribut sélectionné :attribute est invalide.,,validation,not_in,{locale}.php
+validation.not_regex,The :attribute format is invalid.,,A(z) :attribute formátuma érvénytelen.,Le format :attribute est invalide.,,validation,not_regex,{locale}.php
+validation.numeric,The :attribute must be a number.,,A :attribute-nak számnak kell lennie.,L'attribut :attribute doit être un nombre.,,validation,numeric,{locale}.php
+validation.password,The password is incorrect.,,A jelszó helytelen.,,,validation,password,{locale}.php
+validation.present,,,A :attribute mezőnek jelen kell lennie.,Le champ :attribute doit être présent.,,validation,present,{locale}.php
+validation.present_if,,"Az :attribute mezőnek jelen kell lennie, ha az :other értéke :value.",Le champ :attribute doit être présent lorsque :other est :value.,,validation,present_if,{locale}.php
+validation.present_unless,,"Az :attribute mezőnek jelen kell lennie, kivéve, ha az :other nem :value.",Le champ :attribute doit lenni, ha az :other nem :value.,,validation,present_unless,{locale}.php
+validation.present_with,,"Az :attribute mezőnek jelen kell lennie, ha a :values ​​is jelen van.",Le champ :attribute doit être présent lorsque :values ​​est présent.,,validation,present_with,{locale}.php
+validation.present_with_all,,"Az :attribute mezőnek jelen kell lennie, ha a :values ​​értékek jelen vannak.",Le champ :attribute doit être présent lorsque :values ​​est présent.,,validation,present_with_all,{locale}.php
+validation.prohibited,,,A :attribute mező használata tiltott.,Le champ :attribute est interdit.,,validation,prohibited,{locale}.php
+validation.prohibited_if,,"Az :attribute mező használata tilos, ha az :other értéke :value.",Le champ :attribute est interdit lorsque :other est :value.,,validation,prohibited_if,{locale}.php
+validation.prohibited_if_accepted,,"Az :attribute mező tiltott, ha az :other elfogadott.",Le champ :attribute est interdit lorsque :other est accepté.,,validation,prohibited_if_accepted,{locale}.php
+validation.prohibited_if_declined,,"Az :attribute mező tiltott, ha az :other elutasításra kerül.",Le champ :attribute est interdit lorsque :other est refusé.,,validation,prohibited_if_declined,{locale}.php
+validation.prohibited_unless,,"Az :attribute mező használata tiltott, kivéve, ha az :other szerepel a :values ​​változóban.",Le champ :attribute est interdit sauf si :other est présent dans :values.,,validation,prohibited_unless,{locale}.php
+validation.prohibits,,,Az :attribute mező tiltja a :other jelenlétét.,Le champ :attribute interdit la présence de :other.,,validation,prohibits,{locale}.php
+validation.regex,The :attribute format is invalid.,,A(z) :attribute formátuma érvénytelen.,Le format :attribute est invalide.,,validation,regex,{locale}.php
+validation.required,,,A(z) :attribute mező kitöltése kötelező.,Le champ :attribute est obligatoire.,,validation,required,{locale}.php
+validation.required_array_keys,,,Az :attribute mezőnek a következő bejegyzéseket kell tartalmaznia: :values.,Le champ :attribute doit contenir des entrées pour :values.,,validation,required_array_keys,{locale}.php
+validation.required_if,,"Az :attribute mező kitöltése kötelező, ha az :other értéke :value.",Le champ :attribute est obligatoire lorsque :other est :value.,,validation,required_if,{locale}.php
+validation.required_if_accepted,,"Az :attribute mező kitöltése kötelező, ha az :other elfogadott.",Le champ :attribute est obligatory, ha az :other elfogadott.,,validation,required_if_accepted,{locale}.php
+validation.required_if_declined,,"A :attribute mező kitöltése kötelező, ha a :other mezőt elutasítják.",Le champ :attribute est obligatoire lorsque :other est refusé.,,validation,required_if_declined,{locale}.php
+validation.required_unless,,"Az :attribute mező kitöltése kötelező, kivéve, ha az :other szerepel a :values ​​változóban.",Le champ :attribute est obligatoire sauf si :other est présent dans :values.,,validation,required_unless,{locale}.php
+validation.required_with,,"Az :attribute mező kitöltése kötelező, ha a :values jelen van.",Le champ :attribute est obligatoire lorsque :values ​​est présent.,,validation,required_with,{locale}.php
+validation.required_with_all,,"Az :attribute mező kitöltése kötelező, ha :values értékek vannak jelen.",Le champ :attribute est obligatoire lorsque :values ​​est présent.,,validation,required_with_all,{locale}.php
+validation.required_without,,"Az :attribute mező kitöltése kötelező, ha a :values nincs jelen.",Le champ :attribute est obligatoire lorsque :values ​​est absent.,,validation,required_without,{locale}.php
+validation.required_without_all,,"Az :attribute mező kitöltése kötelező, ha a :values egyik értéke sem található meg.",Le champ :attribute est obligatoire lorsqu'aucune valeur :value n'est présente.,,validation,required_without_all,{locale}.php
+validation.same,The :attribute and :other must match.,,A(z) :attribute és a(z) :other paramétereknek egyezniük kell.,Les attributs :attribute et :other doivent correspondre.,,validation,same,{locale}.php
+validation.size.array,The :attribute must contain :size items.,,Az :attribute tulajdonságnak :size elemeket kell tartalmaznia.,L'attribut :attribute doit contenir des éléments :size.,,validation,size.array,{locale}.php
+validation.size.file,The :attribute must be :size kilobytes.,,A(z) :attribute értékének :size kilobájtnak kell lennie.,L'attribut :attribute doit être :size kilobytes.,,validation,size.file,{locale}.php
+validation.size.numeric,The :attribute must be :size.,,A(z) :attribute értékének :size-nek kell lennie.,L'attribut :attribute doit être :size.,,validation,size.numeric,{locale}.php
+validation.size.string,,,"A(z) :attribute karaktereknek kell lenniük: :size.",L'attribut :attribute doit avoir une taille de caractères.,,validation,size.string,{locale}.php
+validation.starts_with,The :attribute must start with one of the following: :values.,,A(z) :attribute tulajdonságnak a következők egyikével kell kezdődnie: :values.,L'attribut :attribute doit commencer par l'une des valeurs suivantes : :values.,,validation,starts_with,{locale}.php
+validation.string,The :attribute must be a string.,,A :attribute-nak karakterláncnak kell lennie.,L'attribut :attribute doit être une chaîne de caractères.,,validation,string,{locale}.php
+validation.timezone,The :attribute must be a valid zone.,,A(z) :attribute tulajdonságnak érvényes zónának kell lennie.,L'attribut :attribute doit correspondre à une zone valide.,,validation,timezone,{locale}.php
+validation.ulid,,,Az :attribute mezőnek érvényes ULID-nak kell lennie.,Le champ :attribute doit être un ULID valide.,,validation,ulid,{locale}.php
+validation.unique,,,A(z) :attribute már foglalt.,L'attribut :attribute a déjà été utilisé.,,validation,unique,{locale}.php
+validation.uploaded,,,A(z) :attribute feltöltése sikertelen.,Le fichier :attribute n'a pas pudo ser cargado.,,validation,uploaded,{locale}.php
+validation.uppercase,,,Az :attribute mezőnek nagybetűsnek kell lennie.,Le champ :attribute doit être en majuscules.,,validation,uppercase,{locale}.php
+validation.url,The :attribute format is invalid.,,A(z) :attribute formátuma érvénytelen.,Le format :attribute est invalide.,,validation,url,{locale}.php
+validation.size.numeric,The :attribute must be :size.,,A(z) :attribute értékének :size-nek kell lennie.,L'attribut :attribute doit être :size.,,validation,size.numeric,{locale}.php
+validation.size.string,The :attribute must be :size characters.,,A(z) :attribute karaktereknek kell lenniük: :size.,L'attribut :attribute doit avoir une taille de caractères.,,validation,size.string,{locale}.php
+validation.starts_with,The :attribute must start with one of the following: :values.,,A(z) :attribute tulajdonságnak a következők egyikével kell kezdődnie: :values.,L'attribut :attribute doit commencer par l'une des valeurs suivantes : :values.,,validation,starts_with,{locale}.php
+validation.string,The :attribute must be a string.,,A :attribute-nak karakterláncnak kell lennie.,L'attribut :attribute doit être une chaîne de caractères.,,validation,string,{locale}.php
+validation.timezone,The :attribute must be a valid zone.,,A(z) :attribute tulajdonságnak érvényes zónának kell lennie.,L'attribut :attribute doit correspondre à une zone valide.,,validation,timezone,{locale}.php
+validation.unique,,,,,,validation,unique,{locale}.php

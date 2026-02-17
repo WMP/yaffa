@@ -1,0 +1,125 @@
+
+opening balance
+name
+terms of service
+:attribute musi być datą wcześniejszą niż :date.
+:attribute musi być datą wcześniejszą lub równą :date.
+:attribute musi zawierać od :min do :max elementów.
+:attribute musi mieć rozmiar od :min do :max kilobajtów.
+:attribute musi być między :min a :max.
+:attribute musi zawierać od :min do :max znaków.
+Pole :attribute musi być prawdziwe lub fałszywe.
+Pole :attribute zawiera niedozwoloną wartość.
+Potwierdzenie :attribute nie pasuje.
+W polu :attribute brakuje wymaganej wartości.
+Hasło jest nieprawidłowe.
+:attribute nie jest prawidłową datą.
+:attribute musi być datą równą :date.
+:attribute nie pasuje do formatu :format.
+Pole :attribute musi mieć :decimal miejsc dziesiętnych.
+Pole :attribute musi zostać odrzucone.
+Pole :attribute musi zostać odrzucone, gdy :other jest równe :value.
+:attribute i :other muszą być różne.
+:attribute musi mieć :digits cyfr.
+:attribute musi zawierać od :min do :max cyfr.
+:attribute ma nieprawidłowe wymiary obrazu.
+Pole :attribute ma zduplikowaną wartość.
+Pole :attribute nie może zawierać żadnej z następujących wartości: :values.
+Pole :attribute nie może kończyć się żadną z następujących wartości: :values.
+Pole :attribute nie może zaczynać się żadną z następujących wartości: :values.
+:attribute musi być prawidłowym adresem e-mail.
+Pole :attribute musi być zakodowane w :encoding.
+:attribute musi kończyć się jedną z następujących wartości: :values.
+Wybrana wartość :attribute jest nieprawidłowa.
+Wybrana wartość :attribute jest nieprawidłowa.
+Pole :attribute musi mieć jedno z następujących rozszerzeń: :values.
+:attribute musi być plikiem.
+Pole :attribute musi mieć wartość.
+:attribute musi mieć więcej niż :value elementów.
+:attribute musi być większe niż :value kilobajtów.
+:attribute musi być większe niż :value.
+:attribute musi zawierać więcej niż :value znaków.
+:attribute musi mieć co najmniej :value elementów.
+:attribute musi być większe lub równe :value kilobajtów.
+:attribute musi być większe lub równe :value.
+:attribute musi zawierać więcej niż lub równo :value znaków.
+Pole :attribute musi być prawidłowym kolorem szesnastkowym.
+:attribute musi być obrazem.
+Wybrana wartość :attribute jest nieprawidłowa.
+Pole :attribute nie istnieje w :other.
+Pole :attribute musi zawierać co najmniej jeden z następujących kluczy: :values.
+:attribute musi być liczbą całkowitą.
+:attribute musi być prawidłowym ciągiem JSON.
+Pole :attribute musi być listą.
+Pole :attribute musi być małymi literami.
+:attribute musi zawierać mniej niż :value elementów.
+:attribute musi być mniejsze niż :value kilobajtów.
+:attribute musi być mniejsze niż :value.
+:attribute musi zawierać mniej niż :value znaków.
+:attribute nie może zawierać więcej niż :value elementów.
+:attribute musi być mniejsze lub równe :value kilobajtów.
+:attribute musi być mniejsze lub równe :value.
+:attribute musi zawierać mniej niż lub równo :value znaków.
+:attribute nie może zawierać więcej niż :max elementów.
+:attribute nie może być większe niż :max kilobajtów.
+:attribute nie może być większe niż :max.
+:attribute nie może zawierać więcej niż :max znaków.
+Pole :attribute nie może mieć więcej niż :max cyfr.
+:attribute musi być plikiem typu: :values.
+:attribute musi być plikiem typu: :values.
+:attribute musi mieć co najmniej :min elementów.
+:attribute musi mieć co najmniej :min kilobajtów.
+:attribute musi wynosić co najmniej :min.
+:attribute musi zawierać co najmniej :min znaków.
+Pole :attribute musi zawierać co najmniej :min cyfr.
+W polu :attribute brakuje wartości.
+W polu :attribute musi brakować wartości, gdy :other jest równe :value.
+W polu :attribute musi brakować wartości, chyba że :other jest równe :value.
+W polu :attribute musi brakować wartości, gdy :values jest obecne.
+W polu :attribute musi brakować wartości, gdy wartości :values są obecne.
+Pole :attribute musi być wielokrotnością :value.
+Wybrana wartość :attribute jest nieprawidłowa.
+Format :attribute jest nieprawidłowy.
+:attribute musi być liczbą.
+Hasło jest nieprawidłowe.
+Pole :attribute musi być obecne.
+Pole :attribute musi być obecne, gdy :other jest równe :value.
+Pole :attribute musi być obecne, chyba że :other jest równe :value.
+Pole :attribute musi być obecne, gdy :values jest również obecne.
+Pole :attribute musi być obecne, gdy wartości :values są obecne.
+Pole :attribute jest zabronione.
+Pole :attribute jest zabronione, gdy :other jest równe :value.
+Pole :attribute jest zabronione, gdy :other jest akceptowane.
+Pole :attribute jest zabronione, gdy :other jest odrzucone.
+Pole :attribute jest zabronione, chyba że :other znajduje się w :values.
+Pole :attribute zabrania obecności :other.
+Format :attribute jest nieprawidłowy.
+Pole :attribute jest wymagane.
+Pole :attribute musi zawierać wpisy dla :values.
+Pole :attribute jest wymagane, gdy :other jest równe :value.
+Pole :attribute jest wymagane, gdy :other jest akceptowane.
+Pole :attribute jest wymagane, gdy :other jest odrzucone.
+Pole :attribute jest wymagane, chyba że :other znajduje się w :values.
+Pole :attribute jest wymagane, gdy :values jest obecne.
+Pole :attribute jest wymagane, gdy wartości :values są obecne.
+Pole :attribute jest wymagane, gdy :values nie jest obecne.
+Pole :attribute jest wymagane, gdy żadna z wartości :values nie zostanie znaleziona.
+:attribute i :other muszą się zgadzać.
+:attribute musi zawierać :size elementów.
+:attribute musi mieć rozmiar :size kilobajtów.
+:attribute musi wynosić :size.
+:attribute musi zawierać :size znaków.
+:attribute musi zaczynać się jedną z następujących wartości: :values.
+:attribute musi być ciągiem znaków.
+:attribute musi być prawidłową strefą.
+Pole :attribute musi być prawidłowym ULID.
+:attribute jest już zajęte.
+Przesyłanie :attribute nie powiodło się.
+Pole :attribute musi być wielkimi literami.
+Format :attribute jest nieprawidłowy.
+:attribute musi wynosić :size.
+:attribute musi zawierać :size znaków.
+:attribute musi zaczynać się jedną z następujących wartości: :values.
+:attribute musi być ciągiem znaków.
+:attribute musi być prawidłową strefą.
+:attribute jest już zajęte.
