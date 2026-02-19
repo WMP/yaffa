@@ -20,6 +20,14 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         $this->hideSensitiveRequestDetails();
 
+        Telescope::tag(function (IncomingEntry $entry) {
+            if ($this->isMonitoredRequestPath()) {
+                return ['monitor:categories'];
+            }
+
+            return [];
+        });
+
         Telescope::filter(function (IncomingEntry $entry) {
             if ($this->app->environment('local')) {
                 return true;
@@ -31,6 +39,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
                 $entry->type === EntryType::EVENT || // Keep all events
                 $entry->isSlowQuery() ||
                 $entry->isScheduledTask() ||
+                $this->hasCategoriesMonitorTag($entry) ||
                 $entry->hasMonitoredTag();
         });
 
@@ -45,8 +54,34 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
                     $entry->type === EntryType::EVENT || // Keep all events
                     $entry->isSlowQuery() ||
                     $entry->isScheduledTask() ||
+                    $this->hasCategoriesMonitorTag($entry) ||
                     $entry->hasMonitoredTag());
         });
+    }
+
+    private function isMonitoredRequestPath(): bool
+    {
+        if (!config('telescope.monitor_categories')) {
+            return false;
+        }
+
+        if ($this->app->runningInConsole()) {
+            return false;
+        }
+
+        $request = request();
+        foreach (config('telescope.monitor_paths', []) as $pattern) {
+            if ($request->is($pattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasCategoriesMonitorTag(IncomingEntry $entry): bool
+    {
+        return in_array('monitor:categories', $entry->tags ?? [], true);
     }
 
     /**

@@ -66,6 +66,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Focused Monitoring (optional)
+    |--------------------------------------------------------------------------
+    |
+    | Enable this to keep all Telescope entries for selected paths only.
+    | Useful on staging when debugging a specific area (e.g. categories).
+    |
+    */
+    'monitor_categories' => env('TELESCOPE_MONITOR_CATEGORIES', false),
+    'monitor_paths' => array_filter(array_map('trim', explode(',', env('TELESCOPE_MONITOR_PATHS', 'categories*,api/assets/categories*')))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Telescope Route Middleware
     |--------------------------------------------------------------------------
     |
