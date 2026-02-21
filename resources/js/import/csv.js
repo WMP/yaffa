@@ -17,9 +17,18 @@ window.transactions = [];
 window.account_currency = {};
 window.unmatchedRows = [];
 window.schedules = [];
+window.csvSampleRows = [];
+window.csvHeaders = [];
 const identifiedTransactionsSectionSelector =
   '#identified-transactions-section';
 const unmatchedRowsSectionSelector = '#unmatched-rows-section';
+const aiDslAllowedKeys = [
+  'csv_options',
+  'column_mapping',
+  'value_mappings',
+  'rules',
+];
+let selectedImportProfile = null;
 
 // Helper function to save nested object values
 function storeNestedObjectValue(base, names, value) {
@@ -73,6 +82,202 @@ function showImportErrorNotification(message) {
     },
   });
   window.dispatchEvent(notificationEvent);
+}
+
+function setAiDslStatus(message, tone = 'muted') {
+  const statusElement = document.getElementById('ai_dsl_status');
+  if (!statusElement) {
+    return;
+  }
+
+  statusElement.className = 'form-text';
+  switch (tone) {
+    case 'success':
+      statusElement.classList.add('text-success');
+      break;
+    case 'danger':
+      statusElement.classList.add('text-danger');
+      break;
+    case 'warning':
+      statusElement.classList.add('text-warning');
+      break;
+    default:
+      statusElement.classList.add('text-muted');
+      break;
+  }
+  statusElement.textContent = message;
+}
+
+function buildAiDslPrompt(csvRows) {
+  const sampleRows = csvRows.slice(0, 8);
+  const headers = Object.keys(sampleRows[0] ?? {});
+  const sampleJson = JSON.stringify(sampleRows, null, 2);
+
+  return [
+    'You are helping me configure YAFFA CSV import rules.',
+    'Generate ONLY valid JSON (no markdown, no explanations).',
+    '',
+    'Expected output structure:',
+    '{',
+    '  "csv_options": { "delimiter": ";", "encoding": "windows-1250" },',
+    '  "column_mapping": { "date": "Transaction Date", "amount": "Amount", "description": "Description", "type": "Type", "from": "From", "to": "To" },',
+    '  "value_mappings": [',
+    '    { "when": { "type": "TRANSFER" }, "set": { "transaction_type": "transfer" } },',
+    '    { "when": { "description_regex": "SALARY|PAYROLL" }, "set": { "category": "Income" } }',
+    '  ],',
+    '  "rules": []',
+    '}',
+    '',
+    'Rules:',
+    '- Preserve original column names exactly.',
+    '- Use regex fields when useful (e.g. "description_regex").',
+    '- Keep it deterministic and machine-readable.',
+    '',
+    'CSV headers:',
+    JSON.stringify(headers),
+    '',
+    'Sample rows:',
+    sampleJson,
+  ].join('\n');
+}
+
+function updateAiPromptFromRows(csvRows) {
+  const promptElement = document.getElementById('ai_dsl_prompt_output');
+  if (!promptElement) {
+    return;
+  }
+
+  if (!csvRows || csvRows.length === 0) {
+    promptElement.value = '';
+    return;
+  }
+
+  promptElement.value = buildAiDslPrompt(csvRows);
+}
+
+function parseAiDslInput(rawValue) {
+  const trimmedValue = String(rawValue ?? '').trim();
+  if (!trimmedValue) {
+    throw new Error('DSL input is empty.');
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(trimmedValue);
+  } catch (_error) {
+    throw new Error('Invalid JSON format.');
+  }
+
+  if (Array.isArray(parsed)) {
+    return { rules: parsed };
+  }
+
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error('DSL must be a JSON object or an array of rules.');
+  }
+
+  const unknownKeys = Object.keys(parsed).filter(
+    (key) => !aiDslAllowedKeys.includes(key),
+  );
+  if (unknownKeys.length > 0) {
+    throw new Error('Unknown keys in DSL: ' + unknownKeys.join(', '));
+  }
+
+  if (Object.keys(parsed).length === 0) {
+    throw new Error('DSL object is empty.');
+  }
+
+  if (
+    parsed.rules !== undefined &&
+    parsed.rules !== null &&
+    !Array.isArray(parsed.rules)
+  ) {
+    throw new Error('"rules" must be an array.');
+  }
+
+  return parsed;
+}
+
+function profileDslToTextareaValue(profile) {
+  if (!profile) {
+    return '';
+  }
+
+  const dsl = {};
+  aiDslAllowedKeys.forEach((key) => {
+    if (profile[key] !== null && profile[key] !== undefined) {
+      dsl[key] = profile[key];
+    }
+  });
+
+  if (Object.keys(dsl).length === 0) {
+    return '';
+  }
+
+  return JSON.stringify(dsl, null, 2);
+}
+
+async function loadImportProfile(profileId) {
+  const response = await fetch('/api/import/csv/profiles/' + profileId, {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Unable to load import profile details.');
+  }
+
+  const profile = await response.json();
+  selectedImportProfile = profile;
+  return profile;
+}
+
+async function saveDslToSelectedProfile() {
+  const profileId = document.getElementById('csv_file').dataset.importProfileId;
+  if (!profileId) {
+    setAiDslStatus('Select an import profile first.', 'warning');
+    return;
+  }
+
+  let dslPayload;
+  try {
+    dslPayload = parseAiDslInput(document.getElementById('ai_dsl_input').value);
+  } catch (error) {
+    setAiDslStatus(error.message, 'danger');
+    return;
+  }
+
+  try {
+    let profile = selectedImportProfile;
+    if (!profile || Number(profile.id) !== Number(profileId)) {
+      profile = await loadImportProfile(profileId);
+    }
+
+    const payload = {
+      name: profile.name,
+      ...dslPayload,
+    };
+
+    const response = await fetch('/api/import/csv/profiles/' + profileId, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': window.csrfToken,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save DSL to the selected profile.');
+    }
+
+    selectedImportProfile = await response.json();
+    setAiDslStatus('DSL saved to selected profile.', 'success');
+  } catch (error) {
+    setAiDslStatus(error.message, 'danger');
+  }
 }
 
 function decodeCsvData(fileData) {
@@ -234,10 +439,14 @@ document.getElementById('csv_file').addEventListener('change', function () {
   // Reset the previous import result before parsing a new file.
   window.transactions = [];
   window.unmatchedRows = [];
+  window.csvSampleRows = [];
+  window.csvHeaders = [];
   table.clear().draw();
   clearUnmatchedRowsTable();
   setSectionVisibility(identifiedTransactionsSectionSelector, false);
   setSectionVisibility(unmatchedRowsSectionSelector, false);
+  updateAiPromptFromRows([]);
+  setAiDslStatus('Parsing CSV...', 'muted');
 
   const myFile = this.files[0];
   const reader = new FileReader();
@@ -253,14 +462,26 @@ document.getElementById('csv_file').addEventListener('change', function () {
       showImportErrorNotification(
         'CSV parse error. Check delimiter, encoding, and quoted values in the file.',
       );
+      setAiDslStatus('CSV parse error. Prompt was not generated.', 'danger');
       return;
     }
 
     let processedRows = 0;
 
     if (csvRows.length === 0) {
+      setAiDslStatus('No rows detected in CSV file.', 'warning');
       return;
     }
+
+    window.csvSampleRows = csvRows.slice(0, 8);
+    window.csvHeaders = Object.keys(csvRows[0] ?? {});
+    updateAiPromptFromRows(window.csvSampleRows);
+    setAiDslStatus(
+      'AI prompt generated from ' +
+        window.csvSampleRows.length +
+        ' sample rows.',
+      'success',
+    );
 
     // Run the rule engine for each row
     csvRows.forEach(function (transaction, index) {
@@ -582,17 +803,75 @@ $('#import_profile')
     placeholder: 'Select import profile',
     allowClear: true,
   })
-  .on('select2:select', function (e) {
+  .on('select2:select', async function (e) {
     // Keep selected profile ID for future profile-based parsing phases.
     document.getElementById('csv_file').dataset.importProfileId =
       e.params.data.id;
+
+    try {
+      const profile = await loadImportProfile(e.params.data.id);
+      document.getElementById('ai_dsl_input').value =
+        profileDslToTextareaValue(profile);
+      setAiDslStatus('Import profile loaded.', 'muted');
+    } catch (error) {
+      setAiDslStatus(error.message, 'danger');
+    }
   })
   .on('select2:unselect', function () {
     delete document.getElementById('csv_file').dataset.importProfileId;
+    selectedImportProfile = null;
   })
   .on('select2:clear', function () {
     delete document.getElementById('csv_file').dataset.importProfileId;
+    selectedImportProfile = null;
   });
+
+document
+  .getElementById('ai_generate_prompt')
+  .addEventListener('click', function () {
+    if (!window.csvSampleRows || window.csvSampleRows.length === 0) {
+      setAiDslStatus(
+        'Load a CSV file first to generate a prompt from sample rows.',
+        'warning',
+      );
+      return;
+    }
+
+    updateAiPromptFromRows(window.csvSampleRows);
+    setAiDslStatus('Prompt regenerated from current sample rows.', 'success');
+  });
+
+document
+  .getElementById('ai_copy_prompt')
+  .addEventListener('click', async () => {
+    const promptText = document.getElementById('ai_dsl_prompt_output').value;
+    if (!promptText.trim()) {
+      setAiDslStatus('Prompt is empty.', 'warning');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(promptText);
+      setAiDslStatus('Prompt copied to clipboard.', 'success');
+    } catch (_error) {
+      setAiDslStatus('Unable to copy prompt to clipboard.', 'danger');
+    }
+  });
+
+document.getElementById('ai_validate_dsl').addEventListener('click', () => {
+  try {
+    parseAiDslInput(document.getElementById('ai_dsl_input').value);
+    setAiDslStatus('DSL JSON is valid.', 'success');
+  } catch (error) {
+    setAiDslStatus(error.message, 'danger');
+  }
+});
+
+document
+  .getElementById('ai_save_dsl_profile')
+  .addEventListener('click', saveDslToSelectedProfile);
+
+setAiDslStatus('Load a CSV file to generate an AI prompt.', 'muted');
 
 // Select 2 functionality for account select
 $('#account')
@@ -1196,6 +1475,12 @@ $('#reset').on('click', function () {
   window.transactions = [];
   window.account_currency = {};
   window.unmatchedRows = [];
+  window.csvSampleRows = [];
+  window.csvHeaders = [];
+  selectedImportProfile = null;
+  document.getElementById('ai_dsl_prompt_output').value = '';
+  document.getElementById('ai_dsl_input').value = '';
+  setAiDslStatus('Form reset.', 'muted');
 
   // Reset the main DataTable
   table.clear().rows.add(transactions).draw();
