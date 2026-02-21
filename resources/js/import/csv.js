@@ -17,11 +17,15 @@ window.transactions = [];
 window.account_currency = {};
 window.unmatchedRows = [];
 window.schedules = [];
+window.csvParsedRows = [];
 window.csvSampleRows = [];
 window.csvHeaders = [];
+window.dslPreviewUnmatchedRows = [];
 const identifiedTransactionsSectionSelector =
   '#identified-transactions-section';
 const unmatchedRowsSectionSelector = '#unmatched-rows-section';
+const aiPromptSampleRowsCount = 3;
+const aiPromptExtraUnmatchedRowsCount = 3;
 const aiDslAllowedKeys = [
   'csv_options',
   'column_mapping',
@@ -108,10 +112,15 @@ function setAiDslStatus(message, tone = 'muted') {
   statusElement.textContent = message;
 }
 
-function buildAiDslPrompt(csvRows) {
-  const sampleRows = csvRows.slice(0, 8);
+function buildAiDslPrompt(csvRows, additionalRows = []) {
+  const sampleRows = csvRows.slice(0, aiPromptSampleRowsCount);
   const headers = Object.keys(sampleRows[0] ?? {});
   const sampleJson = JSON.stringify(sampleRows, null, 2);
+  const additionalJson = JSON.stringify(
+    additionalRows.slice(0, aiPromptExtraUnmatchedRowsCount),
+    null,
+    2,
+  );
 
   return [
     'You are helping me configure YAFFA CSV import rules.',
@@ -140,12 +149,17 @@ function buildAiDslPrompt(csvRows) {
     'CSV headers:',
     JSON.stringify(headers),
     '',
-    'Sample rows:',
+    'Sample rows (first ' + aiPromptSampleRowsCount + '):',
     sampleJson,
+    '',
+    'Additional unmatched rows (up to ' +
+      aiPromptExtraUnmatchedRowsCount +
+      '):',
+    additionalJson,
   ].join('\n');
 }
 
-function updateAiPromptFromRows(csvRows) {
+function updateAiPromptFromRows(csvRows, additionalRows = []) {
   const promptElement = document.getElementById('ai_dsl_prompt_output');
   if (!promptElement) {
     return;
@@ -156,7 +170,7 @@ function updateAiPromptFromRows(csvRows) {
     return;
   }
 
-  promptElement.value = buildAiDslPrompt(csvRows);
+  promptElement.value = buildAiDslPrompt(csvRows, additionalRows);
 }
 
 function parseAiDslInput(rawValue) {
@@ -225,6 +239,101 @@ function profileDslToTextareaValue(profile) {
   return JSON.stringify(dsl, null, 2);
 }
 
+function checkDslConditionValue(row, conditionKey, expectedValue) {
+  if (conditionKey.endsWith('_regex')) {
+    const sourceField = conditionKey.replace(/_regex$/, '');
+    const sourceValue = String(row[sourceField] ?? '');
+    const regex = new RegExp(String(expectedValue ?? ''));
+    return regex.test(sourceValue);
+  }
+
+  return String(row[conditionKey] ?? '') === String(expectedValue ?? '');
+}
+
+function doesDslConditionMatchRow(row, whenConditions) {
+  if (!whenConditions || typeof whenConditions !== 'object') {
+    return false;
+  }
+
+  const conditionEntries = Object.entries(whenConditions);
+  if (conditionEntries.length === 0) {
+    return false;
+  }
+
+  return conditionEntries.every(([conditionKey, expectedValue]) =>
+    checkDslConditionValue(row, conditionKey, expectedValue),
+  );
+}
+
+function applyDslMappingsToRow(row, dslPayload) {
+  const mappedValues = {};
+  const valueMappings = Array.isArray(dslPayload.value_mappings)
+    ? dslPayload.value_mappings
+    : [];
+
+  valueMappings.forEach((mapping) => {
+    if (!mapping || typeof mapping !== 'object') {
+      return;
+    }
+
+    if (!doesDslConditionMatchRow(row, mapping.when)) {
+      return;
+    }
+
+    if (mapping.set && typeof mapping.set === 'object') {
+      Object.assign(mappedValues, mapping.set);
+    }
+  });
+
+  return mappedValues;
+}
+
+function runDslPreviewScan(dslPayload) {
+  const rows = Array.isArray(window.csvParsedRows) ? window.csvParsedRows : [];
+  const matchedRows = [];
+  const unmatchedRows = [];
+
+  rows.forEach((row, index) => {
+    let mappedValues = {};
+
+    try {
+      mappedValues = applyDslMappingsToRow(row, dslPayload);
+    } catch (_error) {
+      unmatchedRows.push({ index: index, row: row });
+      return;
+    }
+
+    const type = String(mappedValues.transaction_type ?? '').trim();
+    const isMatched =
+      type === 'withdrawal' || type === 'deposit' || type === 'transfer';
+
+    if (isMatched) {
+      matchedRows.push({ index: index, row: row, mapped: mappedValues });
+    } else {
+      unmatchedRows.push({ index: index, row: row });
+    }
+  });
+
+  return {
+    matchedRows: matchedRows,
+    unmatchedRows: unmatchedRows,
+    totalRows: rows.length,
+  };
+}
+
+function pickPromptAdditionalUnmatchedRows(unmatchedRows) {
+  const preferredRows = unmatchedRows
+    .filter((entry) => entry.index >= aiPromptSampleRowsCount)
+    .map((entry) => entry.row);
+  const fallbackRows = unmatchedRows
+    .filter((entry) => entry.index < aiPromptSampleRowsCount)
+    .map((entry) => entry.row);
+
+  return preferredRows
+    .concat(fallbackRows)
+    .slice(0, aiPromptExtraUnmatchedRowsCount);
+}
+
 async function loadImportProfile(profileId) {
   const response = await fetch('/api/import/csv/profiles/' + profileId, {
     headers: {
@@ -243,11 +352,6 @@ async function loadImportProfile(profileId) {
 
 async function saveDslToSelectedProfile() {
   const profileId = document.getElementById('csv_file').dataset.importProfileId;
-  if (!profileId) {
-    setAiDslStatus('Select an import profile first.', 'warning');
-    return;
-  }
-
   let dslPayload;
   try {
     dslPayload = parseAiDslInput(document.getElementById('ai_dsl_input').value);
@@ -257,31 +361,75 @@ async function saveDslToSelectedProfile() {
   }
 
   try {
+    if (!profileId) {
+      const profileName = window.prompt(
+        'No profile selected. Enter new profile name:',
+      );
+      const normalizedProfileName = String(profileName ?? '').trim();
+      if (!normalizedProfileName) {
+        setAiDslStatus('Save canceled. No profile name provided.', 'warning');
+        return;
+      }
+
+      const createResponse = await fetch('/api/import/csv/profiles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': window.csrfToken,
+        },
+        body: JSON.stringify({
+          name: normalizedProfileName,
+          ...dslPayload,
+        }),
+      });
+
+      if (!createResponse.ok) {
+        throw new Error('Failed to create a new import profile.');
+      }
+
+      selectedImportProfile = await createResponse.json();
+      document.getElementById('csv_file').dataset.importProfileId =
+        selectedImportProfile.id;
+
+      const option = new Option(
+        selectedImportProfile.name,
+        selectedImportProfile.id,
+        true,
+        true,
+      );
+      $('#import_profile').append(option).trigger('change');
+
+      setAiDslStatus('DSL saved to new import profile.', 'success');
+      return;
+    }
+
     let profile = selectedImportProfile;
     if (!profile || Number(profile.id) !== Number(profileId)) {
       profile = await loadImportProfile(profileId);
     }
 
-    const payload = {
-      name: profile.name,
-      ...dslPayload,
-    };
-
-    const response = await fetch('/api/import/csv/profiles/' + profileId, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': window.csrfToken,
+    const updateResponse = await fetch(
+      '/api/import/csv/profiles/' + profileId,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': window.csrfToken,
+        },
+        body: JSON.stringify({
+          name: profile.name,
+          ...dslPayload,
+        }),
       },
-      body: JSON.stringify(payload),
-    });
+    );
 
-    if (!response.ok) {
+    if (!updateResponse.ok) {
       throw new Error('Failed to save DSL to the selected profile.');
     }
 
-    selectedImportProfile = await response.json();
+    selectedImportProfile = await updateResponse.json();
     setAiDslStatus('DSL saved to selected profile.', 'success');
   } catch (error) {
     setAiDslStatus(error.message, 'danger');
@@ -447,13 +595,15 @@ document.getElementById('csv_file').addEventListener('change', function () {
   // Reset the previous import result before parsing a new file.
   window.transactions = [];
   window.unmatchedRows = [];
+  window.csvParsedRows = [];
   window.csvSampleRows = [];
   window.csvHeaders = [];
+  window.dslPreviewUnmatchedRows = [];
   table.clear().draw();
   clearUnmatchedRowsTable();
   setSectionVisibility(identifiedTransactionsSectionSelector, false);
   setSectionVisibility(unmatchedRowsSectionSelector, false);
-  updateAiPromptFromRows([]);
+  updateAiPromptFromRows([], []);
   setAiDslStatus('Parsing CSV...', 'muted');
 
   const myFile = this.files[0];
@@ -481,13 +631,14 @@ document.getElementById('csv_file').addEventListener('change', function () {
       return;
     }
 
-    window.csvSampleRows = csvRows.slice(0, 8);
+    window.csvParsedRows = csvRows;
+    window.csvSampleRows = csvRows.slice(0, aiPromptSampleRowsCount);
     window.csvHeaders = Object.keys(csvRows[0] ?? {});
-    updateAiPromptFromRows(window.csvSampleRows);
+    updateAiPromptFromRows(window.csvSampleRows, []);
     setAiDslStatus(
       'AI prompt generated from ' +
         window.csvSampleRows.length +
-        ' sample rows.',
+        ' sample rows. Validate DSL to scan and add unmatched rows.',
       'success',
     );
 
@@ -845,7 +996,10 @@ document
       return;
     }
 
-    updateAiPromptFromRows(window.csvSampleRows);
+    const additionalRows = Array.isArray(window.dslPreviewUnmatchedRows)
+      ? window.dslPreviewUnmatchedRows
+      : [];
+    updateAiPromptFromRows(window.csvSampleRows, additionalRows);
     setAiDslStatus('Prompt regenerated from current sample rows.', 'success');
   });
 
@@ -868,8 +1022,35 @@ document
 
 document.getElementById('ai_validate_dsl').addEventListener('click', () => {
   try {
-    parseAiDslInput(document.getElementById('ai_dsl_input').value);
-    setAiDslStatus('DSL JSON is valid.', 'success');
+    const dslPayload = parseAiDslInput(
+      document.getElementById('ai_dsl_input').value,
+    );
+
+    if (!window.csvParsedRows || window.csvParsedRows.length === 0) {
+      setAiDslStatus(
+        'DSL JSON is valid. Load a CSV file to run preview scan.',
+        'success',
+      );
+      return;
+    }
+
+    const previewResult = runDslPreviewScan(dslPayload);
+    const additionalRows = pickPromptAdditionalUnmatchedRows(
+      previewResult.unmatchedRows,
+    );
+    window.dslPreviewUnmatchedRows = additionalRows;
+
+    updateAiPromptFromRows(window.csvSampleRows, additionalRows);
+    setAiDslStatus(
+      'DSL JSON is valid. Preview scan matched ' +
+        previewResult.matchedRows.length +
+        '/' +
+        previewResult.totalRows +
+        ' rows. Added ' +
+        additionalRows.length +
+        ' unmatched rows to prompt.',
+      'success',
+    );
   } catch (error) {
     setAiDslStatus(error.message, 'danger');
   }
@@ -1483,8 +1664,10 @@ $('#reset').on('click', function () {
   window.transactions = [];
   window.account_currency = {};
   window.unmatchedRows = [];
+  window.csvParsedRows = [];
   window.csvSampleRows = [];
   window.csvHeaders = [];
+  window.dslPreviewUnmatchedRows = [];
   selectedImportProfile = null;
   document.getElementById('ai_dsl_prompt_output').value = '';
   document.getElementById('ai_dsl_input').value = '';
