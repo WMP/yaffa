@@ -23,6 +23,7 @@ window.csvHeaders = [];
 window.dslPreviewUnmatchedRows = [];
 const identifiedTransactionsSectionSelector =
   '#identified-transactions-section';
+const dslPreviewMatchedSectionSelector = '#dsl-preview-matched-section';
 const unmatchedRowsSectionSelector = '#unmatched-rows-section';
 const aiPromptSampleRowsCount = 3;
 const aiPromptExtraUnmatchedRowsCount = 3;
@@ -71,6 +72,11 @@ function setSectionVisibility(sectionSelector, isVisible) {
 function clearUnmatchedRowsTable() {
   document.getElementById('unmatched_table_head').innerHTML = '';
   document.getElementById('unmatched_table_body').innerHTML = '';
+}
+
+function clearDslPreviewMatchedRowsTable() {
+  document.getElementById('dsl_preview_matched_table_head').innerHTML = '';
+  document.getElementById('dsl_preview_matched_table_body').innerHTML = '';
 }
 
 function showImportErrorNotification(message) {
@@ -124,11 +130,32 @@ function buildAiDslPrompt(csvRows, additionalRows = []) {
 
   return [
     'You are helping me configure YAFFA CSV import rules.',
+    '',
+    'Output format is mandatory:',
+    '- Return ONLY one fenced code block with language tag json.',
+    '- Do not return any text before or after the code block.',
+    '- The content of the code block must be valid strict JSON parseable by JSON.parse().',
+    '',
+    'Regex escaping rules (mandatory):',
+    '- Use "\\\\s" instead of "\\s".',
+    '- Use "\\\\d" instead of "\\d".',
+    '- Use "\\\\+" instead of "\\+".',
+    '- Do not use "\\-" (use "-" directly).',
+    '',
+    'Validation requirement:',
+    '- Before returning, verify that JSON.parse(output) succeeds.',
+    '',
     'Generate ONLY strict JSON (RFC 8259): no markdown, no comments, no trailing commas.',
     'Return a single JSON object with top-level keys limited to: csv_options, column_mapping, value_mappings, rules.',
     'Use only double quotes in JSON strings.',
     'If you use regex, escape backslashes for JSON (example: "^Title:\\\\s*\\\\d+$").',
     'Do not use keys outside the schema.',
+    '',
+    'YAFFA strict matching guidance:',
+    '- A row is matched only when transaction_type resolves to withdrawal, deposit, or transfer.',
+    '- The source column mapped to column_mapping.type is STRICT by default in YAFFA preview.',
+    '- Amount-sign rules should be fallback only, not the only strict source.',
+    '- Map column_mapping.type to the transaction-kind/type source column from this CSV.',
     '',
     'Expected output structure:',
     '{',
@@ -145,6 +172,7 @@ function buildAiDslPrompt(csvRows, additionalRows = []) {
     '- Preserve original column names exactly.',
     '- Use regex fields when useful (e.g. "description_regex").',
     '- Keep it deterministic and machine-readable.',
+    '- Ensure conditions assigning transaction_type are based on the source column mapped to column_mapping.type.',
     '',
     'CSV headers:',
     JSON.stringify(headers),
@@ -217,6 +245,32 @@ function parseAiDslInput(rawValue) {
     throw new Error('"rules" must be an array.');
   }
 
+  if (
+    parsed.csv_options?.strict_column !== undefined &&
+    parsed.csv_options?.strict_column !== null &&
+    typeof parsed.csv_options.strict_column !== 'string'
+  ) {
+    throw new Error('"csv_options.strict_column" must be a string.');
+  }
+
+  if (
+    parsed.csv_options?.strict_columns !== undefined &&
+    parsed.csv_options?.strict_columns !== null
+  ) {
+    if (!Array.isArray(parsed.csv_options.strict_columns)) {
+      throw new Error('"csv_options.strict_columns" must be an array.');
+    }
+
+    const hasInvalidStrictColumns = parsed.csv_options.strict_columns.some(
+      (columnName) => typeof columnName !== 'string' || !columnName.trim(),
+    );
+    if (hasInvalidStrictColumns) {
+      throw new Error(
+        '"csv_options.strict_columns" must contain non-empty strings.',
+      );
+    }
+  }
+
   return parsed;
 }
 
@@ -237,6 +291,57 @@ function profileDslToTextareaValue(profile) {
   }
 
   return JSON.stringify(dsl, null, 2);
+}
+
+function getDslMappingLabel(mapping, index) {
+  const mappingName = String(mapping?.name ?? '').trim();
+  if (mappingName.length > 0) {
+    return mappingName;
+  }
+
+  const conditionKeys = Object.keys(mapping?.when ?? {});
+  if (conditionKeys.length > 0) {
+    return conditionKeys.join(' & ');
+  }
+
+  return 'rule_' + (index + 1);
+}
+
+function extractConditionSourceField(conditionKey) {
+  if (String(conditionKey).endsWith('_regex')) {
+    return String(conditionKey).replace(/_regex$/, '');
+  }
+
+  return String(conditionKey);
+}
+
+function getDslStrictColumns(dslPayload) {
+  const strictColumns = [];
+  const mappedTypeSourceColumn = String(
+    dslPayload?.column_mapping?.type ?? '',
+  ).trim();
+
+  if (mappedTypeSourceColumn.length > 0) {
+    strictColumns.push(mappedTypeSourceColumn);
+  }
+
+  const strictColumnSingle = dslPayload?.csv_options?.strict_column;
+  const strictColumnsArray = dslPayload?.csv_options?.strict_columns;
+
+  if (typeof strictColumnSingle === 'string' && strictColumnSingle.trim()) {
+    strictColumns.push(strictColumnSingle.trim());
+  }
+
+  if (Array.isArray(strictColumnsArray)) {
+    strictColumnsArray.forEach((columnName) => {
+      const normalizedColumnName = String(columnName ?? '').trim();
+      if (normalizedColumnName.length > 0) {
+        strictColumns.push(normalizedColumnName);
+      }
+    });
+  }
+
+  return Array.from(new Set(strictColumns));
 }
 
 function checkDslConditionValue(row, conditionKey, expectedValue) {
@@ -267,11 +372,13 @@ function doesDslConditionMatchRow(row, whenConditions) {
 
 function applyDslMappingsToRow(row, dslPayload) {
   const mappedValues = {};
+  const matchedByRules = [];
+  const matchedConditionFields = [];
   const valueMappings = Array.isArray(dslPayload.value_mappings)
     ? dslPayload.value_mappings
     : [];
 
-  valueMappings.forEach((mapping) => {
+  valueMappings.forEach((mapping, mappingIndex) => {
     if (!mapping || typeof mapping !== 'object') {
       return;
     }
@@ -280,35 +387,62 @@ function applyDslMappingsToRow(row, dslPayload) {
       return;
     }
 
+    matchedByRules.push(getDslMappingLabel(mapping, mappingIndex));
+    Object.keys(mapping.when ?? {}).forEach((conditionKey) => {
+      const sourceField = extractConditionSourceField(conditionKey);
+      if (!matchedConditionFields.includes(sourceField)) {
+        matchedConditionFields.push(sourceField);
+      }
+    });
+
     if (mapping.set && typeof mapping.set === 'object') {
       Object.assign(mappedValues, mapping.set);
     }
   });
 
-  return mappedValues;
+  return {
+    mappedValues: mappedValues,
+    matchedByRules: matchedByRules,
+    matchedConditionFields: matchedConditionFields,
+  };
 }
 
 function runDslPreviewScan(dslPayload) {
   const rows = Array.isArray(window.csvParsedRows) ? window.csvParsedRows : [];
+  const strictColumns = getDslStrictColumns(dslPayload);
   const matchedRows = [];
   const unmatchedRows = [];
 
   rows.forEach((row, index) => {
-    let mappedValues = {};
+    let mappedResult = { mappedValues: {}, matchedByRules: [] };
 
     try {
-      mappedValues = applyDslMappingsToRow(row, dslPayload);
+      mappedResult = applyDslMappingsToRow(row, dslPayload);
     } catch (_error) {
       unmatchedRows.push({ index: index, row: row });
       return;
     }
 
-    const type = String(mappedValues.transaction_type ?? '').trim();
+    const type = String(
+      mappedResult.mappedValues.transaction_type ?? '',
+    ).trim();
+    const hasStrictCoverage =
+      strictColumns.length === 0 ||
+      strictColumns.some((strictColumn) =>
+        mappedResult.matchedConditionFields.includes(strictColumn),
+      );
     const isMatched =
-      type === 'withdrawal' || type === 'deposit' || type === 'transfer';
+      (type === 'withdrawal' || type === 'deposit' || type === 'transfer') &&
+      hasStrictCoverage;
 
     if (isMatched) {
-      matchedRows.push({ index: index, row: row, mapped: mappedValues });
+      matchedRows.push({
+        index: index,
+        row: row,
+        mapped: mappedResult.mappedValues,
+        matchedByRules: mappedResult.matchedByRules,
+        matchedConditionFields: mappedResult.matchedConditionFields,
+      });
     } else {
       unmatchedRows.push({ index: index, row: row });
     }
@@ -318,6 +452,7 @@ function runDslPreviewScan(dslPayload) {
     matchedRows: matchedRows,
     unmatchedRows: unmatchedRows,
     totalRows: rows.length,
+    strictColumns: strictColumns,
   };
 }
 
@@ -332,6 +467,70 @@ function pickPromptAdditionalUnmatchedRows(unmatchedRows) {
   return preferredRows
     .concat(fallbackRows)
     .slice(0, aiPromptExtraUnmatchedRowsCount);
+}
+
+function hasBroadAmountTransactionTypeRules(dslPayload) {
+  const valueMappings = Array.isArray(dslPayload?.value_mappings)
+    ? dslPayload.value_mappings
+    : [];
+
+  return valueMappings.some((mapping) => {
+    if (!mapping || typeof mapping !== 'object') {
+      return false;
+    }
+    if (!mapping.set || typeof mapping.set !== 'object') {
+      return false;
+    }
+    if (!String(mapping.set.transaction_type ?? '').trim()) {
+      return false;
+    }
+
+    const conditionKeys = Object.keys(mapping.when ?? {});
+    return conditionKeys.some(
+      (conditionKey) =>
+        conditionKey.endsWith('_regex') &&
+        /kwota|amount/i.test(conditionKey.replace(/_regex$/, '')),
+    );
+  });
+}
+
+function refillDslPreviewMatchedRowsTable(matchedRows) {
+  let head = document.getElementById('dsl_preview_matched_table_head');
+  let body = document.getElementById('dsl_preview_matched_table_body');
+
+  head.innerHTML = '';
+  body.innerHTML = '';
+
+  if (!matchedRows || matchedRows.length === 0) {
+    return;
+  }
+
+  const tableRows = matchedRows.map((entry) => ({
+    _row: entry.index + 1,
+    _mapped_transaction_type: entry.mapped.transaction_type ?? '',
+    _matched_by: (entry.matchedByRules ?? []).join(', '),
+    _matched_fields: (entry.matchedConditionFields ?? []).join(', '),
+    ...entry.row,
+  }));
+
+  const headers = Object.keys(tableRows[0]);
+  let headerRow = document.createElement('tr');
+  headers.forEach((headerText) => {
+    let header = document.createElement('th');
+    header.appendChild(document.createTextNode(headerText));
+    headerRow.appendChild(header);
+  });
+  head.appendChild(headerRow);
+
+  tableRows.forEach((tableRow) => {
+    let row = document.createElement('tr');
+    Object.values(tableRow).forEach((text) => {
+      let cell = document.createElement('td');
+      cell.appendChild(document.createTextNode(String(text ?? '')));
+      row.appendChild(cell);
+    });
+    body.appendChild(row);
+  });
 }
 
 async function loadImportProfile(profileId) {
@@ -601,7 +800,9 @@ document.getElementById('csv_file').addEventListener('change', function () {
   window.dslPreviewUnmatchedRows = [];
   table.clear().draw();
   clearUnmatchedRowsTable();
+  clearDslPreviewMatchedRowsTable();
   setSectionVisibility(identifiedTransactionsSectionSelector, false);
+  setSectionVisibility(dslPreviewMatchedSectionSelector, false);
   setSectionVisibility(unmatchedRowsSectionSelector, false);
   updateAiPromptFromRows([], []);
   setAiDslStatus('Parsing CSV...', 'muted');
@@ -1040,7 +1241,25 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
     );
     window.dslPreviewUnmatchedRows = additionalRows;
 
+    refillDslPreviewMatchedRowsTable(previewResult.matchedRows);
+    setSectionVisibility(
+      dslPreviewMatchedSectionSelector,
+      previewResult.matchedRows.length > 0,
+    );
     updateAiPromptFromRows(window.csvSampleRows, additionalRows);
+
+    const broadAmountHint =
+      previewResult.matchedRows.length === previewResult.totalRows &&
+      hasBroadAmountTransactionTypeRules(dslPayload)
+        ? ' All rows matched; broad amount-based rules (e.g., Kwota_regex/amount_regex) may be matching every row.'
+        : '';
+    const strictColumnsHint =
+      previewResult.strictColumns.length > 0
+        ? ' Strict columns active: ' +
+          previewResult.strictColumns.join(', ') +
+          '.'
+        : ' No strict source column detected. Set column_mapping.type to enable strict type-based matching.';
+
     setAiDslStatus(
       'DSL JSON is valid. Preview scan matched ' +
         previewResult.matchedRows.length +
@@ -1048,10 +1267,14 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
         previewResult.totalRows +
         ' rows. Added ' +
         additionalRows.length +
-        ' unmatched rows to prompt.',
+        ' unmatched rows to prompt.' +
+        strictColumnsHint +
+        broadAmountHint,
       'success',
     );
   } catch (error) {
+    clearDslPreviewMatchedRowsTable();
+    setSectionVisibility(dslPreviewMatchedSectionSelector, false);
     setAiDslStatus(error.message, 'danger');
   }
 });
@@ -1671,6 +1894,8 @@ $('#reset').on('click', function () {
   selectedImportProfile = null;
   document.getElementById('ai_dsl_prompt_output').value = '';
   document.getElementById('ai_dsl_input').value = '';
+  clearDslPreviewMatchedRowsTable();
+  setSectionVisibility(dslPreviewMatchedSectionSelector, false);
   setAiDslStatus('Form reset.', 'muted');
 
   // Reset the main DataTable

@@ -145,6 +145,24 @@
         </div>
     </div>
 
+    <div id="dsl-preview-matched-section" class="row mb-3 d-none">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">{{ __('DSL preview matched rows') }}</div>
+                </div>
+                <div class="card-body table-responsive no-padding">
+                    <table id="dsl_preview_matched_table" class="table table-striped table-hover">
+                        <thead id="dsl_preview_matched_table_head">
+                        </thead>
+                        <tbody id="dsl_preview_matched_table_body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="unmatched-rows-section" class="row mb-3 d-none">
         <div class="col-12">
             <div class="card">
