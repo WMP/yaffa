@@ -74,6 +74,85 @@ function showImportErrorNotification(message) {
     window.dispatchEvent(notificationEvent);
 }
 
+function parseCsvRowsFallback(csvData, separator) {
+    const rows = [];
+    let row = [];
+    let cell = '';
+    let inQuotes = false;
+    let i = 0;
+
+    while (i < csvData.length) {
+        const char = csvData[i];
+
+        if (char === '"') {
+            if (inQuotes && csvData[i + 1] === '"') {
+                cell += '"';
+                i += 2;
+                continue;
+            }
+
+            inQuotes = !inQuotes;
+            i++;
+            continue;
+        }
+
+        if (!inQuotes && char === separator) {
+            row.push(cell);
+            cell = '';
+            i++;
+            continue;
+        }
+
+        if (!inQuotes && (char === '\n' || char === '\r')) {
+            row.push(cell);
+            if (!(row.length === 1 && row[0] === '')) {
+                rows.push(row);
+            }
+            row = [];
+            cell = '';
+
+            if (char === '\r' && csvData[i + 1] === '\n') {
+                i += 2;
+            } else {
+                i++;
+            }
+            continue;
+        }
+
+        cell += char;
+        i++;
+    }
+
+    if (inQuotes) {
+        throw new Error('CSV parse error: unclosed quoted field');
+    }
+
+    if (cell !== '' || row.length > 0) {
+        row.push(cell);
+        if (!(row.length === 1 && row[0] === '')) {
+            rows.push(row);
+        }
+    }
+
+    if (rows.length === 0) {
+        return [];
+    }
+
+    const headers = rows[0].map((header, index) => {
+        const trimmed = header.trim();
+        return trimmed === '' ? `_column_${index + 1}` : trimmed;
+    });
+
+    return rows.slice(1).map(values => {
+        const rowObject = {};
+        headers.forEach((header, index) => {
+            rowObject[header] = values[index] ?? '';
+        });
+
+        return rowObject;
+    });
+}
+
 function parseCsvRows(csvData) {
     const separators = [';', ',', '\t', '|'];
     let firstError = null;
@@ -87,8 +166,24 @@ function parseCsvRows(csvData) {
 
             // Prefer parsers that actually split multiple columns in header rows.
             const keyCount = Object.keys(rows[0] ?? {}).length;
-            if (keyCount > 1 || separator === ';') {
+            if (keyCount > 1) {
                 return rows;
+            }
+        } catch (error) {
+            if (!firstError) {
+                firstError = error;
+            }
+        }
+
+        try {
+            const fallbackRows = parseCsvRowsFallback(csvData, separator);
+            if (fallbackRows.length === 0) {
+                continue;
+            }
+
+            const keyCount = Object.keys(fallbackRows[0] ?? {}).length;
+            if (keyCount > 1) {
+                return fallbackRows;
             }
         } catch (error) {
             if (!firstError) {
