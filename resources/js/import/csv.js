@@ -59,6 +59,51 @@ function clearUnmatchedRowsTable() {
     document.getElementById('unmatched_table_body').innerHTML = '';
 }
 
+function showImportErrorNotification(message) {
+    const notificationEvent = new CustomEvent('notification', {
+        detail: {
+            notification: {
+                type: 'error',
+                message: message,
+                title: null,
+                icon: null,
+                dismissible: true,
+            }
+        },
+    });
+    window.dispatchEvent(notificationEvent);
+}
+
+function parseCsvRows(csvData) {
+    const separators = [';', ',', '\t', '|'];
+    let firstError = null;
+
+    for (const separator of separators) {
+        try {
+            const rows = $.csv.toObjects(csvData, {separator: separator});
+            if (rows.length === 0) {
+                continue;
+            }
+
+            // Prefer parsers that actually split multiple columns in header rows.
+            const keyCount = Object.keys(rows[0] ?? {}).length;
+            if (keyCount > 1 || separator === ';') {
+                return rows;
+            }
+        } catch (error) {
+            if (!firstError) {
+                firstError = error;
+            }
+        }
+    }
+
+    if (firstError) {
+        throw firstError;
+    }
+
+    return [];
+}
+
 // CSV parse functionality
 document.getElementById('csv_file').addEventListener('change', function () {
     if (!this.files || !this.files[0]) {
@@ -78,8 +123,17 @@ document.getElementById('csv_file').addEventListener('change', function () {
 
     reader.addEventListener('load', function (e) {
 
-        let csvData = e.target.result;
-        let csvRows = $.csv.toObjects(csvData, {separator: ';'});
+        let csvData = (e.target.result ?? '').replace(/^\uFEFF/, '');
+        let csvRows = [];
+
+        try {
+            csvRows = parseCsvRows(csvData);
+        } catch (error) {
+            console.error(error);
+            showImportErrorNotification('CSV parse error. Check delimiter, encoding, and quoted values in the file.');
+            return;
+        }
+
         let processedRows = 0;
 
         if (csvRows.length === 0) {
@@ -169,7 +223,7 @@ document.getElementById('csv_file').addEventListener('change', function () {
         });
     });
 
-    reader.readAsBinaryString(myFile);
+    reader.readAsText(myFile);
 });
 
 function collectSimilarTransactions() {
