@@ -115,7 +115,11 @@ function buildAiDslPrompt(csvRows) {
 
   return [
     'You are helping me configure YAFFA CSV import rules.',
-    'Generate ONLY valid JSON (no markdown, no explanations).',
+    'Generate ONLY strict JSON (RFC 8259): no markdown, no comments, no trailing commas.',
+    'Return a single JSON object with top-level keys limited to: csv_options, column_mapping, value_mappings, rules.',
+    'Use only double quotes in JSON strings.',
+    'If you use regex, escape backslashes for JSON (example: "^Title:\\\\s*\\\\d+$").',
+    'Do not use keys outside the schema.',
     '',
     'Expected output structure:',
     '{',
@@ -164,8 +168,12 @@ function parseAiDslInput(rawValue) {
   let parsed;
   try {
     parsed = JSON.parse(trimmedValue);
-  } catch (_error) {
-    throw new Error('Invalid JSON format.');
+  } catch (error) {
+    throw new Error(
+      'Invalid JSON format: ' +
+        error.message +
+        '. Hint: escape regex backslashes, e.g. "\\\\s", "\\\\d", "\\\\+".',
+    );
   }
 
   if (Array.isArray(parsed)) {
