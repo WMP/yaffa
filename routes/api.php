@@ -5,6 +5,7 @@ use App\Http\Controllers\API\AccountEntityApiController;
 use App\Http\Controllers\API\AccountGroupApiController;
 use App\Http\Controllers\API\CategoryApiController;
 use App\Http\Controllers\API\CurrencyRateApiController;
+use App\Http\Controllers\API\ImportProfileApiController;
 use App\Http\Controllers\API\InvestmentApiController;
 use App\Http\Controllers\API\InvestmentGroupApiController;
 use App\Http\Controllers\API\InvestmentPriceApiController;
@@ -141,3 +142,12 @@ Route::patch('/user/settings', [UserApiController::class, 'updateSettings'])
     ->name('user.settings.update');
 Route::patch('/user/change_password', [UserApiController::class, 'changePassword'])
     ->name('user.change_password');
+
+Route::get('/import/csv/profiles', [ImportProfileApiController::class, 'index']);
+Route::post('/import/csv/profiles', [ImportProfileApiController::class, 'store'])
+    ->name('api.import-profile.store');
+Route::get('/import/csv/profiles/{importProfile}', [ImportProfileApiController::class, 'show']);
+Route::patch('/import/csv/profiles/{importProfile}', [ImportProfileApiController::class, 'update'])
+    ->name('api.import-profile.update');
+Route::delete('/import/csv/profiles/{importProfile}', [ImportProfileApiController::class, 'destroy'])
+    ->name('api.import-profile.destroy');

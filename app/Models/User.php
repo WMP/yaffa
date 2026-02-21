@@ -51,6 +51,8 @@ use Spatie\Onboard\Concerns\Onboardable;
  * @property-read int|null $investment_groups_count
  * @property-read Collection<int, Investment> $investments
  * @property-read int|null $investments_count
+ * @property-read Collection<int, ImportProfile> $importProfiles
+ * @property-read int|null $import_profiles_count
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read Collection<int, AccountEntity> $payees
@@ -168,6 +170,11 @@ class User extends Authenticatable implements MustVerifyEmail, Onboardable
     public function investments(): HasMany
     {
         return $this->hasMany(Investment::class);
+    }
+
+    public function importProfiles(): HasMany
+    {
+        return $this->hasMany(ImportProfile::class);
     }
 
     public function payees(): HasMany

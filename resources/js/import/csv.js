@@ -17,6 +17,8 @@ window.transactions = [];
 window.account_currency = {};
 window.unmatchedRows = [];
 window.schedules = [];
+const identifiedTransactionsSectionSelector = '#identified-transactions-section';
+const unmatchedRowsSectionSelector = '#unmatched-rows-section';
 
 // Helper function to save nested object values
 function storeNestedObjectValue(base, names, value) {
@@ -43,11 +45,33 @@ import engine from './rules/hun_raiffeisen_v1.js';
 // The following variable is used to store the current transaction being created.
 let recentTransactionDraftId;
 
+function setSectionVisibility(sectionSelector, isVisible) {
+    const section = $(sectionSelector);
+    if (isVisible) {
+        section.removeClass('d-none');
+    } else {
+        section.addClass('d-none');
+    }
+}
+
+function clearUnmatchedRowsTable() {
+    document.getElementById('unmatched_table_head').innerHTML = '';
+    document.getElementById('unmatched_table_body').innerHTML = '';
+}
+
 // CSV parse functionality
 document.getElementById('csv_file').addEventListener('change', function () {
     if (!this.files || !this.files[0]) {
         return;
     }
+
+    // Reset the previous import result before parsing a new file.
+    window.transactions = [];
+    window.unmatchedRows = [];
+    table.clear().draw();
+    clearUnmatchedRowsTable();
+    setSectionVisibility(identifiedTransactionsSectionSelector, false);
+    setSectionVisibility(unmatchedRowsSectionSelector, false);
 
     const myFile = this.files[0];
     const reader = new FileReader();
@@ -57,6 +81,10 @@ document.getElementById('csv_file').addEventListener('change', function () {
         let csvData = e.target.result;
         let csvRows = $.csv.toObjects(csvData, {separator: ';'});
         let processedRows = 0;
+
+        if (csvRows.length === 0) {
+            return;
+        }
 
         // Run the rule engine for each row
         csvRows.forEach(function (transaction, index) {
@@ -120,12 +148,22 @@ document.getElementById('csv_file').addEventListener('change', function () {
 
                     // If all rows have been processed, refill tables
                     if (processedRows === csvRows.length) {
-                        refillUnmatchedRows(unmatchedRows);
                         table.clear().rows.add(transactions).draw();
                         table.columns.adjust().draw();
+                        setSectionVisibility(identifiedTransactionsSectionSelector, transactions.length > 0);
+
+                        if (unmatchedRows.length > 0) {
+                            refillUnmatchedRows(unmatchedRows);
+                            setSectionVisibility(unmatchedRowsSectionSelector, true);
+                        } else {
+                            clearUnmatchedRowsTable();
+                            setSectionVisibility(unmatchedRowsSectionSelector, false);
+                        }
 
                         // Also initiate collection of similar transactions
-                        collectSimilarTransactions();
+                        if (transactions.length > 0) {
+                            collectSimilarTransactions();
+                        }
                     }
                 })
         });
@@ -245,8 +283,7 @@ function refillUnmatchedRows(data) {
     body.innerHTML = '';
 
     if (data.length === 0) {
-        // No unmatched rows
-        head.innerHTML = '<th>No unmatched rows</th>';
+        return;
     }
 
     // Add headings
@@ -272,6 +309,48 @@ function refillUnmatchedRows(data) {
         body.appendChild(row);
     });
 }
+
+$('#import_profile').select2({
+    multiple: false,
+    ajax: {
+        url: '/api/import/csv/profiles',
+        dataType: 'json',
+        delay: 150,
+        data: function (params) {
+            return {
+                q: params.term,
+            };
+        },
+        processResults: function (data) {
+            return {
+                results: data.map(function (profile) {
+                    let label = profile.name;
+                    if (profile.is_default) {
+                        label += ' (' + __('default') + ')';
+                    }
+                    return {
+                        id: profile.id,
+                        text: label,
+                    };
+                }),
+            };
+        },
+        cache: true
+    },
+    selectOnClose: false,
+    placeholder: "Select import profile",
+    allowClear: true
+})
+    .on('select2:select', function (e) {
+        // Keep selected profile ID for future profile-based parsing phases.
+        document.getElementById('csv_file').dataset.importProfileId = e.params.data.id;
+    })
+    .on('select2:unselect', function () {
+        delete document.getElementById('csv_file').dataset.importProfileId;
+    })
+    .on('select2:clear', function () {
+        delete document.getElementById('csv_file').dataset.importProfileId;
+    });
 
 // Select 2 functionality for account select
 $('#account').select2({
@@ -785,10 +864,12 @@ $('#reset').on('click', function () {
 
     // Reset select2
     $('#account').val(null).trigger('change');
+    $('#import_profile').val(null).trigger('change');
 
     // Reset file input and make it disabled
     $('#csv_file').val(null);
     $('#csv_file').prop('disabled', true);
+    delete document.getElementById('csv_file').dataset.importProfileId;
 
     // Reset global variables
     window.recentTransactionDraftId = null;
@@ -799,9 +880,10 @@ $('#reset').on('click', function () {
     // Reset the main DataTable
     table.clear().rows.add(transactions).draw();
 
-    // Reset the unmatched table header and body
-    document.getElementById('unmatched_table_head').innerHTML = '';
-    document.getElementById('unmatched_table_body').innerHTML = '';
+    // Reset table sections
+    clearUnmatchedRowsTable();
+    setSectionVisibility(identifiedTransactionsSectionSelector, false);
+    setSectionVisibility(unmatchedRowsSectionSelector, false);
 });
 
 // Load active schedules via API

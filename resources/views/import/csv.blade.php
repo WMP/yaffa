@@ -10,11 +10,15 @@
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label for="account">{{ __('Target account') }}</label>
                             <select name="account" id="account" class="form-control"></select>
                         </div>
-                        <div class="col-md-6 form-group">
+                        <div class="col-md-3 form-group">
+                            <label for="import_profile">{{ __('Import profile') }}</label>
+                            <select name="import_profile" id="import_profile" class="form-control"></select>
+                        </div>
+                        <div class="col-md-4 form-group">
                             <label for="csv_file">{{ __('File') }}</label><br>
                             <input type="file" class="form-control-file" id="csv_file" name="file" disabled>
                         </div>
@@ -28,7 +32,7 @@
         </div>
     </div>
 
-    <div class="row mb-3">
+    <div id="identified-transactions-section" class="row mb-3 d-none">
         <div class="col-sm-12">
             <div class="card">
                 <div class="card-header">
@@ -88,7 +92,7 @@
         </div>
     </div>
 
-    <div class="row mb-3">
+    <div id="unmatched-rows-section" class="row mb-3 d-none">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
