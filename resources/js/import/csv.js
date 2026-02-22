@@ -807,6 +807,7 @@ function buildDslDraftTransaction(row, draftId, dslPayload, mappedValues) {
 
   const rawTransaction = {
     draftId: draftId,
+    date: parsedDate,
     handled: false,
     hidden: false,
     similarTransactions: false,
@@ -2225,11 +2226,21 @@ document
   });
 
 function collectSimilarTransactions() {
+  const datedTransactions = transactions.filter(
+    (transaction) =>
+      transaction?.date instanceof Date &&
+      !Number.isNaN(transaction.date.getTime()),
+  );
+  if (datedTransactions.length === 0) {
+    table.clear().rows.add(transactions).draw();
+    return;
+  }
+
   // Find min and max date in transactions array
   let minDate = new Date(
     Math.min.apply(
       Math,
-      transactions.map(function (o) {
+      datedTransactions.map(function (o) {
         return o.date;
       }),
     ),
@@ -2237,7 +2248,7 @@ function collectSimilarTransactions() {
   let maxDate = new Date(
     Math.max.apply(
       Math,
-      transactions.map(function (o) {
+      datedTransactions.map(function (o) {
         return o.date;
       }),
     ),
