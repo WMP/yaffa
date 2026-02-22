@@ -23,6 +23,7 @@ window.csvHeaders = [];
 window.dslPreviewMatchedRows = [];
 window.dslPreviewUnmatchedEntries = [];
 window.dslPreviewPromptUnmatchedRows = [];
+window.dslPreviewPromptUnmatchedIndexes = [];
 window.dslPreviewIssueRows = {};
 window.dslPreviewFilters = {
   include: {},
@@ -129,11 +130,7 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
   const sampleRows = csvRows.slice(0, aiPromptSampleRowsCount);
   const headers = Object.keys(sampleRows[0] ?? {});
   const sampleJson = JSON.stringify(sampleRows, null, 2);
-  const additionalJson = JSON.stringify(
-    additionalRows.slice(0, aiPromptExtraUnmatchedRowsCount),
-    null,
-    2,
-  );
+  const additionalJson = JSON.stringify(additionalRows, null, 2);
   const flaggedIssuesJson = JSON.stringify(flaggedIssueRows, null, 2);
 
   return [
@@ -153,7 +150,7 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     'Validation requirement:',
     '- Before returning, verify that JSON.parse(output) succeeds.',
     '',
-    'Generate ONLY strict JSON (RFC 8259): no markdown, no comments, no trailing commas.',
+    'Generate ONLY strict JSON (RFC 8259): no markdown comments, no trailing commas.',
     'Return a single JSON object with top-level keys limited to: csv_options, column_mapping, value_mappings, rules.',
     'Use only double quotes in JSON strings.',
     'If you use regex, escape backslashes for JSON (example: "^Title:\\\\s*\\\\d+$").',
@@ -165,13 +162,24 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '- Amount-sign rules should be fallback only, not the only strict source.',
     '- Map column_mapping.type to the transaction-kind/type source column from this CSV.',
     '',
+    'Hard engine constraints (MANDATORY):',
+    '- In value_mappings[].when, use ONLY keys based on exact CSV headers:',
+    '  - exact match: "<EXACT_HEADER>"',
+    '  - regex match: "<EXACT_HEADER>_regex"',
+    '- Do NOT use abstract keys like "type_regex" or "amount_regex".',
+    '- For this CSV, valid examples are "Typ transakcji_regex", "Kwota_regex", "Opis transakcji_regex".',
+    '- Do NOT use unsupported pseudo-conditions like "transaction_type_missing".',
+    '- Do NOT invent transaction labels not present in provided rows (sample + unmatched + flagged).',
+    '- If a mapping cannot be derived from provided rows, omit it.',
+    '- Keep "rules" as an empty array [] unless explicitly required by the provided rows.',
+    '- Allowed set keys: "transaction_type", "category".',
+    '',
     'Expected output structure:',
     '{',
     '  "csv_options": { "delimiter": ";", "encoding": "windows-1250" },',
-    '  "column_mapping": { "date": "Transaction Date", "amount": "Amount", "description": "Description", "type": "Type", "from": "From", "to": "To" },',
+    '  "column_mapping": { "date": "Data operacji", "amount": "Kwota", "description": "Opis transakcji", "type": "Typ transakcji", "from": "_column_8", "to": "_column_9" },',
     '  "value_mappings": [',
-    '    { "when": { "type": "TRANSFER" }, "set": { "transaction_type": "transfer" } },',
-    '    { "when": { "description_regex": "SALARY|PAYROLL" }, "set": { "category": "Income" } }',
+    '    { "when": { "Typ transakcji_regex": "^Płatność\\\\s+kartą$" }, "set": { "transaction_type": "withdrawal" } }',
     '  ],',
     '  "rules": []',
     '}',
@@ -181,6 +189,7 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '- Use regex fields when useful (e.g. "description_regex").',
     '- Keep it deterministic and machine-readable.',
     '- Ensure conditions assigning transaction_type are based on the source column mapped to column_mapping.type.',
+    '- transaction_type must be one of: withdrawal, deposit, transfer.',
     '',
     'CSV headers:',
     JSON.stringify(headers),
@@ -188,13 +197,14 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     'Sample rows (first ' + aiPromptSampleRowsCount + '):',
     sampleJson,
     '',
-    'Additional unmatched rows (up to ' +
-      aiPromptExtraUnmatchedRowsCount +
-      '):',
+    'Additional unmatched rows (accumulated, +3 per test run):',
     additionalJson,
     '',
     'Flagged preview rows (user-marked as incorrect; regenerate rules to classify these correctly):',
     flaggedIssuesJson,
+    '',
+    'Final requirement:',
+    'Output only one json code block and ensure all regex strings are JSON-escaped correctly.',
   ].join('\n');
 }
 
@@ -314,20 +324,18 @@ function profileDslToTextareaValue(profile) {
 
 function getDslPreviewIssueState(rowIndex) {
   const key = String(rowIndex);
-  return (
-    window.dslPreviewIssueRows[key] ?? {
-      enabled: false,
-      reason: '',
-    }
-  );
+  return String(window.dslPreviewIssueRows[key] ?? '');
 }
 
-function setDslPreviewIssueState(rowIndex, nextState) {
+function setDslPreviewIssueState(rowIndex, reasonText) {
   const key = String(rowIndex);
-  window.dslPreviewIssueRows[key] = {
-    ...getDslPreviewIssueState(rowIndex),
-    ...nextState,
-  };
+  const normalizedReason = String(reasonText ?? '');
+  if (!normalizedReason.trim()) {
+    delete window.dslPreviewIssueRows[key];
+    return;
+  }
+
+  window.dslPreviewIssueRows[key] = normalizedReason;
 }
 
 function collectFlaggedDslPreviewRowsForPrompt() {
@@ -335,22 +343,16 @@ function collectFlaggedDslPreviewRowsForPrompt() {
     (window.dslPreviewMatchedRows ?? []).map((entry) => [entry.index, entry]),
   );
   const flaggedRows = [];
-  const missingReasonRows = [];
 
   Object.entries(window.dslPreviewIssueRows ?? {}).forEach(
-    ([rowIndexRaw, issueState]) => {
+    ([rowIndexRaw, reasonRaw]) => {
       const rowIndex = Number(rowIndexRaw);
       if (!Number.isFinite(rowIndex)) {
         return;
       }
 
-      if (!issueState?.enabled) {
-        return;
-      }
-
-      const reason = String(issueState.reason ?? '').trim();
+      const reason = String(reasonRaw ?? '').trim();
       if (!reason) {
-        missingReasonRows.push(rowIndex + 1);
         return;
       }
 
@@ -369,20 +371,20 @@ function collectFlaggedDslPreviewRowsForPrompt() {
 
   return {
     flaggedRows: flaggedRows,
-    missingReasonRows: missingReasonRows,
   };
 }
 
 function getPromptRowsFromPreviewState() {
-  const promptUnmatchedRows = pickPromptAdditionalUnmatchedRows(
-    window.dslPreviewUnmatchedEntries ?? [],
-  );
+  const promptUnmatchedRows = Array.isArray(
+    window.dslPreviewPromptUnmatchedRows,
+  )
+    ? window.dslPreviewPromptUnmatchedRows
+    : [];
   const flaggedInfo = collectFlaggedDslPreviewRowsForPrompt();
 
   return {
     promptUnmatchedRows: promptUnmatchedRows,
     flaggedRows: flaggedInfo.flaggedRows,
-    missingReasonRows: flaggedInfo.missingReasonRows,
   };
 }
 
@@ -401,10 +403,22 @@ function updateDslPreviewFiltersStatus() {
   }
 
   const includeLabel = includeFilters
-    .map(([column, value]) => column + '="' + value + '"')
+    .map(
+      ([column, values]) =>
+        column +
+        ' IN [' +
+        (Array.isArray(values) ? values.join(', ') : '') +
+        ']',
+    )
     .join(', ');
   const excludeLabel = excludeFilters
-    .map(([column, value]) => column + '="' + value + '"')
+    .map(
+      ([column, values]) =>
+        column +
+        ' NOT IN [' +
+        (Array.isArray(values) ? values.join(', ') : '') +
+        ']',
+    )
     .join(', ');
 
   const parts = [];
@@ -427,18 +441,26 @@ function applyDslPreviewFilters(tableRows) {
       window.dslPreviewFilters.exclude ?? {},
     );
 
-    const includesPass = includeFilters.every(
-      ([column, value]) =>
-        String(tableRow[column] ?? '') === String(value ?? ''),
-    );
+    const includesPass = includeFilters.every(([column, values]) => {
+      const normalizedValues = Array.isArray(values) ? values : [];
+      if (normalizedValues.length === 0) {
+        return true;
+      }
+
+      return normalizedValues.includes(String(tableRow[column] ?? ''));
+    });
     if (!includesPass) {
       return false;
     }
 
-    const excludesPass = excludeFilters.every(
-      ([column, value]) =>
-        String(tableRow[column] ?? '') !== String(value ?? ''),
-    );
+    const excludesPass = excludeFilters.every(([column, values]) => {
+      const normalizedValues = Array.isArray(values) ? values : [];
+      if (normalizedValues.length === 0) {
+        return true;
+      }
+
+      return !normalizedValues.includes(String(tableRow[column] ?? ''));
+    });
 
     return excludesPass;
   });
@@ -449,6 +471,46 @@ function clearDslPreviewFilters() {
     include: {},
     exclude: {},
   };
+}
+
+function addDslPreviewFilterValue(filterType, column, value) {
+  const filterRoot = window.dslPreviewFilters[filterType] ?? {};
+  const normalizedColumn = String(column ?? '');
+  const normalizedValue = String(value ?? '');
+  if (!normalizedColumn) {
+    return;
+  }
+
+  const existingValues = Array.isArray(filterRoot[normalizedColumn])
+    ? filterRoot[normalizedColumn]
+    : [];
+  if (!existingValues.includes(normalizedValue)) {
+    existingValues.push(normalizedValue);
+  }
+  filterRoot[normalizedColumn] = existingValues;
+  window.dslPreviewFilters[filterType] = filterRoot;
+}
+
+function removeDslPreviewFilterValue(filterType, column, value) {
+  const filterRoot = window.dslPreviewFilters[filterType] ?? {};
+  const normalizedColumn = String(column ?? '');
+  const normalizedValue = String(value ?? '');
+  if (!normalizedColumn) {
+    return;
+  }
+
+  const existingValues = Array.isArray(filterRoot[normalizedColumn])
+    ? filterRoot[normalizedColumn]
+    : [];
+  const nextValues = existingValues.filter(
+    (entry) => String(entry) !== normalizedValue,
+  );
+  if (nextValues.length === 0) {
+    delete filterRoot[normalizedColumn];
+  } else {
+    filterRoot[normalizedColumn] = nextValues;
+  }
+  window.dslPreviewFilters[filterType] = filterRoot;
 }
 
 function getDslMappingLabel(mapping, index) {
@@ -665,7 +727,7 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
   }
 
   const tableRows = matchedRows.map((entry) => {
-    const issueState = getDslPreviewIssueState(entry.index);
+    const issueReason = getDslPreviewIssueState(entry.index);
 
     return {
       _row_index: entry.index,
@@ -673,8 +735,7 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
       _mapped_transaction_type: entry.mapped.transaction_type ?? '',
       _matched_by: (entry.matchedByRules ?? []).join(', '),
       _matched_fields: (entry.matchedConditionFields ?? []).join(', '),
-      _mark_issue: issueState.enabled ? '1' : '0',
-      _issue_reason: issueState.reason ?? '',
+      _issue_reason: issueReason,
       ...entry.row,
     };
   });
@@ -688,8 +749,7 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
     _mapped_transaction_type: 'mapped transaction_type',
     _matched_by: 'matched by',
     _matched_fields: 'matched fields',
-    _mark_issue: 'mark issue',
-    _issue_reason: 'issue reason (required)',
+    _issue_reason: 'issue reason (fill to mark row as incorrect)',
   };
   let headerRow = document.createElement('tr');
   headers.forEach((headerText) => {
@@ -706,17 +766,6 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
     headers.forEach((headerText) => {
       let cell = document.createElement('td');
 
-      if (headerText === '_mark_issue') {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'form-check-input dsl-preview-mark-issue';
-        checkbox.dataset.rowIndex = String(tableRow._row_index);
-        checkbox.checked = tableRow._mark_issue === '1';
-        cell.appendChild(checkbox);
-        row.appendChild(cell);
-        return;
-      }
-
       if (headerText === '_issue_reason') {
         const issueInput = document.createElement('input');
         issueInput.type = 'text';
@@ -725,7 +774,6 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
         issueInput.dataset.rowIndex = String(tableRow._row_index);
         issueInput.value = String(tableRow._issue_reason ?? '');
         issueInput.placeholder = 'Describe why this row is wrong';
-        issueInput.disabled = tableRow._mark_issue !== '1';
         cell.appendChild(issueInput);
         row.appendChild(cell);
         return;
@@ -741,7 +789,10 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
         'btn btn-link btn-sm p-0 me-1 dsl-cell-filter-include';
       includeButton.dataset.column = headerText;
       includeButton.dataset.value = text;
-      includeButton.textContent = '+';
+      includeButton.innerHTML =
+        '<i class="fa fa-plus-circle text-success" aria-hidden="true"></i>';
+      includeButton.setAttribute('aria-label', 'Include value');
+      includeButton.title = 'Include value';
 
       const excludeButton = document.createElement('button');
       excludeButton.type = 'button';
@@ -749,7 +800,10 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
         'btn btn-link btn-sm p-0 dsl-cell-filter-exclude';
       excludeButton.dataset.column = headerText;
       excludeButton.dataset.value = text;
-      excludeButton.textContent = '-';
+      excludeButton.innerHTML =
+        '<i class="fa fa-minus-circle text-danger" aria-hidden="true"></i>';
+      excludeButton.setAttribute('aria-label', 'Exclude value');
+      excludeButton.title = 'Exclude value';
 
       filterControls.appendChild(includeButton);
       filterControls.appendChild(excludeButton);
@@ -766,7 +820,6 @@ function refreshPromptFromCurrentPreview() {
     return {
       promptUnmatchedRows: [],
       flaggedRows: [],
-      missingReasonRows: [],
     };
   }
 
@@ -1047,6 +1100,7 @@ document.getElementById('csv_file').addEventListener('change', function () {
   window.dslPreviewMatchedRows = [];
   window.dslPreviewUnmatchedEntries = [];
   window.dslPreviewPromptUnmatchedRows = [];
+  window.dslPreviewPromptUnmatchedIndexes = [];
   window.dslPreviewIssueRows = {};
   clearDslPreviewFilters();
   table.clear().draw();
@@ -1498,6 +1552,16 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
       }
     });
 
+    // Add only new unmatched rows to prompt memory (+3 per test run).
+    const usedPromptIndexes = new Set(window.dslPreviewPromptUnmatchedIndexes);
+    const nextPromptEntries = previewResult.unmatchedRows
+      .filter((entry) => !usedPromptIndexes.has(entry.index))
+      .slice(0, aiPromptExtraUnmatchedRowsCount);
+    nextPromptEntries.forEach((entry) => {
+      window.dslPreviewPromptUnmatchedIndexes.push(entry.index);
+      window.dslPreviewPromptUnmatchedRows.push(entry.row);
+    });
+
     refillDslPreviewMatchedRowsTable(previewResult.matchedRows);
     setSectionVisibility(
       dslPreviewMatchedSectionSelector,
@@ -1515,7 +1579,6 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
     }
 
     const promptRows = refreshPromptFromCurrentPreview();
-    window.dslPreviewPromptUnmatchedRows = promptRows.promptUnmatchedRows;
 
     const broadAmountHint =
       previewResult.matchedRows.length === previewResult.totalRows &&
@@ -1532,26 +1595,28 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
       promptRows.flaggedRows.length > 0
         ? ' Flagged rows sent to prompt: ' + promptRows.flaggedRows.length + '.'
         : '';
-    const missingIssueReasonHint =
-      promptRows.missingReasonRows.length > 0
-        ? ' Fill issue reason for rows: ' +
-          promptRows.missingReasonRows.join(', ') +
-          '.'
-        : '';
+    const iterationHint =
+      nextPromptEntries.length > 0
+        ? ' Added ' +
+          nextPromptEntries.length +
+          ' new unmatched rows in this test run (prompt unmatched total: ' +
+          window.dslPreviewPromptUnmatchedRows.length +
+          ').'
+        : ' No new unmatched rows added in this test run.';
 
     setAiDslStatus(
       'DSL JSON is valid. Preview scan matched ' +
         previewResult.matchedRows.length +
         '/' +
         previewResult.totalRows +
-        ' rows. Added ' +
+        ' rows. Prompt unmatched total: ' +
         promptRows.promptUnmatchedRows.length +
-        ' unmatched rows to prompt.' +
+        '.' +
+        iterationHint +
         strictColumnsHint +
         issueRowsHint +
-        broadAmountHint +
-        missingIssueReasonHint,
-      promptRows.missingReasonRows.length > 0 ? 'warning' : 'success',
+        broadAmountHint,
+      'success',
     );
   } catch (error) {
     clearUnmatchedRowsTable();
@@ -1580,10 +1645,8 @@ $(document).on(
       return;
     }
 
-    window.dslPreviewFilters.include[column] = value;
-    if (window.dslPreviewFilters.exclude[column] === value) {
-      delete window.dslPreviewFilters.exclude[column];
-    }
+    addDslPreviewFilterValue('include', column, value);
+    removeDslPreviewFilterValue('exclude', column, value);
 
     refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
     setAiDslStatus(
@@ -1603,57 +1666,14 @@ $(document).on(
       return;
     }
 
-    window.dslPreviewFilters.exclude[column] = value;
-    if (window.dslPreviewFilters.include[column] === value) {
-      delete window.dslPreviewFilters.include[column];
-    }
+    addDslPreviewFilterValue('exclude', column, value);
+    removeDslPreviewFilterValue('include', column, value);
 
     refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
     setAiDslStatus(
       'Applied exclude filter: ' + column + ' != "' + value + '".',
       'muted',
     );
-  },
-);
-
-$(document).on(
-  'change',
-  '#dsl_preview_matched_table .dsl-preview-mark-issue',
-  function () {
-    const rowIndex = Number(this.dataset.rowIndex);
-    if (!Number.isFinite(rowIndex)) {
-      return;
-    }
-
-    setDslPreviewIssueState(rowIndex, {
-      enabled: this.checked,
-    });
-
-    if (!this.checked) {
-      setDslPreviewIssueState(rowIndex, { reason: '' });
-    }
-
-    refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
-
-    const promptRows = refreshPromptFromCurrentPreview();
-    if (promptRows.missingReasonRows.length > 0) {
-      setAiDslStatus(
-        'Provide issue reason for rows: ' +
-          promptRows.missingReasonRows.join(', ') +
-          '.',
-        'warning',
-      );
-      return;
-    }
-
-    if (this.checked) {
-      setAiDslStatus(
-        'Row marked as issue. Add reason to send it to AI.',
-        'muted',
-      );
-    } else {
-      setAiDslStatus('Issue mark removed from row.', 'muted');
-    }
   },
 );
 
@@ -1666,20 +1686,9 @@ $(document).on(
       return;
     }
 
-    setDslPreviewIssueState(rowIndex, {
-      reason: this.value,
-    });
+    setDslPreviewIssueState(rowIndex, this.value);
 
     const promptRows = refreshPromptFromCurrentPreview();
-    if (promptRows.missingReasonRows.length > 0) {
-      setAiDslStatus(
-        'Provide issue reason for rows: ' +
-          promptRows.missingReasonRows.join(', ') +
-          '.',
-        'warning',
-      );
-      return;
-    }
 
     setAiDslStatus(
       'Issue description saved. Flagged rows added to AI prompt: ' +
@@ -2305,6 +2314,7 @@ $('#reset').on('click', function () {
   window.dslPreviewMatchedRows = [];
   window.dslPreviewUnmatchedEntries = [];
   window.dslPreviewPromptUnmatchedRows = [];
+  window.dslPreviewPromptUnmatchedIndexes = [];
   window.dslPreviewIssueRows = {};
   clearDslPreviewFilters();
   selectedImportProfile = null;

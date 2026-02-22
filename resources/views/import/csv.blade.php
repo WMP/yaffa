@@ -71,7 +71,7 @@
                             ></textarea>
                             <div class="mt-2">
                                 <button type="button" class="btn btn-outline-primary btn-sm" id="ai_validate_dsl">
-                                    {{ __('Validate JSON') }}
+                                    {{ __('Test DSL') }}
                                 </button>
                                 <button type="button" class="btn btn-primary btn-sm" id="ai_save_dsl_profile">
                                     {{ __('Save to selected profile') }}
