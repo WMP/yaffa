@@ -1,6 +1,6 @@
 /**
  * This functionality allows the user to open a CSV file and parse it to an array of objects.
- * The array of objects is then run throug a rule engine, to create a list of possible transactions.
+ * The array is then interpreted using a selected DSL import profile.
  */
 
 import 'datatables.net-bs5';
@@ -55,6 +55,23 @@ const aiDslAllowedKeys = [
   'value_mappings',
   'rules',
 ];
+const dslTransactionTypes = {
+  withdrawal: {
+    id: 1,
+    name: 'withdrawal',
+    amount_multiplier: -1,
+  },
+  deposit: {
+    id: 2,
+    name: 'deposit',
+    amount_multiplier: 1,
+  },
+  transfer: {
+    id: 3,
+    name: 'transfer',
+    amount_multiplier: null,
+  },
+};
 let selectedImportProfile = null;
 window.dslStatusState = {
   mapping: {},
@@ -173,28 +190,6 @@ function updateDslStatusStateFromPreview(dslPayload, previewResult) {
   };
   renderDslStatusTable();
 }
-
-// Helper function to save nested object values
-function storeNestedObjectValue(base, names, value) {
-  // If a value is given, remove the last name and keep it for later:
-  const lastName = arguments.length === 3 ? names.pop() : false;
-
-  // Walk the hierarchy, creating new objects where needed.
-  // If the lastName was removed, then the last object is not set yet:
-  for (let i = 0; i < names.length; i++) {
-    base = base[names[i]] = base[names[i]] || {};
-  }
-
-  // If a value was given, set it to the last name:
-  if (lastName) base = base[lastName] = value;
-
-  // Return the last object in the hierarchy:
-  return base;
-}
-
-// Require the rule engine
-// TODO: make this selectable from a list of available rules
-import engine from './rules/hun_raiffeisen_v1.js';
 
 // The following variable is used to store the current transaction being created.
 let recentTransactionDraftId;
@@ -581,6 +576,304 @@ function profileDslToTextareaValue(profile) {
   }
 
   return JSON.stringify(dsl, null, 2);
+}
+
+function getActiveDslPayloadForImport() {
+  if (selectedImportProfile) {
+    const profileDslValue = profileDslToTextareaValue(selectedImportProfile);
+    if (!profileDslValue.trim()) {
+      throw new Error(
+        'Selected import profile does not contain DSL settings yet.',
+      );
+    }
+
+    return parseAiDslInput(profileDslValue);
+  }
+
+  const inputElement = document.getElementById('ai_dsl_input');
+  const rawDslInput = String(inputElement?.value ?? '').trim();
+  if (!rawDslInput) {
+    throw new Error(
+      'No DSL loaded. Select an import profile or use Add new profile and provide DSL JSON.',
+    );
+  }
+
+  return parseAiDslInput(rawDslInput);
+}
+
+function getSelectedAccountReference() {
+  const selectedAccountId = Number($('#account').val());
+  if (!Number.isFinite(selectedAccountId)) {
+    return null;
+  }
+
+  const selectedAccountData = $('#account').select2('data');
+  const selectedAccountLabel =
+    selectedAccountData?.[0]?.text ||
+    String($('#account option:selected').text() ?? '').trim() ||
+    'Selected account';
+
+  return {
+    id: selectedAccountId,
+    name: selectedAccountLabel,
+  };
+}
+
+function parseDslDateValue(rawDateValue) {
+  const rawDate = String(rawDateValue ?? '').trim();
+  if (!rawDate) {
+    return null;
+  }
+
+  const isoLikeMatch = rawDate.match(/^(\d{4})[./-](\d{1,2})[./-](\d{1,2})$/);
+  if (isoLikeMatch) {
+    const year = Number(isoLikeMatch[1]);
+    const month = Number(isoLikeMatch[2]);
+    const day = Number(isoLikeMatch[3]);
+    const parsedDate = new Date(year, month - 1, day);
+    if (
+      parsedDate.getFullYear() === year &&
+      parsedDate.getMonth() === month - 1 &&
+      parsedDate.getDate() === day
+    ) {
+      return parsedDate;
+    }
+  }
+
+  const dayFirstMatch = rawDate.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
+  if (dayFirstMatch) {
+    const day = Number(dayFirstMatch[1]);
+    const month = Number(dayFirstMatch[2]);
+    const year = Number(dayFirstMatch[3]);
+    const parsedDate = new Date(year, month - 1, day);
+    if (
+      parsedDate.getFullYear() === year &&
+      parsedDate.getMonth() === month - 1 &&
+      parsedDate.getDate() === day
+    ) {
+      return parsedDate;
+    }
+  }
+
+  const timestamp = Date.parse(rawDate);
+  if (!Number.isNaN(timestamp)) {
+    return new Date(timestamp);
+  }
+
+  return null;
+}
+
+function parseDslAmountValue(rawAmountValue) {
+  let normalizedValue = String(rawAmountValue ?? '').trim();
+  if (!normalizedValue) {
+    return null;
+  }
+
+  normalizedValue = normalizedValue
+    .replace(/\u00A0/g, ' ')
+    .replace(/\s+/g, '')
+    .replace(/[^0-9,.\-+]/g, '');
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  const lastCommaIndex = normalizedValue.lastIndexOf(',');
+  const lastDotIndex = normalizedValue.lastIndexOf('.');
+
+  if (lastCommaIndex >= 0 && lastDotIndex >= 0) {
+    if (lastCommaIndex > lastDotIndex) {
+      normalizedValue = normalizedValue.replace(/\./g, '').replace(',', '.');
+    } else {
+      normalizedValue = normalizedValue.replace(/,/g, '');
+    }
+  } else if (lastCommaIndex >= 0) {
+    normalizedValue = normalizedValue.replace(',', '.');
+  }
+
+  const parsedNumber = Number.parseFloat(normalizedValue);
+  if (!Number.isFinite(parsedNumber)) {
+    return null;
+  }
+
+  return Math.abs(parsedNumber);
+}
+
+function findPayeeByImportValue(rawValue) {
+  const sourceValue = String(rawValue ?? '')
+    .trim()
+    .toLowerCase();
+  if (!sourceValue) {
+    return null;
+  }
+
+  const payees = Array.isArray(window.payees) ? window.payees : [];
+
+  const matchedByName = payees.find((payee) => {
+    const payeeName = String(payee?.name ?? '')
+      .trim()
+      .toLowerCase();
+    return payeeName.length > 0 && sourceValue.includes(payeeName);
+  });
+  if (matchedByName) {
+    return matchedByName;
+  }
+
+  for (const payee of payees) {
+    const aliasLines = String(payee?.alias ?? '')
+      .split(/\r?\n/)
+      .map((entry) => entry.trim().toLowerCase())
+      .filter((entry) => entry.length > 0);
+    if (aliasLines.some((aliasLine) => sourceValue.includes(aliasLine))) {
+      return payee;
+    }
+  }
+
+  return null;
+}
+
+function resolveCounterpartyAccount(rawValue) {
+  const matchedPayee = findPayeeByImportValue(rawValue);
+  if (matchedPayee) {
+    return matchedPayee;
+  }
+
+  const fallbackLabel = String(rawValue ?? '').trim();
+  if (!fallbackLabel) {
+    return undefined;
+  }
+
+  return {
+    name: fallbackLabel,
+    config: {},
+  };
+}
+
+function isQuickRecordPossible(rawTransaction) {
+  if (
+    !rawTransaction?.date ||
+    !rawTransaction?.config?.account_from ||
+    !rawTransaction?.config?.account_to ||
+    !rawTransaction?.config?.amount_from ||
+    !rawTransaction?.config?.amount_to
+  ) {
+    return false;
+  }
+
+  if (rawTransaction.transaction_type?.name === 'withdrawal') {
+    const withdrawalCategoryId =
+      rawTransaction.config.account_to?.config?.category_id ??
+      rawTransaction.config.account_to?.config?.category?.id;
+    return Boolean(withdrawalCategoryId);
+  }
+
+  if (rawTransaction.transaction_type?.name === 'deposit') {
+    const depositCategoryId =
+      rawTransaction.config.account_from?.config?.category_id ??
+      rawTransaction.config.account_from?.config?.category?.id;
+    return Boolean(depositCategoryId);
+  }
+
+  return false;
+}
+
+function buildDslDraftTransaction(row, draftId, dslPayload, mappedValues) {
+  const transactionTypeName = String(
+    mappedValues?.transaction_type ?? '',
+  ).trim();
+  const transactionType = dslTransactionTypes[transactionTypeName];
+  if (!transactionType) {
+    return null;
+  }
+
+  const columnMapping = dslPayload?.column_mapping ?? {};
+  const dateColumnName = String(columnMapping.date ?? '').trim();
+  const amountColumnName = String(columnMapping.amount ?? '').trim();
+  const descriptionColumnName = String(columnMapping.description ?? '').trim();
+  const fromColumnName = String(columnMapping.from ?? '').trim();
+  const toColumnName = String(columnMapping.to ?? '').trim();
+
+  const parsedDate = parseDslDateValue(row[dateColumnName]);
+  const parsedAmount = parseDslAmountValue(row[amountColumnName]);
+  const selectedAccount = getSelectedAccountReference();
+
+  if (!parsedDate || !Number.isFinite(parsedAmount) || !selectedAccount?.id) {
+    return null;
+  }
+
+  const descriptionValue = String(row[descriptionColumnName] ?? '').trim();
+  const fromValue = row[fromColumnName];
+  const toValue = row[toColumnName];
+
+  const rawTransaction = {
+    draftId: draftId,
+    handled: false,
+    hidden: false,
+    similarTransactions: false,
+    relatedSchedules: false,
+    quickRecordingPossible: false,
+    transaction_config_type: 'standard',
+    transaction_type_id: transactionType.id,
+    transaction_type: {
+      name: transactionType.name,
+      amount_multiplier: transactionType.amount_multiplier,
+    },
+    config: {
+      amount_from: parsedAmount,
+      amount_to: parsedAmount,
+    },
+  };
+
+  if (descriptionValue.length > 0) {
+    rawTransaction.comment = descriptionValue;
+  }
+
+  if (transactionTypeName === 'withdrawal') {
+    rawTransaction.config.account_from = selectedAccount;
+    rawTransaction.config.account_to = resolveCounterpartyAccount(
+      toValue ?? fromValue,
+    );
+  } else if (transactionTypeName === 'deposit') {
+    rawTransaction.config.account_from = resolveCounterpartyAccount(
+      fromValue ?? toValue,
+    );
+    rawTransaction.config.account_to = selectedAccount;
+  } else {
+    rawTransaction.config.account_from = selectedAccount;
+    rawTransaction.config.account_to = resolveCounterpartyAccount(toValue);
+  }
+
+  rawTransaction.quickRecordingPossible = isQuickRecordPossible(rawTransaction);
+
+  return rawTransaction;
+}
+
+function buildTransactionsFromDslPreviewRows(previewRows, dslPayload) {
+  const transactions = [];
+  const failedEntries = [];
+
+  (previewRows ?? []).forEach((entry) => {
+    const draft = buildDslDraftTransaction(
+      entry.row,
+      Number(entry.index),
+      dslPayload,
+      entry.mapped ?? {},
+    );
+    if (draft) {
+      transactions.push(draft);
+      return;
+    }
+
+    failedEntries.push({
+      index: entry.index,
+      row: entry.row,
+    });
+  });
+
+  return {
+    transactions: transactions,
+    failedEntries: failedEntries,
+  };
 }
 
 function getDslPreviewIssueState(rowIndex) {
@@ -1722,191 +2015,214 @@ function parseCsvRows(csvData) {
 }
 
 // CSV parse functionality
-document.getElementById('csv_file').addEventListener('change', function () {
-  if (!this.files || !this.files[0]) {
-    return;
-  }
-
-  // Reset the previous import result before parsing a new file.
-  window.transactions = [];
-  window.unmatchedRows = [];
-  window.csvParsedRows = [];
-  window.csvSampleRows = [];
-  window.csvHeaders = [];
-  window.dslPreviewMatchedRows = [];
-  window.dslPreviewUnmatchedEntries = [];
-  window.dslPreviewPromptUnmatchedRows = [];
-  window.dslPreviewPromptUnmatchedIndexes = [];
-  window.dslPreviewPromptStrictValueKeys = [];
-  window.dslPreviewIssueRows = {};
-  window.dslPreviewSelectedRows = {};
-  window.csvDraftsReady = false;
-  window.dslBulkImportInProgress = false;
-  updateCsvImportSummary(0, 0, 0);
-  clearDslPreviewFilters();
-  table.clear().draw();
-  clearUnmatchedRowsTable();
-  clearDslPreviewMatchedRowsTable();
-  updateDslPreviewFiltersStatus();
-  setSectionVisibility(identifiedTransactionsSectionSelector, false);
-  setSectionVisibility(dslPreviewMatchedSectionSelector, false);
-  setSectionVisibility(unmatchedRowsSectionSelector, false);
-  updateAiPromptFromRows([], [], []);
-  resetDslStatusState(0);
-  setAiDslStatus('Parsing CSV...', 'muted');
-
-  const myFile = this.files[0];
-  const reader = new FileReader();
-
-  reader.addEventListener('load', function (e) {
-    let csvData = decodeCsvData(e.target.result);
-    let csvRows = [];
-
-    try {
-      csvRows = parseCsvRows(csvData);
-    } catch (error) {
-      console.error(error);
-      showImportErrorNotification(
-        'CSV parse error. Check delimiter, encoding, and quoted values in the file.',
-      );
-      setAiDslStatus('CSV parse error. Prompt was not generated.', 'danger');
+document
+  .getElementById('csv_file')
+  .addEventListener('change', async function () {
+    if (!this.files || !this.files[0]) {
       return;
     }
 
-    let processedRows = 0;
-
-    if (csvRows.length === 0) {
-      updateCsvImportSummary(0, 0, 0);
-      setAiDslStatus('No rows detected in CSV file.', 'warning');
-      return;
+    const profileId = this.dataset.importProfileId;
+    if (
+      profileId &&
+      (!selectedImportProfile ||
+        Number(selectedImportProfile.id) !== Number(profileId))
+    ) {
+      try {
+        const profile = await loadImportProfile(profileId);
+        document.getElementById('ai_dsl_input').value =
+          profileDslToTextareaValue(profile);
+      } catch (error) {
+        setAiDslStatus(error.message, 'danger');
+        return;
+      }
     }
 
-    window.csvParsedRows = csvRows;
-    window.csvSampleRows = csvRows.slice(0, aiPromptSampleRowsCount);
-    window.csvHeaders = Object.keys(csvRows[0] ?? {});
-    window.dslStatusState.totalRows = csvRows.length;
-    window.dslStatusState.matchedRows = null;
-    window.dslStatusState.unmatchedRows = null;
-    window.dslStatusState.strictFields = [];
-    renderDslStatusTable();
-    updateAiPromptFromRows(window.csvSampleRows, [], []);
-    setAiDslStatus(
-      'AI prompt generated from ' +
-        window.csvSampleRows.length +
-        ' sample rows. Validate DSL to scan and add unmatched rows.',
-      'success',
-    );
+    // Reset the previous import result before parsing a new file.
+    window.transactions = [];
+    window.unmatchedRows = [];
+    window.csvParsedRows = [];
+    window.csvSampleRows = [];
+    window.csvHeaders = [];
+    window.dslPreviewMatchedRows = [];
+    window.dslPreviewUnmatchedEntries = [];
+    window.dslPreviewPromptUnmatchedRows = [];
+    window.dslPreviewPromptUnmatchedIndexes = [];
+    window.dslPreviewPromptStrictValueKeys = [];
+    window.dslPreviewIssueRows = {};
+    window.dslPreviewSelectedRows = {};
+    window.csvDraftsReady = false;
+    window.dslBulkImportInProgress = false;
+    updateCsvImportSummary(0, 0, 0);
+    clearDslPreviewFilters();
+    table.clear().draw();
+    clearUnmatchedRowsTable();
+    clearDslPreviewMatchedRowsTable();
+    updateDslPreviewFiltersStatus();
+    setSectionVisibility(identifiedTransactionsSectionSelector, false);
+    setSectionVisibility(dslPreviewMatchedSectionSelector, false);
+    setSectionVisibility(unmatchedRowsSectionSelector, false);
+    updateAiPromptFromRows([], [], []);
+    resetDslStatusState(0);
+    setAiDslStatus('Parsing CSV...', 'muted');
 
-    // Run the rule engine for each row
-    csvRows.forEach(function (transaction, index) {
-      // Drop empty columns
-      // TODO: Can and should this be generalized?
-      delete transaction[''];
+    const myFile = this.files[0];
+    const reader = new FileReader();
 
-      let rawTransaction = {
-        draftId: index,
-        handled: false,
-        hidden: false,
-        similarTransactions: false,
-        quickRecordingPossible: false,
-        config: {},
-      };
+    reader.addEventListener('load', function (e) {
+      const csvData = decodeCsvData(e.target.result);
+      let csvRows = [];
 
-      engine.run(transaction).then(({ events }) => {
-        // Loop all rules to extract transaction data from row
-        events
-          .filter((event) => event.params.processingRules)
-          .forEach((event) =>
-            event.params.processingRules.forEach((rule) => {
-              // Get value from rule, prefering a custom static value over a custom function
-              let value;
+      try {
+        csvRows = parseCsvRows(csvData);
+      } catch (error) {
+        console.error(error);
+        showImportErrorNotification(
+          'CSV parse error. Check delimiter, encoding, and quoted values in the file.',
+        );
+        setAiDslStatus('CSV parse error. Prompt was not generated.', 'danger');
+        return;
+      }
 
-              if (rule.hasOwnProperty('customValue')) {
-                value = rule.customValue;
-              } else if (
-                rule.hasOwnProperty('customFunction') &&
-                typeof rule.customFunction === 'function'
-              ) {
-                value = rule.customFunction(transaction, rawTransaction);
-              }
+      if (csvRows.length === 0) {
+        updateCsvImportSummary(0, 0, 0);
+        setAiDslStatus('No rows detected in CSV file.', 'warning');
+        return;
+      }
 
-              // If field is provided as list of keys (.), split to an array and handle accordingly
-              if (rule.transactionField.includes('.')) {
-                const fieldPath = rule.transactionField.split('.');
-                storeNestedObjectValue(rawTransaction, fieldPath, value);
-              } else {
-                rawTransaction[rule.transactionField] = value;
-              }
-            }),
-          );
-
-        // TODO: proper filtering
-        if (rawTransaction.date) {
-          // Does this draft transaction qualify for a quick recording?
-          // It needs: date, account_from, account_to, amount_from, amount_to, payee default category
-          if (
-            rawTransaction.date &&
-            rawTransaction.config &&
-            rawTransaction.config.account_from &&
-            rawTransaction.config.account_to &&
-            rawTransaction.config.amount_from &&
-            rawTransaction.config.amount_to
-          ) {
-            if (
-              rawTransaction.transaction_type.name === 'withdrawal' &&
-              rawTransaction.config.account_to.config.category_id
-            ) {
-              rawTransaction.quickRecordingPossible = true;
-            } else if (
-              rawTransaction.transaction_type.name === 'deposit' &&
-              rawTransaction.config.account_from.config.category_id
-            ) {
-              rawTransaction.quickRecordingPossible = true;
-            }
-          }
-
-          transactions.push(rawTransaction);
-        } else {
-          unmatchedRows.push(transaction);
-        }
-
-        processedRows++;
-
-        // If all rows have been processed, refill tables
-        if (processedRows === csvRows.length) {
-          window.csvDraftsReady = true;
-          updateCsvImportSummary(
-            csvRows.length,
-            transactions.length,
-            unmatchedRows.length,
-          );
-          table.clear().rows.add(transactions).draw();
-          table.columns.adjust().draw();
-          setSectionVisibility(
-            identifiedTransactionsSectionSelector,
-            transactions.length > 0,
-          );
-          updateDslPreviewSelectionSummary();
-
-          if (unmatchedRows.length > 0) {
-            refillUnmatchedRows(unmatchedRows);
-            setSectionVisibility(unmatchedRowsSectionSelector, true);
-          } else {
-            clearUnmatchedRowsTable();
-            setSectionVisibility(unmatchedRowsSectionSelector, false);
-          }
-
-          // Also initiate collection of similar transactions
-          if (transactions.length > 0) {
-            collectSimilarTransactions();
-          }
-        }
+      csvRows.forEach((row) => {
+        delete row[''];
       });
-    });
-  });
 
-  reader.readAsArrayBuffer(myFile);
-});
+      window.csvParsedRows = csvRows;
+      window.csvSampleRows = csvRows.slice(0, aiPromptSampleRowsCount);
+      window.csvHeaders = Object.keys(csvRows[0] ?? {});
+      window.dslStatusState.totalRows = csvRows.length;
+      window.dslStatusState.matchedRows = null;
+      window.dslStatusState.unmatchedRows = null;
+      window.dslStatusState.strictFields = [];
+      renderDslStatusTable();
+      updateAiPromptFromRows(window.csvSampleRows, [], []);
+      setAiDslStatus(
+        'AI prompt generated from ' +
+          window.csvSampleRows.length +
+          ' sample rows. Validate DSL to scan and add unmatched rows.',
+        'success',
+      );
+
+      let dslPayload;
+      try {
+        dslPayload = getActiveDslPayloadForImport();
+      } catch (error) {
+        window.csvDraftsReady = false;
+        window.unmatchedRows = csvRows;
+        updateCsvImportSummary(csvRows.length, 0, window.unmatchedRows.length);
+        refillUnmatchedRows(window.unmatchedRows);
+        setSectionVisibility(unmatchedRowsSectionSelector, true);
+        setSectionVisibility(identifiedTransactionsSectionSelector, false);
+        setSectionVisibility(dslPreviewMatchedSectionSelector, false);
+        setAiDslStatus(error.message, 'warning');
+        return;
+      }
+
+      let previewResult;
+      try {
+        previewResult = runDslPreviewScan(dslPayload);
+      } catch (error) {
+        window.csvDraftsReady = false;
+        showImportErrorNotification('DSL preview scan failed.');
+        setAiDslStatus(
+          'DSL preview scan failed: ' + String(error?.message ?? error),
+          'danger',
+        );
+        return;
+      }
+
+      const draftBuildResult = buildTransactionsFromDslPreviewRows(
+        previewResult.matchedRows,
+        dslPayload,
+      );
+      const builtDraftIndexes = new Set(
+        draftBuildResult.transactions.map((transaction) =>
+          Number(transaction.draftId),
+        ),
+      );
+      const matchedRowsWithDrafts = previewResult.matchedRows.filter((entry) =>
+        builtDraftIndexes.has(Number(entry.index)),
+      );
+      const unmatchedEntries = [
+        ...previewResult.unmatchedRows,
+        ...draftBuildResult.failedEntries,
+      ];
+
+      window.transactions = draftBuildResult.transactions;
+      window.unmatchedRows = unmatchedEntries.map((entry) => entry.row);
+      window.dslPreviewMatchedRows = matchedRowsWithDrafts;
+      window.dslPreviewUnmatchedEntries = unmatchedEntries;
+      window.csvDraftsReady = true;
+
+      updateDslStatusStateFromPreview(dslPayload, {
+        ...previewResult,
+        matchedRows: matchedRowsWithDrafts,
+        unmatchedRows: unmatchedEntries,
+        totalRows: csvRows.length,
+      });
+      refillDslPreviewMatchedRowsTable(matchedRowsWithDrafts);
+      setSectionVisibility(
+        dslPreviewMatchedSectionSelector,
+        matchedRowsWithDrafts.length > 0,
+      );
+
+      if (window.unmatchedRows.length > 0) {
+        refillUnmatchedRows(window.unmatchedRows);
+        setSectionVisibility(unmatchedRowsSectionSelector, true);
+      } else {
+        clearUnmatchedRowsTable();
+        setSectionVisibility(unmatchedRowsSectionSelector, false);
+      }
+
+      updateCsvImportSummary(
+        csvRows.length,
+        window.transactions.length,
+        window.unmatchedRows.length,
+      );
+      table.clear().rows.add(window.transactions).draw();
+      table.columns.adjust().draw();
+      setSectionVisibility(
+        identifiedTransactionsSectionSelector,
+        window.transactions.length > 0,
+      );
+      updateDslPreviewSelectionSummary();
+
+      if (window.transactions.length > 0) {
+        collectSimilarTransactions();
+      }
+
+      const parsedWithLabel = selectedImportProfile?.name
+        ? ' using profile "' + selectedImportProfile.name + '"'
+        : ' using DSL input';
+      const conversionFailureCount = draftBuildResult.failedEntries.length;
+      const conversionHint =
+        conversionFailureCount > 0
+          ? ' Conversion skipped for ' +
+            conversionFailureCount +
+            ' matched rows (missing date/amount/account mapping).'
+          : '';
+      setAiDslStatus(
+        'CSV parsed' +
+          parsedWithLabel +
+          '. Accepted ' +
+          window.transactions.length +
+          '/' +
+          csvRows.length +
+          ' rows.' +
+          conversionHint,
+        window.transactions.length > 0 ? 'success' : 'warning',
+      );
+    });
+
+    reader.readAsArrayBuffer(myFile);
+  });
 
 function collectSimilarTransactions() {
   // Find min and max date in transactions array
@@ -2149,7 +2465,7 @@ $('#import_profile')
     }
 
     setSectionVisibility(aiAssistantSectionSelector, false);
-    // Keep selected profile ID for future profile-based parsing phases.
+    // Keep selected profile ID for profile-based parsing.
     document.getElementById('csv_file').dataset.importProfileId =
       e.params.data.id;
 
