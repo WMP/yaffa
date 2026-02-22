@@ -27,6 +27,7 @@ window.dslPreviewPromptUnmatchedIndexes = [];
 window.dslPreviewPromptStrictValueKeys = [];
 window.dslPreviewIssueRows = {};
 window.dslPreviewSelectedRows = {};
+window.dslPreviewPayload = null;
 window.dslPreviewFilters = {
   include: {},
   exclude: {},
@@ -877,6 +878,81 @@ function buildTransactionsFromDslPreviewRows(previewRows, dslPayload) {
   };
 }
 
+function getCounterpartyDisplayName(rawValue) {
+  const resolvedAccount = resolveCounterpartyAccount(rawValue);
+  if (!resolvedAccount) {
+    return '';
+  }
+
+  return String(resolvedAccount.name ?? '').trim();
+}
+
+function formatYaffaPreviewDate(rawDateValue) {
+  if (!(rawDateValue instanceof Date) || Number.isNaN(rawDateValue.getTime())) {
+    return '';
+  }
+
+  return rawDateValue.toISOString().slice(0, 10);
+}
+
+function buildYaffaPreviewFields(entry, dslPayload) {
+  const row = entry?.row ?? {};
+  const columnMapping = dslPayload?.column_mapping ?? {};
+
+  const dateColumnName = String(columnMapping.date ?? '').trim();
+  const amountColumnName = String(columnMapping.amount ?? '').trim();
+  const descriptionColumnName = String(columnMapping.description ?? '').trim();
+  const fromColumnName = String(columnMapping.from ?? '').trim();
+  const toColumnName = String(columnMapping.to ?? '').trim();
+
+  const mappedType = String(entry?.mapped?.transaction_type ?? '').trim();
+  const mappedCategory = String(entry?.mapped?.category ?? '').trim();
+  const parsedDate = parseDslDateValue(row[dateColumnName]);
+  const parsedAmount = parseDslAmountValue(row[amountColumnName]);
+  const selectedAccount = getSelectedAccountReference();
+  const selectedAccountName = String(selectedAccount?.name ?? '').trim();
+  const descriptionValue = String(row[descriptionColumnName] ?? '').trim();
+  const fromSourceValue = row[fromColumnName];
+  const toSourceValue = row[toColumnName];
+
+  let yaffaFrom = '';
+  let yaffaTo = '';
+  if (mappedType === 'withdrawal') {
+    yaffaFrom = selectedAccountName;
+    yaffaTo = getCounterpartyDisplayName(toSourceValue ?? fromSourceValue);
+  } else if (mappedType === 'deposit') {
+    yaffaFrom = getCounterpartyDisplayName(fromSourceValue ?? toSourceValue);
+    yaffaTo = selectedAccountName;
+  } else if (mappedType === 'transfer') {
+    yaffaFrom = selectedAccountName;
+    yaffaTo = getCounterpartyDisplayName(toSourceValue);
+  }
+
+  const mappingSummaryParts = [
+    mappedType ? 'type=' + mappedType : '',
+    mappedCategory ? 'category=' + mappedCategory : '',
+    dateColumnName ? 'date<-' + dateColumnName : '',
+    amountColumnName ? 'amount<-' + amountColumnName : '',
+    descriptionColumnName ? 'description<-' + descriptionColumnName : '',
+    fromColumnName ? 'from<-' + fromColumnName : '',
+    toColumnName ? 'to<-' + toColumnName : '',
+  ].filter((part) => part.length > 0);
+
+  return {
+    _yaffa_match_summary: mappingSummaryParts.join(' | '),
+    _yaffa_type: mappedType,
+    _yaffa_date: formatYaffaPreviewDate(parsedDate),
+    _yaffa_amount:
+      Number.isFinite(parsedAmount) && parsedAmount !== null
+        ? String(parsedAmount)
+        : '',
+    _yaffa_description: descriptionValue,
+    _yaffa_from: yaffaFrom,
+    _yaffa_to: yaffaTo,
+    _yaffa_category: mappedCategory,
+  };
+}
+
 function getDslPreviewIssueState(rowIndex) {
   const key = String(rowIndex);
   return String(window.dslPreviewIssueRows[key] ?? '');
@@ -1347,6 +1423,7 @@ function hasBroadAmountTransactionTypeRules(dslPayload) {
 function refillDslPreviewMatchedRowsTable(matchedRows) {
   let head = document.getElementById('dsl_preview_matched_table_head');
   let body = document.getElementById('dsl_preview_matched_table_body');
+  const dslPayload = window.dslPreviewPayload ?? {};
 
   head.innerHTML = '';
   body.innerHTML = '';
@@ -1360,6 +1437,7 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
 
   const tableRows = matchedRows.map((entry) => {
     const issueReason = getDslPreviewIssueState(entry.index);
+    const yaffaPreviewFields = buildYaffaPreviewFields(entry, dslPayload);
 
     return {
       _row_index: entry.index,
@@ -1368,6 +1446,7 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
       _matched_by: (entry.matchedByRules ?? []).join(', '),
       _matched_fields: (entry.matchedConditionFields ?? []).join(', '),
       _issue_reason: issueReason,
+      ...yaffaPreviewFields,
       ...entry.row,
     };
   });
@@ -1386,6 +1465,14 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
     _matched_by: 'matched by',
     _matched_fields: 'matched fields',
     _issue_reason: 'issue reason (fill to mark row as incorrect)',
+    _yaffa_match_summary: 'YAFFA match summary',
+    _yaffa_type: 'YAFFA type',
+    _yaffa_date: 'YAFFA date',
+    _yaffa_amount: 'YAFFA amount',
+    _yaffa_description: 'YAFFA description',
+    _yaffa_from: 'YAFFA from',
+    _yaffa_to: 'YAFFA to',
+    _yaffa_category: 'YAFFA category',
   };
   let headerRow = document.createElement('tr');
   headers.forEach((headerText) => {
@@ -2052,6 +2139,7 @@ document
     window.dslPreviewPromptStrictValueKeys = [];
     window.dslPreviewIssueRows = {};
     window.dslPreviewSelectedRows = {};
+    window.dslPreviewPayload = null;
     window.csvDraftsReady = false;
     window.dslBulkImportInProgress = false;
     updateCsvImportSummary(0, 0, 0);
@@ -2114,6 +2202,7 @@ document
       let dslPayload;
       try {
         dslPayload = getActiveDslPayloadForImport();
+        window.dslPreviewPayload = dslPayload;
       } catch (error) {
         window.csvDraftsReady = false;
         window.unmatchedRows = csvRows;
@@ -2537,6 +2626,7 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
     const dslPayload = parseAiDslInput(
       document.getElementById('ai_dsl_input').value,
     );
+    window.dslPreviewPayload = dslPayload;
 
     if (!window.csvParsedRows || window.csvParsedRows.length === 0) {
       setAiDslStatus(
@@ -2644,6 +2734,7 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
       'success',
     );
   } catch (error) {
+    window.dslPreviewPayload = null;
     clearUnmatchedRowsTable();
     clearDslPreviewMatchedRowsTable();
     updateDslPreviewFiltersStatus();
@@ -3338,6 +3429,7 @@ $('#reset').on('click', function () {
   window.dslPreviewPromptStrictValueKeys = [];
   window.dslPreviewIssueRows = {};
   window.dslPreviewSelectedRows = {};
+  window.dslPreviewPayload = null;
   window.csvDraftsReady = false;
   window.dslBulkImportInProgress = false;
   clearDslPreviewFilters();
