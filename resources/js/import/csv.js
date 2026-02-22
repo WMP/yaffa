@@ -20,7 +20,14 @@ window.schedules = [];
 window.csvParsedRows = [];
 window.csvSampleRows = [];
 window.csvHeaders = [];
-window.dslPreviewUnmatchedRows = [];
+window.dslPreviewMatchedRows = [];
+window.dslPreviewUnmatchedEntries = [];
+window.dslPreviewPromptUnmatchedRows = [];
+window.dslPreviewIssueRows = {};
+window.dslPreviewFilters = {
+  include: {},
+  exclude: {},
+};
 const identifiedTransactionsSectionSelector =
   '#identified-transactions-section';
 const dslPreviewMatchedSectionSelector = '#dsl-preview-matched-section';
@@ -118,7 +125,7 @@ function setAiDslStatus(message, tone = 'muted') {
   statusElement.textContent = message;
 }
 
-function buildAiDslPrompt(csvRows, additionalRows = []) {
+function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
   const sampleRows = csvRows.slice(0, aiPromptSampleRowsCount);
   const headers = Object.keys(sampleRows[0] ?? {});
   const sampleJson = JSON.stringify(sampleRows, null, 2);
@@ -127,6 +134,7 @@ function buildAiDslPrompt(csvRows, additionalRows = []) {
     null,
     2,
   );
+  const flaggedIssuesJson = JSON.stringify(flaggedIssueRows, null, 2);
 
   return [
     'You are helping me configure YAFFA CSV import rules.',
@@ -184,10 +192,17 @@ function buildAiDslPrompt(csvRows, additionalRows = []) {
       aiPromptExtraUnmatchedRowsCount +
       '):',
     additionalJson,
+    '',
+    'Flagged preview rows (user-marked as incorrect; regenerate rules to classify these correctly):',
+    flaggedIssuesJson,
   ].join('\n');
 }
 
-function updateAiPromptFromRows(csvRows, additionalRows = []) {
+function updateAiPromptFromRows(
+  csvRows,
+  additionalRows = [],
+  flaggedIssueRows = [],
+) {
   const promptElement = document.getElementById('ai_dsl_prompt_output');
   if (!promptElement) {
     return;
@@ -198,7 +213,11 @@ function updateAiPromptFromRows(csvRows, additionalRows = []) {
     return;
   }
 
-  promptElement.value = buildAiDslPrompt(csvRows, additionalRows);
+  promptElement.value = buildAiDslPrompt(
+    csvRows,
+    additionalRows,
+    flaggedIssueRows,
+  );
 }
 
 function parseAiDslInput(rawValue) {
@@ -291,6 +310,145 @@ function profileDslToTextareaValue(profile) {
   }
 
   return JSON.stringify(dsl, null, 2);
+}
+
+function getDslPreviewIssueState(rowIndex) {
+  const key = String(rowIndex);
+  return (
+    window.dslPreviewIssueRows[key] ?? {
+      enabled: false,
+      reason: '',
+    }
+  );
+}
+
+function setDslPreviewIssueState(rowIndex, nextState) {
+  const key = String(rowIndex);
+  window.dslPreviewIssueRows[key] = {
+    ...getDslPreviewIssueState(rowIndex),
+    ...nextState,
+  };
+}
+
+function collectFlaggedDslPreviewRowsForPrompt() {
+  const rowsByIndex = new Map(
+    (window.dslPreviewMatchedRows ?? []).map((entry) => [entry.index, entry]),
+  );
+  const flaggedRows = [];
+  const missingReasonRows = [];
+
+  Object.entries(window.dslPreviewIssueRows ?? {}).forEach(
+    ([rowIndexRaw, issueState]) => {
+      const rowIndex = Number(rowIndexRaw);
+      if (!Number.isFinite(rowIndex)) {
+        return;
+      }
+
+      if (!issueState?.enabled) {
+        return;
+      }
+
+      const reason = String(issueState.reason ?? '').trim();
+      if (!reason) {
+        missingReasonRows.push(rowIndex + 1);
+        return;
+      }
+
+      const matchedEntry = rowsByIndex.get(rowIndex);
+      if (!matchedEntry) {
+        return;
+      }
+
+      flaggedRows.push({
+        _row: matchedEntry.index + 1,
+        _issue_reason: reason,
+        ...matchedEntry.row,
+      });
+    },
+  );
+
+  return {
+    flaggedRows: flaggedRows,
+    missingReasonRows: missingReasonRows,
+  };
+}
+
+function getPromptRowsFromPreviewState() {
+  const promptUnmatchedRows = pickPromptAdditionalUnmatchedRows(
+    window.dslPreviewUnmatchedEntries ?? [],
+  );
+  const flaggedInfo = collectFlaggedDslPreviewRowsForPrompt();
+
+  return {
+    promptUnmatchedRows: promptUnmatchedRows,
+    flaggedRows: flaggedInfo.flaggedRows,
+    missingReasonRows: flaggedInfo.missingReasonRows,
+  };
+}
+
+function updateDslPreviewFiltersStatus() {
+  const statusElement = document.getElementById('dsl_preview_filters_status');
+  if (!statusElement) {
+    return;
+  }
+
+  const includeFilters = Object.entries(window.dslPreviewFilters.include ?? {});
+  const excludeFilters = Object.entries(window.dslPreviewFilters.exclude ?? {});
+
+  if (includeFilters.length === 0 && excludeFilters.length === 0) {
+    statusElement.textContent = 'No active DSL preview filters.';
+    return;
+  }
+
+  const includeLabel = includeFilters
+    .map(([column, value]) => column + '="' + value + '"')
+    .join(', ');
+  const excludeLabel = excludeFilters
+    .map(([column, value]) => column + '="' + value + '"')
+    .join(', ');
+
+  const parts = [];
+  if (includeLabel) {
+    parts.push('Include: ' + includeLabel);
+  }
+  if (excludeLabel) {
+    parts.push('Exclude: ' + excludeLabel);
+  }
+
+  statusElement.textContent = parts.join(' | ');
+}
+
+function applyDslPreviewFilters(tableRows) {
+  return tableRows.filter((tableRow) => {
+    const includeFilters = Object.entries(
+      window.dslPreviewFilters.include ?? {},
+    );
+    const excludeFilters = Object.entries(
+      window.dslPreviewFilters.exclude ?? {},
+    );
+
+    const includesPass = includeFilters.every(
+      ([column, value]) =>
+        String(tableRow[column] ?? '') === String(value ?? ''),
+    );
+    if (!includesPass) {
+      return false;
+    }
+
+    const excludesPass = excludeFilters.every(
+      ([column, value]) =>
+        String(tableRow[column] ?? '') !== String(value ?? ''),
+    );
+
+    return excludesPass;
+  });
+}
+
+function clearDslPreviewFilters() {
+  window.dslPreviewFilters = {
+    include: {},
+    exclude: {},
+  };
 }
 
 function getDslMappingLabel(mapping, index) {
@@ -500,37 +658,126 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
 
   head.innerHTML = '';
   body.innerHTML = '';
+  updateDslPreviewFiltersStatus();
 
   if (!matchedRows || matchedRows.length === 0) {
     return;
   }
 
-  const tableRows = matchedRows.map((entry) => ({
-    _row: entry.index + 1,
-    _mapped_transaction_type: entry.mapped.transaction_type ?? '',
-    _matched_by: (entry.matchedByRules ?? []).join(', '),
-    _matched_fields: (entry.matchedConditionFields ?? []).join(', '),
-    ...entry.row,
-  }));
+  const tableRows = matchedRows.map((entry) => {
+    const issueState = getDslPreviewIssueState(entry.index);
 
-  const headers = Object.keys(tableRows[0]);
+    return {
+      _row_index: entry.index,
+      _row: entry.index + 1,
+      _mapped_transaction_type: entry.mapped.transaction_type ?? '',
+      _matched_by: (entry.matchedByRules ?? []).join(', '),
+      _matched_fields: (entry.matchedConditionFields ?? []).join(', '),
+      _mark_issue: issueState.enabled ? '1' : '0',
+      _issue_reason: issueState.reason ?? '',
+      ...entry.row,
+    };
+  });
+  const filteredTableRows = applyDslPreviewFilters(tableRows);
+
+  const headers = Object.keys(tableRows[0]).filter(
+    (headerName) => headerName !== '_row_index',
+  );
+  const headerLabels = {
+    _row: '#',
+    _mapped_transaction_type: 'mapped transaction_type',
+    _matched_by: 'matched by',
+    _matched_fields: 'matched fields',
+    _mark_issue: 'mark issue',
+    _issue_reason: 'issue reason (required)',
+  };
   let headerRow = document.createElement('tr');
   headers.forEach((headerText) => {
     let header = document.createElement('th');
-    header.appendChild(document.createTextNode(headerText));
+    header.appendChild(
+      document.createTextNode(headerLabels[headerText] ?? headerText),
+    );
     headerRow.appendChild(header);
   });
   head.appendChild(headerRow);
 
-  tableRows.forEach((tableRow) => {
+  filteredTableRows.forEach((tableRow) => {
     let row = document.createElement('tr');
-    Object.values(tableRow).forEach((text) => {
+    headers.forEach((headerText) => {
       let cell = document.createElement('td');
-      cell.appendChild(document.createTextNode(String(text ?? '')));
+
+      if (headerText === '_mark_issue') {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'form-check-input dsl-preview-mark-issue';
+        checkbox.dataset.rowIndex = String(tableRow._row_index);
+        checkbox.checked = tableRow._mark_issue === '1';
+        cell.appendChild(checkbox);
+        row.appendChild(cell);
+        return;
+      }
+
+      if (headerText === '_issue_reason') {
+        const issueInput = document.createElement('input');
+        issueInput.type = 'text';
+        issueInput.className =
+          'form-control form-control-sm dsl-preview-issue-reason';
+        issueInput.dataset.rowIndex = String(tableRow._row_index);
+        issueInput.value = String(tableRow._issue_reason ?? '');
+        issueInput.placeholder = 'Describe why this row is wrong';
+        issueInput.disabled = tableRow._mark_issue !== '1';
+        cell.appendChild(issueInput);
+        row.appendChild(cell);
+        return;
+      }
+
+      const text = String(tableRow[headerText] ?? '');
+      const filterControls = document.createElement('div');
+      filterControls.className = 'mb-1';
+
+      const includeButton = document.createElement('button');
+      includeButton.type = 'button';
+      includeButton.className =
+        'btn btn-link btn-sm p-0 me-1 dsl-cell-filter-include';
+      includeButton.dataset.column = headerText;
+      includeButton.dataset.value = text;
+      includeButton.textContent = '+';
+
+      const excludeButton = document.createElement('button');
+      excludeButton.type = 'button';
+      excludeButton.className =
+        'btn btn-link btn-sm p-0 dsl-cell-filter-exclude';
+      excludeButton.dataset.column = headerText;
+      excludeButton.dataset.value = text;
+      excludeButton.textContent = '-';
+
+      filterControls.appendChild(includeButton);
+      filterControls.appendChild(excludeButton);
+      cell.appendChild(filterControls);
+      cell.appendChild(document.createTextNode(text));
       row.appendChild(cell);
     });
     body.appendChild(row);
   });
+}
+
+function refreshPromptFromCurrentPreview() {
+  if (!window.csvSampleRows || window.csvSampleRows.length === 0) {
+    return {
+      promptUnmatchedRows: [],
+      flaggedRows: [],
+      missingReasonRows: [],
+    };
+  }
+
+  const promptRows = getPromptRowsFromPreviewState();
+  updateAiPromptFromRows(
+    window.csvSampleRows,
+    promptRows.promptUnmatchedRows,
+    promptRows.flaggedRows,
+  );
+
+  return promptRows;
 }
 
 async function loadImportProfile(profileId) {
@@ -797,14 +1044,19 @@ document.getElementById('csv_file').addEventListener('change', function () {
   window.csvParsedRows = [];
   window.csvSampleRows = [];
   window.csvHeaders = [];
-  window.dslPreviewUnmatchedRows = [];
+  window.dslPreviewMatchedRows = [];
+  window.dslPreviewUnmatchedEntries = [];
+  window.dslPreviewPromptUnmatchedRows = [];
+  window.dslPreviewIssueRows = {};
+  clearDslPreviewFilters();
   table.clear().draw();
   clearUnmatchedRowsTable();
   clearDslPreviewMatchedRowsTable();
+  updateDslPreviewFiltersStatus();
   setSectionVisibility(identifiedTransactionsSectionSelector, false);
   setSectionVisibility(dslPreviewMatchedSectionSelector, false);
   setSectionVisibility(unmatchedRowsSectionSelector, false);
-  updateAiPromptFromRows([], []);
+  updateAiPromptFromRows([], [], []);
   setAiDslStatus('Parsing CSV...', 'muted');
 
   const myFile = this.files[0];
@@ -835,7 +1087,7 @@ document.getElementById('csv_file').addEventListener('change', function () {
     window.csvParsedRows = csvRows;
     window.csvSampleRows = csvRows.slice(0, aiPromptSampleRowsCount);
     window.csvHeaders = Object.keys(csvRows[0] ?? {});
-    updateAiPromptFromRows(window.csvSampleRows, []);
+    updateAiPromptFromRows(window.csvSampleRows, [], []);
     setAiDslStatus(
       'AI prompt generated from ' +
         window.csvSampleRows.length +
@@ -1197,10 +1449,7 @@ document
       return;
     }
 
-    const additionalRows = Array.isArray(window.dslPreviewUnmatchedRows)
-      ? window.dslPreviewUnmatchedRows
-      : [];
-    updateAiPromptFromRows(window.csvSampleRows, additionalRows);
+    refreshPromptFromCurrentPreview();
     setAiDslStatus('Prompt regenerated from current sample rows.', 'success');
   });
 
@@ -1236,17 +1485,37 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
     }
 
     const previewResult = runDslPreviewScan(dslPayload);
-    const additionalRows = pickPromptAdditionalUnmatchedRows(
-      previewResult.unmatchedRows,
+    window.dslPreviewMatchedRows = previewResult.matchedRows;
+    window.dslPreviewUnmatchedEntries = previewResult.unmatchedRows;
+
+    // Keep issue marks only for rows that are still matched in current preview.
+    const matchedIndexes = new Set(
+      previewResult.matchedRows.map((entry) => String(entry.index)),
     );
-    window.dslPreviewUnmatchedRows = additionalRows;
+    Object.keys(window.dslPreviewIssueRows).forEach((rowIndex) => {
+      if (!matchedIndexes.has(rowIndex)) {
+        delete window.dslPreviewIssueRows[rowIndex];
+      }
+    });
 
     refillDslPreviewMatchedRowsTable(previewResult.matchedRows);
     setSectionVisibility(
       dslPreviewMatchedSectionSelector,
       previewResult.matchedRows.length > 0,
     );
-    updateAiPromptFromRows(window.csvSampleRows, additionalRows);
+    const previewUnmatchedRows = previewResult.unmatchedRows.map(
+      (entry) => entry.row,
+    );
+    if (previewUnmatchedRows.length > 0) {
+      refillUnmatchedRows(previewUnmatchedRows);
+      setSectionVisibility(unmatchedRowsSectionSelector, true);
+    } else {
+      clearUnmatchedRowsTable();
+      setSectionVisibility(unmatchedRowsSectionSelector, false);
+    }
+
+    const promptRows = refreshPromptFromCurrentPreview();
+    window.dslPreviewPromptUnmatchedRows = promptRows.promptUnmatchedRows;
 
     const broadAmountHint =
       previewResult.matchedRows.length === previewResult.totalRows &&
@@ -1259,6 +1528,16 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
           previewResult.strictColumns.join(', ') +
           '.'
         : ' No strict source column detected. Set column_mapping.type to enable strict type-based matching.';
+    const issueRowsHint =
+      promptRows.flaggedRows.length > 0
+        ? ' Flagged rows sent to prompt: ' + promptRows.flaggedRows.length + '.'
+        : '';
+    const missingIssueReasonHint =
+      promptRows.missingReasonRows.length > 0
+        ? ' Fill issue reason for rows: ' +
+          promptRows.missingReasonRows.join(', ') +
+          '.'
+        : '';
 
     setAiDslStatus(
       'DSL JSON is valid. Preview scan matched ' +
@@ -1266,24 +1545,157 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
         '/' +
         previewResult.totalRows +
         ' rows. Added ' +
-        additionalRows.length +
+        promptRows.promptUnmatchedRows.length +
         ' unmatched rows to prompt.' +
         strictColumnsHint +
-        broadAmountHint,
-      'success',
+        issueRowsHint +
+        broadAmountHint +
+        missingIssueReasonHint,
+      promptRows.missingReasonRows.length > 0 ? 'warning' : 'success',
     );
   } catch (error) {
+    clearUnmatchedRowsTable();
     clearDslPreviewMatchedRowsTable();
+    updateDslPreviewFiltersStatus();
     setSectionVisibility(dslPreviewMatchedSectionSelector, false);
+    setSectionVisibility(unmatchedRowsSectionSelector, false);
     setAiDslStatus(error.message, 'danger');
   }
 });
+
+$('#dsl_preview_clear_filters').on('click', function () {
+  clearDslPreviewFilters();
+  refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
+  refreshPromptFromCurrentPreview();
+  setAiDslStatus('DSL preview filters cleared.', 'muted');
+});
+
+$(document).on(
+  'click',
+  '#dsl_preview_matched_table .dsl-cell-filter-include',
+  function () {
+    const column = String(this.dataset.column ?? '');
+    const value = String(this.dataset.value ?? '');
+    if (!column) {
+      return;
+    }
+
+    window.dslPreviewFilters.include[column] = value;
+    if (window.dslPreviewFilters.exclude[column] === value) {
+      delete window.dslPreviewFilters.exclude[column];
+    }
+
+    refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
+    setAiDslStatus(
+      'Applied include filter: ' + column + ' = "' + value + '".',
+      'muted',
+    );
+  },
+);
+
+$(document).on(
+  'click',
+  '#dsl_preview_matched_table .dsl-cell-filter-exclude',
+  function () {
+    const column = String(this.dataset.column ?? '');
+    const value = String(this.dataset.value ?? '');
+    if (!column) {
+      return;
+    }
+
+    window.dslPreviewFilters.exclude[column] = value;
+    if (window.dslPreviewFilters.include[column] === value) {
+      delete window.dslPreviewFilters.include[column];
+    }
+
+    refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
+    setAiDslStatus(
+      'Applied exclude filter: ' + column + ' != "' + value + '".',
+      'muted',
+    );
+  },
+);
+
+$(document).on(
+  'change',
+  '#dsl_preview_matched_table .dsl-preview-mark-issue',
+  function () {
+    const rowIndex = Number(this.dataset.rowIndex);
+    if (!Number.isFinite(rowIndex)) {
+      return;
+    }
+
+    setDslPreviewIssueState(rowIndex, {
+      enabled: this.checked,
+    });
+
+    if (!this.checked) {
+      setDslPreviewIssueState(rowIndex, { reason: '' });
+    }
+
+    refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
+
+    const promptRows = refreshPromptFromCurrentPreview();
+    if (promptRows.missingReasonRows.length > 0) {
+      setAiDslStatus(
+        'Provide issue reason for rows: ' +
+          promptRows.missingReasonRows.join(', ') +
+          '.',
+        'warning',
+      );
+      return;
+    }
+
+    if (this.checked) {
+      setAiDslStatus(
+        'Row marked as issue. Add reason to send it to AI.',
+        'muted',
+      );
+    } else {
+      setAiDslStatus('Issue mark removed from row.', 'muted');
+    }
+  },
+);
+
+$(document).on(
+  'input',
+  '#dsl_preview_matched_table .dsl-preview-issue-reason',
+  function () {
+    const rowIndex = Number(this.dataset.rowIndex);
+    if (!Number.isFinite(rowIndex)) {
+      return;
+    }
+
+    setDslPreviewIssueState(rowIndex, {
+      reason: this.value,
+    });
+
+    const promptRows = refreshPromptFromCurrentPreview();
+    if (promptRows.missingReasonRows.length > 0) {
+      setAiDslStatus(
+        'Provide issue reason for rows: ' +
+          promptRows.missingReasonRows.join(', ') +
+          '.',
+        'warning',
+      );
+      return;
+    }
+
+    setAiDslStatus(
+      'Issue description saved. Flagged rows added to AI prompt: ' +
+        promptRows.flaggedRows.length +
+        '.',
+      'success',
+    );
+  },
+);
 
 document
   .getElementById('ai_save_dsl_profile')
   .addEventListener('click', saveDslToSelectedProfile);
 
 setAiDslStatus('Load a CSV file to generate an AI prompt.', 'muted');
+updateDslPreviewFiltersStatus();
 
 // Select 2 functionality for account select
 $('#account')
@@ -1890,10 +2302,15 @@ $('#reset').on('click', function () {
   window.csvParsedRows = [];
   window.csvSampleRows = [];
   window.csvHeaders = [];
-  window.dslPreviewUnmatchedRows = [];
+  window.dslPreviewMatchedRows = [];
+  window.dslPreviewUnmatchedEntries = [];
+  window.dslPreviewPromptUnmatchedRows = [];
+  window.dslPreviewIssueRows = {};
+  clearDslPreviewFilters();
   selectedImportProfile = null;
   document.getElementById('ai_dsl_prompt_output').value = '';
   document.getElementById('ai_dsl_input').value = '';
+  updateDslPreviewFiltersStatus();
   clearDslPreviewMatchedRowsTable();
   setSectionVisibility(dslPreviewMatchedSectionSelector, false);
   setAiDslStatus('Form reset.', 'muted');

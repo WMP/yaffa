@@ -149,15 +149,28 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">{{ __('DSL preview matched rows') }}</div>
+                    <div class="card-title collapse-control">
+                        <span data-coreui-toggle="collapse" href="#collapse-dsl-preview-matched-container" aria-expanded="true" aria-controls="collapse-dsl-preview-matched-container">
+                            <i class="fa fa-angle-down"></i>
+                            {{ __('DSL preview matched rows') }}
+                        </span>
+                    </div>
                 </div>
-                <div class="card-body table-responsive no-padding">
-                    <table id="dsl_preview_matched_table" class="table table-striped table-hover">
-                        <thead id="dsl_preview_matched_table_head">
-                        </thead>
-                        <tbody id="dsl_preview_matched_table_body">
-                        </tbody>
-                    </table>
+                <div class="card-body collapse show no-padding" id="collapse-dsl-preview-matched-container">
+                    <div class="p-2 border-bottom d-flex align-items-center justify-content-between">
+                        <small id="dsl_preview_filters_status" class="text-muted"></small>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="dsl_preview_clear_filters">
+                            {{ __('Clear filters') }}
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="dsl_preview_matched_table" class="table table-striped table-hover">
+                            <thead id="dsl_preview_matched_table_head">
+                            </thead>
+                            <tbody id="dsl_preview_matched_table_body">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
