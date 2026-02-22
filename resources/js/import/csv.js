@@ -36,6 +36,14 @@ const dslPreviewMatchedSectionSelector = '#dsl-preview-matched-section';
 const unmatchedRowsSectionSelector = '#unmatched-rows-section';
 const aiPromptSampleRowsCount = 3;
 const aiPromptExtraUnmatchedRowsCount = 3;
+const dslStatusYaffaFields = [
+  'date',
+  'amount',
+  'description',
+  'type',
+  'from',
+  'to',
+];
 const aiDslAllowedKeys = [
   'csv_options',
   'column_mapping',
@@ -43,6 +51,118 @@ const aiDslAllowedKeys = [
   'rules',
 ];
 let selectedImportProfile = null;
+window.dslStatusState = {
+  mapping: {},
+  strictFields: [],
+  matchedRows: null,
+  totalRows: 0,
+  unmatchedRows: null,
+};
+
+function getDslStatusDisplayValue(rawValue) {
+  const value = String(rawValue ?? '').trim();
+  return value.length > 0 ? value : 'n/a';
+}
+
+function getDslStatusMappingFromPayload(dslPayload) {
+  const mapping = {};
+  dslStatusYaffaFields.forEach((yaffaField) => {
+    mapping[yaffaField] = String(
+      dslPayload?.column_mapping?.[yaffaField] ?? '',
+    ).trim();
+  });
+  return mapping;
+}
+
+function renderDslStatusTable() {
+  const tableBody = document.getElementById('dsl_status_table_body');
+  if (!tableBody) {
+    return;
+  }
+
+  const mappingSummary = dslStatusYaffaFields
+    .map((yaffaField) => {
+      const mappedCsvField = getDslStatusDisplayValue(
+        window.dslStatusState.mapping?.[yaffaField] ?? '',
+      );
+      return yaffaField + ' -> ' + mappedCsvField;
+    })
+    .join(', ');
+
+  const strictFieldsSummary = Array.isArray(window.dslStatusState.strictFields)
+    ? window.dslStatusState.strictFields
+        .map((strictField) => String(strictField).trim())
+        .filter((strictField) => strictField.length > 0)
+        .join(', ')
+    : '';
+
+  const matchedRowsValue =
+    window.dslStatusState.matchedRows === null
+      ? 'n/a'
+      : String(window.dslStatusState.matchedRows);
+  const totalRowsValue = Number.isFinite(window.dslStatusState.totalRows)
+    ? String(window.dslStatusState.totalRows)
+    : '0';
+  const unmatchedRowsValue =
+    window.dslStatusState.unmatchedRows === null
+      ? 'n/a'
+      : String(window.dslStatusState.unmatchedRows);
+
+  const rows = [
+    ['YAFFA <-> CSV mapping', mappingSummary],
+    ['Strict fields detected', getDslStatusDisplayValue(strictFieldsSummary)],
+    ['Matched rows', matchedRowsValue],
+    ['All rows', totalRowsValue],
+    ['Unmatched rows', unmatchedRowsValue],
+  ];
+
+  tableBody.innerHTML = '';
+  rows.forEach(([label, value]) => {
+    const row = document.createElement('tr');
+    const labelCell = document.createElement('th');
+    labelCell.scope = 'row';
+    labelCell.textContent = label;
+    const valueCell = document.createElement('td');
+    valueCell.textContent = value;
+    row.appendChild(labelCell);
+    row.appendChild(valueCell);
+    tableBody.appendChild(row);
+  });
+}
+
+function resetDslStatusState(totalRows = 0) {
+  const normalizedTotalRows = Number(totalRows);
+  window.dslStatusState = {
+    mapping: {},
+    strictFields: [],
+    matchedRows: null,
+    totalRows:
+      Number.isFinite(normalizedTotalRows) && normalizedTotalRows > 0
+        ? normalizedTotalRows
+        : 0,
+    unmatchedRows: null,
+  };
+  renderDslStatusTable();
+}
+
+function updateDslStatusStateFromPreview(dslPayload, previewResult) {
+  window.dslStatusState = {
+    mapping: getDslStatusMappingFromPayload(dslPayload),
+    strictFields: Array.isArray(previewResult?.strictColumns)
+      ? previewResult.strictColumns
+      : [],
+    matchedRows: Array.isArray(previewResult?.matchedRows)
+      ? previewResult.matchedRows.length
+      : null,
+    totalRows: Number.isFinite(previewResult?.totalRows)
+      ? previewResult.totalRows
+      : 0,
+    unmatchedRows: Array.isArray(previewResult?.unmatchedRows)
+      ? previewResult.unmatchedRows.length
+      : null,
+  };
+  renderDslStatusTable();
+}
 
 // Helper function to save nested object values
 function storeNestedObjectValue(base, names, value) {
@@ -198,7 +318,7 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     'Sample rows (first ' + aiPromptSampleRowsCount + '):',
     sampleJson,
     '',
-    'Additional unmatched rows (accumulated, +3 per test run):',
+    'Additional unmatched rows (accumulated from preview tests):',
     additionalJson,
     '',
     'Flagged preview rows (user-marked as incorrect; regenerate rules to classify these correctly):',
@@ -693,6 +813,10 @@ function pickNextPromptUnmatchedEntries(
   const usedStrictValueKeys = new Set(
     window.dslPreviewPromptStrictValueKeys ?? [],
   );
+  const isFirstPromptIteration =
+    usedIndexes.size === 0 && usedStrictValueKeys.size === 0;
+  const selectAllUniqueStrictValues =
+    Boolean(strictColumn) && isFirstPromptIteration;
   const selectedEntries = [];
 
   const buildStrictValueKey = (entry) => {
@@ -706,7 +830,10 @@ function pickNextPromptUnmatchedEntries(
 
   if (strictColumn) {
     for (const entry of candidates) {
-      if (selectedEntries.length >= maxResults) {
+      if (
+        !selectAllUniqueStrictValues &&
+        selectedEntries.length >= maxResults
+      ) {
         break;
       }
       if (usedIndexes.has(entry.index)) {
@@ -725,7 +852,7 @@ function pickNextPromptUnmatchedEntries(
     }
   }
 
-  if (selectedEntries.length < maxResults) {
+  if (!selectAllUniqueStrictValues && selectedEntries.length < maxResults) {
     for (const entry of candidates) {
       if (selectedEntries.length >= maxResults) {
         break;
@@ -754,6 +881,7 @@ function pickNextPromptUnmatchedEntries(
     selectedEntries: selectedEntries,
     strictColumn: strictColumn,
     usedStrictValueKeys: Array.from(usedStrictValueKeys),
+    selectedAllUniqueStrictValues: selectAllUniqueStrictValues,
   };
 }
 
@@ -1180,6 +1308,7 @@ document.getElementById('csv_file').addEventListener('change', function () {
   setSectionVisibility(dslPreviewMatchedSectionSelector, false);
   setSectionVisibility(unmatchedRowsSectionSelector, false);
   updateAiPromptFromRows([], [], []);
+  resetDslStatusState(0);
   setAiDslStatus('Parsing CSV...', 'muted');
 
   const myFile = this.files[0];
@@ -1210,6 +1339,11 @@ document.getElementById('csv_file').addEventListener('change', function () {
     window.csvParsedRows = csvRows;
     window.csvSampleRows = csvRows.slice(0, aiPromptSampleRowsCount);
     window.csvHeaders = Object.keys(csvRows[0] ?? {});
+    window.dslStatusState.totalRows = csvRows.length;
+    window.dslStatusState.matchedRows = null;
+    window.dslStatusState.unmatchedRows = null;
+    window.dslStatusState.strictFields = [];
+    renderDslStatusTable();
     updateAiPromptFromRows(window.csvSampleRows, [], []);
     setAiDslStatus(
       'AI prompt generated from ' +
@@ -1621,8 +1755,9 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
       }
     });
 
-    // Add only new unmatched rows to prompt memory (+3 per test run),
-    // preferring rows with next unique value from strict column.
+    // Add new unmatched rows to prompt memory.
+    // First test run: collect all unique values from strict column.
+    // Next runs: collect up to aiPromptExtraUnmatchedRowsCount unique rows.
     const nextPromptSelection = pickNextPromptUnmatchedEntries(
       previewResult.unmatchedRows,
       previewResult.strictColumns,
@@ -1635,6 +1770,7 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
       window.dslPreviewPromptUnmatchedIndexes.push(entry.index);
       window.dslPreviewPromptUnmatchedRows.push(entry.row);
     });
+    updateDslStatusStateFromPreview(dslPayload, previewResult);
 
     refillDslPreviewMatchedRowsTable(previewResult.matchedRows);
     setSectionVisibility(
@@ -1671,13 +1807,21 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
         : '';
     const iterationHint =
       nextPromptEntries.length > 0
-        ? ' Added ' +
-          nextPromptEntries.length +
-          ' new unmatched rows in this test run based on unique strict values from "' +
-          (nextPromptSelection.strictColumn || 'n/a') +
-          '" (prompt unmatched total: ' +
-          window.dslPreviewPromptUnmatchedRows.length +
-          ').'
+        ? nextPromptSelection.selectedAllUniqueStrictValues
+          ? ' First test run: added all unmatched rows with unique values from strict column "' +
+            (nextPromptSelection.strictColumn || 'n/a') +
+            '" (' +
+            nextPromptEntries.length +
+            ' rows, prompt unmatched total: ' +
+            window.dslPreviewPromptUnmatchedRows.length +
+            ').'
+          : ' Added ' +
+            nextPromptEntries.length +
+            ' new unmatched rows in this test run based on unique strict values from "' +
+            (nextPromptSelection.strictColumn || 'n/a') +
+            '" (prompt unmatched total: ' +
+            window.dslPreviewPromptUnmatchedRows.length +
+            ').'
         : ' No new unmatched rows added in this test run.';
 
     setAiDslStatus(
@@ -1700,6 +1844,10 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
     updateDslPreviewFiltersStatus();
     setSectionVisibility(dslPreviewMatchedSectionSelector, false);
     setSectionVisibility(unmatchedRowsSectionSelector, false);
+    window.dslStatusState.matchedRows = null;
+    window.dslStatusState.unmatchedRows = null;
+    window.dslStatusState.strictFields = [];
+    renderDslStatusTable();
     setAiDslStatus(error.message, 'danger');
   }
 });
@@ -1781,6 +1929,7 @@ document
 
 setAiDslStatus('Load a CSV file to generate an AI prompt.', 'muted');
 updateDslPreviewFiltersStatus();
+resetDslStatusState(0);
 
 // Select 2 functionality for account select
 $('#account')
@@ -2400,6 +2549,7 @@ $('#reset').on('click', function () {
   updateDslPreviewFiltersStatus();
   clearDslPreviewMatchedRowsTable();
   setSectionVisibility(dslPreviewMatchedSectionSelector, false);
+  resetDslStatusState(0);
   setAiDslStatus('Form reset.', 'muted');
 
   // Reset the main DataTable

@@ -56,8 +56,13 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3">
-                        {{ __('Load a CSV file and generate a structured AI prompt from sample rows. Then paste generated DSL JSON, run Test DSL, inspect matched and unmatched rows, use per-cell include/exclude filters, and mark incorrect matches with an issue reason. Each test run can append new unmatched examples to the prompt for iterative DSL refinement.') }}
+                        {{ __('Load a CSV file and generate a structured AI prompt from sample rows. Then paste generated DSL JSON, run Test DSL, inspect matched and unmatched rows, use per-cell include/exclude filters, and mark incorrect matches with an issue reason. Each test run can append new unmatched examples to the prompt for iterative DSL refinement. The status table below shows current YAFFA to CSV mapping, detected strict fields, and match counters.') }}
                     </p>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered mb-0" id="dsl_status_table">
+                            <tbody id="dsl_status_table_body"></tbody>
+                        </table>
+                    </div>
                     <div class="row">
                         <div class="col-md-6 form-group">
                             <label for="ai_dsl_prompt_output">{{ __('Prompt for AI') }}</label>
