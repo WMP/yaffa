@@ -101,6 +101,9 @@
                                 <button type="button" class="btn btn-outline-primary btn-sm" id="ai_validate_dsl">
                                     {{ __('Test DSL') }}
                                 </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="ai_format_dsl">
+                                    {{ __('Format JSON') }}
+                                </button>
                                 <button type="button" class="btn btn-primary btn-sm" id="ai_save_dsl_profile">
                                     {{ __('Save to selected profile') }}
                                 </button>

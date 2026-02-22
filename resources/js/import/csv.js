@@ -468,7 +468,7 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '',
     'Expected output structure:',
     '{',
-    '  "csv_options": { "delimiter": ";", "encoding": "windows-1250", "counterparty_extract_regex": "Address:\\\\s*(.*?)\\\\s*City:", "counterparty_extract_group": 1 },',
+    '  "csv_options": { "delimiter": "<DETECTED_DELIMITER>" },',
     '  "column_mapping": { "date": "<DATE_HEADER>", "amount": "<AMOUNT_HEADER>", "description": "<DESCRIPTION_HEADER>", "type": "<TYPE_HEADER>", "from": "<FROM_HEADER>", "to": "<TO_HEADER>" },',
     '  "value_mappings": [',
     '    { "when": { "<TYPE_HEADER>_regex": "^CARD\\\\s+PAYMENT$" }, "set": { "transaction_type": "withdrawal" } }',
@@ -483,6 +483,8 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '- Replace all placeholder header names with exact values from CSV headers.',
     '- Ensure conditions assigning transaction_type are based on the source column mapped to column_mapping.type.',
     '- transaction_type must be one of: withdrawal, deposit, transfer.',
+    '- Add csv_options.encoding only if non-UTF-8 is strongly indicated by the provided data.',
+    '- Add csv_options.counterparty_extract_regex/counterparty_extract_group only when counterparty text is embedded in longer metadata.',
     '- Prefer counterparty extraction patterns that are language-agnostic and derived from the actual sample rows (no bank-specific assumptions).',
     '',
     'CSV headers:',
@@ -524,8 +526,33 @@ function updateAiPromptFromRows(
   );
 }
 
-function parseAiDslInput(rawValue) {
+function normalizeAiDslInput(rawValue) {
   const trimmedValue = String(rawValue ?? '').trim();
+  if (!trimmedValue) {
+    return '';
+  }
+
+  const fencedBlockMatch = trimmedValue.match(
+    /^```(?:json)?\s*([\s\S]*?)\s*```$/i,
+  );
+  if (fencedBlockMatch) {
+    return String(fencedBlockMatch[1] ?? '').trim();
+  }
+
+  return trimmedValue;
+}
+
+function formatAiDslInputTextarea(dslPayload) {
+  const inputElement = document.getElementById('ai_dsl_input');
+  if (!inputElement || !dslPayload || typeof dslPayload !== 'object') {
+    return;
+  }
+
+  inputElement.value = JSON.stringify(dslPayload, null, 2);
+}
+
+function parseAiDslInput(rawValue) {
+  const trimmedValue = normalizeAiDslInput(rawValue);
   if (!trimmedValue) {
     throw new Error('DSL input is empty.');
   }
@@ -1830,6 +1857,7 @@ async function saveDslToSelectedProfile() {
   let dslPayload;
   try {
     dslPayload = parseAiDslInput(document.getElementById('ai_dsl_input').value);
+    formatAiDslInputTextarea(dslPayload);
   } catch (error) {
     setAiDslStatus(error.message, 'danger');
     return;
@@ -2892,6 +2920,7 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
     const dslPayload = parseAiDslInput(
       document.getElementById('ai_dsl_input').value,
     );
+    formatAiDslInputTextarea(dslPayload);
     window.dslPreviewPayload = dslPayload;
 
     if (!window.csvParsedRows || window.csvParsedRows.length === 0) {
@@ -3010,6 +3039,18 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
     window.dslStatusState.unmatchedRows = null;
     window.dslStatusState.strictFields = [];
     renderDslStatusTable();
+    setAiDslStatus(error.message, 'danger');
+  }
+});
+
+document.getElementById('ai_format_dsl').addEventListener('click', () => {
+  try {
+    const dslPayload = parseAiDslInput(
+      document.getElementById('ai_dsl_input').value,
+    );
+    formatAiDslInputTextarea(dslPayload);
+    setAiDslStatus('DSL JSON formatted.', 'success');
+  } catch (error) {
     setAiDslStatus(error.message, 'danger');
   }
 });
