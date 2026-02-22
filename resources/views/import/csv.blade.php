@@ -48,7 +48,7 @@
         }
     </style>
 
-    <div class="row mb-3">
+    <div id="ai-dsl-assistant-section" class="row mb-3 d-none">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
@@ -113,6 +113,12 @@
                     <div class="card-title">{{ __('Identified transactions') }}</div>
                 </div>
                 <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+                        <small id="import_parse_summary" class="text-muted"></small>
+                        <button type="button" class="btn btn-success btn-sm" id="import_all_quick_transactions">
+                            {{ __('Import all accepted transactions') }}
+                        </button>
+                    </div>
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="form-group d-inline-block">

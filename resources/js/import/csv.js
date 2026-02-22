@@ -37,6 +37,8 @@ const identifiedTransactionsSectionSelector =
   '#identified-transactions-section';
 const dslPreviewMatchedSectionSelector = '#dsl-preview-matched-section';
 const unmatchedRowsSectionSelector = '#unmatched-rows-section';
+const aiAssistantSectionSelector = '#ai-dsl-assistant-section';
+const addNewProfileOptionId = '__add_new_profile__';
 const aiPromptSampleRowsCount = 3;
 const aiPromptExtraUnmatchedRowsCount = 3;
 const dslStatusYaffaFields = [
@@ -60,6 +62,11 @@ window.dslStatusState = {
   matchedRows: null,
   totalRows: 0,
   unmatchedRows: null,
+};
+window.csvImportSummary = {
+  totalRows: 0,
+  acceptedRows: 0,
+  unmatchedRows: 0,
 };
 
 function getDslStatusDisplayValue(rawValue) {
@@ -251,6 +258,51 @@ function setAiDslStatus(message, tone = 'muted') {
   statusElement.textContent = message;
 }
 
+function getQuickImportableDraftIds() {
+  return (window.transactions || [])
+    .filter((transaction) => transaction.quickRecordingPossible)
+    .filter((transaction) => !transaction.handled)
+    .map((transaction) => Number(transaction.draftId))
+    .filter((draftId) => Number.isFinite(draftId));
+}
+
+function updateQuickImportButtonState() {
+  const importButton = document.getElementById('import_all_quick_transactions');
+  if (!importButton) {
+    return;
+  }
+
+  const importableCount = getQuickImportableDraftIds().length;
+  importButton.textContent =
+    'Import all accepted transactions' +
+    (importableCount > 0 ? ' (' + importableCount + ')' : '');
+  importButton.disabled =
+    window.dslBulkImportInProgress ||
+    !window.csvDraftsReady ||
+    importableCount === 0;
+}
+
+function updateCsvImportSummary(totalRows, acceptedRows, unmatchedRows) {
+  window.csvImportSummary = {
+    totalRows: Number(totalRows) || 0,
+    acceptedRows: Number(acceptedRows) || 0,
+    unmatchedRows: Number(unmatchedRows) || 0,
+  };
+
+  const summaryElement = document.getElementById('import_parse_summary');
+  if (!summaryElement) {
+    return;
+  }
+
+  summaryElement.textContent =
+    'Accepted: ' +
+    window.csvImportSummary.acceptedRows +
+    ' / Total: ' +
+    window.csvImportSummary.totalRows +
+    ' / Unmatched: ' +
+    window.csvImportSummary.unmatchedRows;
+}
+
 function isDslPreviewRowSelected(rowIndex) {
   const key = String(rowIndex);
   return window.dslPreviewSelectedRows[key] !== false;
@@ -313,6 +365,7 @@ function updateDslPreviewSelectionSummary() {
       selectedCount === 0 ||
       matchedRows.length === 0;
   }
+  updateQuickImportButtonState();
 
   const selectAllCheckbox = document.getElementById('dsl_preview_select_all');
   if (!selectAllCheckbox) {
@@ -1455,6 +1508,69 @@ async function importSelectedDslPreviewRows() {
   updateDslPreviewSelectionSummary();
 }
 
+async function importAllAcceptedTransactions() {
+  if (window.dslBulkImportInProgress) {
+    return;
+  }
+
+  if (!window.csvDraftsReady) {
+    setAiDslStatus(
+      'CSV rows are still being processed. Wait for parsing to finish.',
+      'warning',
+    );
+    return;
+  }
+
+  const draftIds = getQuickImportableDraftIds();
+  if (draftIds.length === 0) {
+    setAiDslStatus(
+      'No accepted transactions available for quick import.',
+      'warning',
+    );
+    return;
+  }
+
+  window.dslBulkImportInProgress = true;
+  updateDslPreviewSelectionSummary();
+
+  let importedCount = 0;
+  const failedImports = [];
+
+  for (const draftId of draftIds) {
+    const importResult = await quickImportDraftTransaction(draftId, {
+      showToast: false,
+    });
+    if (importResult.ok) {
+      importedCount++;
+      setDslPreviewRowSelected(draftId, false);
+    } else {
+      failedImports.push(importResult.message);
+    }
+  }
+
+  window.table.clear().rows.add(window.transactions).draw();
+  updateQuickImportButtonState();
+  updateDslPreviewSelectionSummary();
+
+  const failedCount = failedImports.length;
+  const summaryMessage =
+    'Bulk import finished. Selected: ' +
+    draftIds.length +
+    ', imported: ' +
+    importedCount +
+    ', failed: ' +
+    failedCount +
+    '.';
+  setAiDslStatus(summaryMessage, failedCount > 0 ? 'warning' : 'success');
+  showImportNotification(
+    failedCount > 0 ? 'warning' : 'success',
+    summaryMessage,
+  );
+
+  window.dslBulkImportInProgress = false;
+  updateDslPreviewSelectionSummary();
+}
+
 function decodeCsvData(fileData) {
   if (typeof fileData === 'string') {
     return fileData.replace(/^\uFEFF/, '');
@@ -1626,6 +1742,7 @@ document.getElementById('csv_file').addEventListener('change', function () {
   window.dslPreviewSelectedRows = {};
   window.csvDraftsReady = false;
   window.dslBulkImportInProgress = false;
+  updateCsvImportSummary(0, 0, 0);
   clearDslPreviewFilters();
   table.clear().draw();
   clearUnmatchedRowsTable();
@@ -1659,6 +1776,7 @@ document.getElementById('csv_file').addEventListener('change', function () {
     let processedRows = 0;
 
     if (csvRows.length === 0) {
+      updateCsvImportSummary(0, 0, 0);
       setAiDslStatus('No rows detected in CSV file.', 'warning');
       return;
     }
@@ -1757,6 +1875,11 @@ document.getElementById('csv_file').addEventListener('change', function () {
         // If all rows have been processed, refill tables
         if (processedRows === csvRows.length) {
           window.csvDraftsReady = true;
+          updateCsvImportSummary(
+            csvRows.length,
+            transactions.length,
+            unmatchedRows.length,
+          );
           table.clear().rows.add(transactions).draw();
           table.columns.adjust().draw();
           setSectionVisibility(
@@ -1982,8 +2105,15 @@ $('#import_profile')
         };
       },
       processResults: function (data) {
-        return {
-          results: data.map(function (profile) {
+        const results = [
+          {
+            id: addNewProfileOptionId,
+            text: '+ Add new profile',
+          },
+        ];
+
+        results.push(
+          ...data.map(function (profile) {
             let label = profile.name;
             if (profile.is_default) {
               label += ' (' + __('default') + ')';
@@ -1993,6 +2123,10 @@ $('#import_profile')
               text: label,
             };
           }),
+        );
+
+        return {
+          results: results,
         };
       },
       cache: true,
@@ -2002,6 +2136,19 @@ $('#import_profile')
     allowClear: true,
   })
   .on('select2:select', async function (e) {
+    if (String(e.params.data.id) === addNewProfileOptionId) {
+      delete document.getElementById('csv_file').dataset.importProfileId;
+      selectedImportProfile = null;
+      setSectionVisibility(aiAssistantSectionSelector, true);
+      document.getElementById('ai_dsl_input').value = '';
+      setAiDslStatus(
+        'New profile mode enabled. Configure DSL and click Save to selected profile.',
+        'muted',
+      );
+      return;
+    }
+
+    setSectionVisibility(aiAssistantSectionSelector, false);
     // Keep selected profile ID for future profile-based parsing phases.
     document.getElementById('csv_file').dataset.importProfileId =
       e.params.data.id;
@@ -2018,10 +2165,12 @@ $('#import_profile')
   .on('select2:unselect', function () {
     delete document.getElementById('csv_file').dataset.importProfileId;
     selectedImportProfile = null;
+    setSectionVisibility(aiAssistantSectionSelector, false);
   })
   .on('select2:clear', function () {
     delete document.getElementById('csv_file').dataset.importProfileId;
     selectedImportProfile = null;
+    setSectionVisibility(aiAssistantSectionSelector, false);
   });
 
 document
@@ -2287,12 +2436,18 @@ document
   .addEventListener('click', importSelectedDslPreviewRows);
 
 document
+  .getElementById('import_all_quick_transactions')
+  .addEventListener('click', importAllAcceptedTransactions);
+
+document
   .getElementById('ai_save_dsl_profile')
   .addEventListener('click', saveDslToSelectedProfile);
 
 setAiDslStatus('Load a CSV file to generate an AI prompt.', 'muted');
 updateDslPreviewFiltersStatus();
 updateDslPreviewSelectionSummary();
+updateCsvImportSummary(0, 0, 0);
+setSectionVisibility(aiAssistantSectionSelector, false);
 resetDslStatusState(0);
 
 // Select 2 functionality for account select
@@ -2776,6 +2931,8 @@ window.addEventListener('transaction-created', function (event) {
 
   // Update the table
   window.table.clear().rows.add(window.transactions).draw();
+  updateQuickImportButtonState();
+  updateDslPreviewSelectionSummary();
 });
 
 // Set up an event listener for immediately creating a transaction
@@ -2796,6 +2953,7 @@ $(tableSelector).on('click', 'button.record', async function () {
   }
 
   window.table.clear().rows.add(window.transactions).draw();
+  updateQuickImportButtonState();
   updateDslPreviewSelectionSummary();
 });
 
@@ -2810,6 +2968,8 @@ $(tableSelector).on('click', 'button.handled', function () {
 
   // Remove this button from the table
   $(this).remove();
+  updateQuickImportButtonState();
+  updateDslPreviewSelectionSummary();
 });
 
 // Set up filtering
@@ -2858,8 +3018,10 @@ $('#reset').on('click', function () {
   document.getElementById('ai_dsl_prompt_output').value = '';
   document.getElementById('ai_dsl_input').value = '';
   updateDslPreviewFiltersStatus();
+  updateCsvImportSummary(0, 0, 0);
   clearDslPreviewMatchedRowsTable();
   setSectionVisibility(dslPreviewMatchedSectionSelector, false);
+  setSectionVisibility(aiAssistantSectionSelector, false);
   resetDslStatusState(0);
   setAiDslStatus('Form reset.', 'muted');
 
@@ -2870,6 +3032,7 @@ $('#reset').on('click', function () {
   clearUnmatchedRowsTable();
   setSectionVisibility(identifiedTransactionsSectionSelector, false);
   setSectionVisibility(unmatchedRowsSectionSelector, false);
+  updateQuickImportButtonState();
 });
 
 // Load active schedules via API
