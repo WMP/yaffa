@@ -278,6 +278,20 @@ function updateQuickImportButtonState() {
     importableCount === 0;
 }
 
+function resetIdentifiedTransactionsFilters() {
+  if (!window.table) {
+    return;
+  }
+
+  window.table.search('');
+  window.table.column(7).search('');
+  // Keep historical behavior: default to unhandled drafts
+  window.table.column(9).search('No');
+
+  $('input[name=has_similar][value=""]').prop('checked', true);
+  $('input[name=handled][value="No"]').prop('checked', true);
+}
+
 function updateCsvImportSummary(totalRows, acceptedRows, unmatchedRows) {
   window.csvImportSummary = {
     totalRows: Number(totalRows) || 0,
@@ -2145,6 +2159,7 @@ document
     updateCsvImportSummary(0, 0, 0);
     clearDslPreviewFilters();
     table.clear().draw();
+    resetIdentifiedTransactionsFilters();
     clearUnmatchedRowsTable();
     clearDslPreviewMatchedRowsTable();
     updateDslPreviewFiltersStatus();
@@ -3150,8 +3165,8 @@ window.table = $(tableSelector).DataTable({
   },
   // Apply initial filters
   initComplete: function () {
-    // Initially filter by handled
-    $(tableSelector).DataTable().column(9).search('No').draw();
+    resetIdentifiedTransactionsFilters();
+    $(tableSelector).DataTable().draw();
   },
 });
 
@@ -3446,6 +3461,7 @@ $('#reset').on('click', function () {
 
   // Reset the main DataTable
   table.clear().rows.add(transactions).draw();
+  resetIdentifiedTransactionsFilters();
 
   // Reset table sections
   clearUnmatchedRowsTable();
