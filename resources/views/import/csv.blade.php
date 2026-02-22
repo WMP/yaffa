@@ -32,6 +32,22 @@
         </div>
     </div>
 
+    <style>
+        #dsl_preview_matched_table td .dsl-cell-filter-controls {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity .12s ease-in-out;
+        }
+
+        #dsl_preview_matched_table td:hover .dsl-cell-filter-controls,
+        #dsl_preview_matched_table td:focus-within .dsl-cell-filter-controls {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+    </style>
+
     <div class="row mb-3">
         <div class="col-12">
             <div class="card">
@@ -40,7 +56,7 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3">
-                        {{ __('Load a CSV file, generate an AI prompt from sample rows, then paste the generated DSL JSON below.') }}
+                        {{ __('Load a CSV file and generate a structured AI prompt from sample rows. Then paste generated DSL JSON, run Test DSL, inspect matched and unmatched rows, use per-cell include/exclude filters, and mark incorrect matches with an issue reason. Each test run can append new unmatched examples to the prompt for iterative DSL refinement.') }}
                     </p>
                     <div class="row">
                         <div class="col-md-6 form-group">

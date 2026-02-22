@@ -24,6 +24,7 @@ window.dslPreviewMatchedRows = [];
 window.dslPreviewUnmatchedEntries = [];
 window.dslPreviewPromptUnmatchedRows = [];
 window.dslPreviewPromptUnmatchedIndexes = [];
+window.dslPreviewPromptStrictValueKeys = [];
 window.dslPreviewIssueRows = {};
 window.dslPreviewFilters = {
   include: {},
@@ -167,7 +168,6 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '  - exact match: "<EXACT_HEADER>"',
     '  - regex match: "<EXACT_HEADER>_regex"',
     '- Do NOT use abstract keys like "type_regex" or "amount_regex".',
-    '- For this CSV, valid examples are "Typ transakcji_regex", "Kwota_regex", "Opis transakcji_regex".',
     '- Do NOT use unsupported pseudo-conditions like "transaction_type_missing".',
     '- Do NOT invent transaction labels not present in provided rows (sample + unmatched + flagged).',
     '- If a mapping cannot be derived from provided rows, omit it.',
@@ -177,9 +177,9 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     'Expected output structure:',
     '{',
     '  "csv_options": { "delimiter": ";", "encoding": "windows-1250" },',
-    '  "column_mapping": { "date": "Data operacji", "amount": "Kwota", "description": "Opis transakcji", "type": "Typ transakcji", "from": "_column_8", "to": "_column_9" },',
+    '  "column_mapping": { "date": "<DATE_HEADER>", "amount": "<AMOUNT_HEADER>", "description": "<DESCRIPTION_HEADER>", "type": "<TYPE_HEADER>", "from": "<FROM_HEADER>", "to": "<TO_HEADER>" },',
     '  "value_mappings": [',
-    '    { "when": { "Typ transakcji_regex": "^Płatność\\\\s+kartą$" }, "set": { "transaction_type": "withdrawal" } }',
+    '    { "when": { "<TYPE_HEADER>_regex": "^CARD\\\\s+PAYMENT$" }, "set": { "transaction_type": "withdrawal" } }',
     '  ],',
     '  "rules": []',
     '}',
@@ -188,6 +188,7 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '- Preserve original column names exactly.',
     '- Use regex fields when useful (e.g. "description_regex").',
     '- Keep it deterministic and machine-readable.',
+    '- Replace all placeholder header names with exact values from CSV headers.',
     '- Ensure conditions assigning transaction_type are based on the source column mapped to column_mapping.type.',
     '- transaction_type must be one of: withdrawal, deposit, transfer.',
     '',
@@ -676,17 +677,84 @@ function runDslPreviewScan(dslPayload) {
   };
 }
 
-function pickPromptAdditionalUnmatchedRows(unmatchedRows) {
-  const preferredRows = unmatchedRows
-    .filter((entry) => entry.index >= aiPromptSampleRowsCount)
-    .map((entry) => entry.row);
-  const fallbackRows = unmatchedRows
-    .filter((entry) => entry.index < aiPromptSampleRowsCount)
-    .map((entry) => entry.row);
+function pickNextPromptUnmatchedEntries(
+  unmatchedEntries,
+  strictColumns,
+  limit,
+) {
+  const normalizedLimit = Number(limit);
+  const maxResults =
+    Number.isFinite(normalizedLimit) && normalizedLimit > 0
+      ? normalizedLimit
+      : aiPromptExtraUnmatchedRowsCount;
+  const candidates = Array.isArray(unmatchedEntries) ? unmatchedEntries : [];
+  const strictColumn = String(strictColumns?.[0] ?? '').trim();
+  const usedIndexes = new Set(window.dslPreviewPromptUnmatchedIndexes ?? []);
+  const usedStrictValueKeys = new Set(
+    window.dslPreviewPromptStrictValueKeys ?? [],
+  );
+  const selectedEntries = [];
 
-  return preferredRows
-    .concat(fallbackRows)
-    .slice(0, aiPromptExtraUnmatchedRowsCount);
+  const buildStrictValueKey = (entry) => {
+    if (!strictColumn) {
+      return '';
+    }
+    return (
+      strictColumn + '::' + String(entry?.row?.[strictColumn] ?? '').trim()
+    );
+  };
+
+  if (strictColumn) {
+    for (const entry of candidates) {
+      if (selectedEntries.length >= maxResults) {
+        break;
+      }
+      if (usedIndexes.has(entry.index)) {
+        continue;
+      }
+
+      const strictValueKey = buildStrictValueKey(entry);
+      if (strictValueKey && usedStrictValueKeys.has(strictValueKey)) {
+        continue;
+      }
+
+      selectedEntries.push(entry);
+      if (strictValueKey) {
+        usedStrictValueKeys.add(strictValueKey);
+      }
+    }
+  }
+
+  if (selectedEntries.length < maxResults) {
+    for (const entry of candidates) {
+      if (selectedEntries.length >= maxResults) {
+        break;
+      }
+      if (usedIndexes.has(entry.index)) {
+        continue;
+      }
+      if (
+        selectedEntries.some(
+          (selectedEntry) => selectedEntry.index === entry.index,
+        )
+      ) {
+        continue;
+      }
+
+      selectedEntries.push(entry);
+
+      const strictValueKey = buildStrictValueKey(entry);
+      if (strictValueKey) {
+        usedStrictValueKeys.add(strictValueKey);
+      }
+    }
+  }
+
+  return {
+    selectedEntries: selectedEntries,
+    strictColumn: strictColumn,
+    usedStrictValueKeys: Array.from(usedStrictValueKeys),
+  };
 }
 
 function hasBroadAmountTransactionTypeRules(dslPayload) {
@@ -781,7 +849,7 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
 
       const text = String(tableRow[headerText] ?? '');
       const filterControls = document.createElement('div');
-      filterControls.className = 'mb-1';
+      filterControls.className = 'dsl-cell-filter-controls mb-1';
 
       const includeButton = document.createElement('button');
       includeButton.type = 'button';
@@ -1101,6 +1169,7 @@ document.getElementById('csv_file').addEventListener('change', function () {
   window.dslPreviewUnmatchedEntries = [];
   window.dslPreviewPromptUnmatchedRows = [];
   window.dslPreviewPromptUnmatchedIndexes = [];
+  window.dslPreviewPromptStrictValueKeys = [];
   window.dslPreviewIssueRows = {};
   clearDslPreviewFilters();
   table.clear().draw();
@@ -1552,11 +1621,16 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
       }
     });
 
-    // Add only new unmatched rows to prompt memory (+3 per test run).
-    const usedPromptIndexes = new Set(window.dslPreviewPromptUnmatchedIndexes);
-    const nextPromptEntries = previewResult.unmatchedRows
-      .filter((entry) => !usedPromptIndexes.has(entry.index))
-      .slice(0, aiPromptExtraUnmatchedRowsCount);
+    // Add only new unmatched rows to prompt memory (+3 per test run),
+    // preferring rows with next unique value from strict column.
+    const nextPromptSelection = pickNextPromptUnmatchedEntries(
+      previewResult.unmatchedRows,
+      previewResult.strictColumns,
+      aiPromptExtraUnmatchedRowsCount,
+    );
+    const nextPromptEntries = nextPromptSelection.selectedEntries;
+    window.dslPreviewPromptStrictValueKeys =
+      nextPromptSelection.usedStrictValueKeys;
     nextPromptEntries.forEach((entry) => {
       window.dslPreviewPromptUnmatchedIndexes.push(entry.index);
       window.dslPreviewPromptUnmatchedRows.push(entry.row);
@@ -1599,7 +1673,9 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
       nextPromptEntries.length > 0
         ? ' Added ' +
           nextPromptEntries.length +
-          ' new unmatched rows in this test run (prompt unmatched total: ' +
+          ' new unmatched rows in this test run based on unique strict values from "' +
+          (nextPromptSelection.strictColumn || 'n/a') +
+          '" (prompt unmatched total: ' +
           window.dslPreviewPromptUnmatchedRows.length +
           ').'
         : ' No new unmatched rows added in this test run.';
@@ -1650,7 +1726,7 @@ $(document).on(
 
     refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
     setAiDslStatus(
-      'Applied include filter: ' + column + ' = "' + value + '".',
+      'Added include filter: ' + column + ' = "' + value + '".',
       'muted',
     );
   },
@@ -1671,7 +1747,7 @@ $(document).on(
 
     refillDslPreviewMatchedRowsTable(window.dslPreviewMatchedRows ?? []);
     setAiDslStatus(
-      'Applied exclude filter: ' + column + ' != "' + value + '".',
+      'Added exclude filter: ' + column + ' != "' + value + '".',
       'muted',
     );
   },
@@ -2315,6 +2391,7 @@ $('#reset').on('click', function () {
   window.dslPreviewUnmatchedEntries = [];
   window.dslPreviewPromptUnmatchedRows = [];
   window.dslPreviewPromptUnmatchedIndexes = [];
+  window.dslPreviewPromptStrictValueKeys = [];
   window.dslPreviewIssueRows = {};
   clearDslPreviewFilters();
   selectedImportProfile = null;
