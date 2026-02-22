@@ -178,11 +178,19 @@
                     </div>
                 </div>
                 <div class="card-body collapse show no-padding" id="collapse-dsl-preview-matched-container">
-                    <div class="p-2 border-bottom d-flex align-items-center justify-content-between">
-                        <small id="dsl_preview_filters_status" class="text-muted"></small>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" id="dsl_preview_clear_filters">
-                            {{ __('Clear filters') }}
-                        </button>
+                    <div class="p-2 border-bottom d-flex flex-wrap align-items-center justify-content-between">
+                        <div>
+                            <small id="dsl_preview_filters_status" class="text-muted d-block"></small>
+                            <small id="dsl_preview_selection_status" class="text-muted d-block"></small>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-success btn-sm me-2" id="ai_import_matched_dsl">
+                                {{ __('Import selected transactions') }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="dsl_preview_clear_filters">
+                                {{ __('Clear filters') }}
+                            </button>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table id="dsl_preview_matched_table" class="table table-striped table-hover">

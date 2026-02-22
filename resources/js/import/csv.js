@@ -26,10 +26,13 @@ window.dslPreviewPromptUnmatchedRows = [];
 window.dslPreviewPromptUnmatchedIndexes = [];
 window.dslPreviewPromptStrictValueKeys = [];
 window.dslPreviewIssueRows = {};
+window.dslPreviewSelectedRows = {};
 window.dslPreviewFilters = {
   include: {},
   exclude: {},
 };
+window.csvDraftsReady = false;
+window.dslBulkImportInProgress = false;
 const identifiedTransactionsSectionSelector =
   '#identified-transactions-section';
 const dslPreviewMatchedSectionSelector = '#dsl-preview-matched-section';
@@ -206,6 +209,7 @@ function clearUnmatchedRowsTable() {
 function clearDslPreviewMatchedRowsTable() {
   document.getElementById('dsl_preview_matched_table_head').innerHTML = '';
   document.getElementById('dsl_preview_matched_table_body').innerHTML = '';
+  updateDslPreviewSelectionSummary();
 }
 
 function showImportErrorNotification(message) {
@@ -245,6 +249,89 @@ function setAiDslStatus(message, tone = 'muted') {
       break;
   }
   statusElement.textContent = message;
+}
+
+function isDslPreviewRowSelected(rowIndex) {
+  const key = String(rowIndex);
+  return window.dslPreviewSelectedRows[key] !== false;
+}
+
+function setDslPreviewRowSelected(rowIndex, isSelected) {
+  const key = String(rowIndex);
+  window.dslPreviewSelectedRows[key] = isSelected !== false;
+}
+
+function syncDslPreviewSelectionWithMatchedRows(matchedRows) {
+  const nextSelection = {};
+  (matchedRows || []).forEach((entry) => {
+    const key = String(entry.index);
+    if (
+      Object.prototype.hasOwnProperty.call(window.dslPreviewSelectedRows, key)
+    ) {
+      nextSelection[key] = window.dslPreviewSelectedRows[key] !== false;
+    } else {
+      nextSelection[key] = true;
+    }
+  });
+  window.dslPreviewSelectedRows = nextSelection;
+}
+
+function getSelectedDslPreviewMatchedRows() {
+  return (window.dslPreviewMatchedRows || []).filter((entry) =>
+    isDslPreviewRowSelected(entry.index),
+  );
+}
+
+function getVisibleDslPreviewRowIndexes() {
+  return Array.from(
+    document.querySelectorAll(
+      '#dsl_preview_matched_table .dsl-preview-select-row',
+    ),
+  )
+    .map((inputElement) => Number(inputElement.dataset.rowIndex))
+    .filter((rowIndex) => Number.isFinite(rowIndex));
+}
+
+function updateDslPreviewSelectionSummary() {
+  const summaryElement = document.getElementById(
+    'dsl_preview_selection_status',
+  );
+  if (!summaryElement) {
+    return;
+  }
+
+  const matchedRows = window.dslPreviewMatchedRows || [];
+  const selectedCount = getSelectedDslPreviewMatchedRows().length;
+  summaryElement.textContent =
+    'Selected: ' + selectedCount + ' / Matched: ' + matchedRows.length;
+
+  const importButton = document.getElementById('ai_import_matched_dsl');
+  if (importButton) {
+    importButton.disabled =
+      window.dslBulkImportInProgress ||
+      !window.csvDraftsReady ||
+      selectedCount === 0 ||
+      matchedRows.length === 0;
+  }
+
+  const selectAllCheckbox = document.getElementById('dsl_preview_select_all');
+  if (!selectAllCheckbox) {
+    return;
+  }
+
+  const visibleRowIndexes = getVisibleDslPreviewRowIndexes();
+  if (visibleRowIndexes.length === 0) {
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = false;
+    return;
+  }
+
+  const visibleSelectedCount = visibleRowIndexes.filter((rowIndex) =>
+    isDslPreviewRowSelected(rowIndex),
+  ).length;
+  selectAllCheckbox.checked = visibleSelectedCount === visibleRowIndexes.length;
+  selectAllCheckbox.indeterminate =
+    visibleSelectedCount > 0 && visibleSelectedCount < visibleRowIndexes.length;
 }
 
 function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
@@ -917,8 +1004,10 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
   head.innerHTML = '';
   body.innerHTML = '';
   updateDslPreviewFiltersStatus();
+  syncDslPreviewSelectionWithMatchedRows(matchedRows);
 
   if (!matchedRows || matchedRows.length === 0) {
+    updateDslPreviewSelectionSummary();
     return;
   }
 
@@ -937,10 +1026,14 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
   });
   const filteredTableRows = applyDslPreviewFilters(tableRows);
 
-  const headers = Object.keys(tableRows[0]).filter(
-    (headerName) => headerName !== '_row_index',
-  );
+  const headers = [
+    '_selected',
+    ...Object.keys(tableRows[0]).filter(
+      (headerName) => headerName !== '_row_index',
+    ),
+  ];
   const headerLabels = {
+    _selected: '',
     _row: '#',
     _mapped_transaction_type: 'mapped transaction_type',
     _matched_by: 'matched by',
@@ -950,9 +1043,18 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
   let headerRow = document.createElement('tr');
   headers.forEach((headerText) => {
     let header = document.createElement('th');
-    header.appendChild(
-      document.createTextNode(headerLabels[headerText] ?? headerText),
-    );
+    if (headerText === '_selected') {
+      const selectAllCheckbox = document.createElement('input');
+      selectAllCheckbox.type = 'checkbox';
+      selectAllCheckbox.id = 'dsl_preview_select_all';
+      selectAllCheckbox.className = 'form-check-input';
+      selectAllCheckbox.title = 'Select all visible rows';
+      header.appendChild(selectAllCheckbox);
+    } else {
+      header.appendChild(
+        document.createTextNode(headerLabels[headerText] ?? headerText),
+      );
+    }
     headerRow.appendChild(header);
   });
   head.appendChild(headerRow);
@@ -961,6 +1063,18 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
     let row = document.createElement('tr');
     headers.forEach((headerText) => {
       let cell = document.createElement('td');
+
+      if (headerText === '_selected') {
+        const rowCheckbox = document.createElement('input');
+        rowCheckbox.type = 'checkbox';
+        rowCheckbox.className = 'form-check-input dsl-preview-select-row';
+        rowCheckbox.dataset.rowIndex = String(tableRow._row_index);
+        rowCheckbox.checked = isDslPreviewRowSelected(tableRow._row_index);
+        cell.classList.add('text-center');
+        cell.appendChild(rowCheckbox);
+        row.appendChild(cell);
+        return;
+      }
 
       if (headerText === '_issue_reason') {
         const issueInput = document.createElement('input');
@@ -1009,6 +1123,8 @@ function refillDslPreviewMatchedRowsTable(matchedRows) {
     });
     body.appendChild(row);
   });
+
+  updateDslPreviewSelectionSummary();
 }
 
 function refreshPromptFromCurrentPreview() {
@@ -1129,6 +1245,214 @@ async function saveDslToSelectedProfile() {
   } catch (error) {
     setAiDslStatus(error.message, 'danger');
   }
+}
+
+function showImportNotification(type, message) {
+  const notificationEvent = new CustomEvent('notification', {
+    detail: {
+      notification: {
+        type: type,
+        message: message,
+        title: null,
+        icon: null,
+        dismissible: true,
+      },
+    },
+  });
+  window.dispatchEvent(notificationEvent);
+}
+
+function buildQuickRecordPayloadFromDraft(draft) {
+  if (!draft) {
+    return { error: 'Draft transaction not found.' };
+  }
+
+  if (!draft.quickRecordingPossible) {
+    return {
+      error:
+        'Draft transaction is not ready for quick import (missing required values).',
+    };
+  }
+
+  const payload = JSON.parse(JSON.stringify(draft));
+  payload.action = 'create';
+  payload.config_type = 'standard';
+  payload.items = [];
+  payload.fromModal = true;
+
+  if (
+    !payload.config ||
+    !payload.config.account_from ||
+    !payload.config.account_to ||
+    !payload.config.account_from.id ||
+    !payload.config.account_to.id
+  ) {
+    return {
+      error: 'Draft transaction is missing source/target account values.',
+    };
+  }
+
+  payload.config.account_from_id = payload.config.account_from.id;
+  payload.config.account_to_id = payload.config.account_to.id;
+
+  if (payload.config.account_to?.config?.category) {
+    payload.remaining_payee_default_amount =
+      payload.amount ?? payload.config.amount_to;
+    payload.remaining_payee_default_category_id =
+      payload.config.account_to.config.category.id;
+  }
+
+  return { payload: payload };
+}
+
+async function quickImportDraftTransaction(draftId, options = {}) {
+  const showToast = options.showToast !== false;
+  const draft = window.transactions.find(
+    (transaction) => Number(transaction.draftId) === Number(draftId),
+  );
+  const payloadResult = buildQuickRecordPayloadFromDraft(draft);
+  if (payloadResult.error) {
+    return { ok: false, reason: 'invalid_draft', message: payloadResult.error };
+  }
+
+  try {
+    const response = await fetch(route('api.transactions.storeStandard'), {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': window.csrfToken,
+      },
+      body: JSON.stringify(payloadResult.payload),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      return {
+        ok: false,
+        reason: 'api_error',
+        message:
+          'Import failed for row #' +
+          (Number(draftId) + 1) +
+          (errorBody ? ': ' + errorBody : '.'),
+      };
+    }
+
+    const responseData = await response.json();
+    const createdTransaction = responseData.transaction;
+
+    if (draft) {
+      draft.handled = true;
+    }
+
+    if (showToast && createdTransaction?.id) {
+      showImportNotification(
+        'success',
+        'Transaction added (#' + createdTransaction.id + ')',
+      );
+    }
+
+    return { ok: true, transaction: createdTransaction };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: 'network_error',
+      message:
+        'Import failed for row #' +
+        (Number(draftId) + 1) +
+        ': ' +
+        String(error?.message ?? error),
+    };
+  }
+}
+
+async function importSelectedDslPreviewRows() {
+  if (window.dslBulkImportInProgress) {
+    return;
+  }
+
+  if (!window.csvDraftsReady) {
+    setAiDslStatus(
+      'CSV rows are still being processed. Wait for parsing to finish.',
+      'warning',
+    );
+    return;
+  }
+
+  const selectedRows = getSelectedDslPreviewMatchedRows();
+  if (selectedRows.length === 0) {
+    setAiDslStatus('Select at least one matched row to import.', 'warning');
+    return;
+  }
+
+  window.dslBulkImportInProgress = true;
+  updateDslPreviewSelectionSummary();
+
+  const selectedDraftIds = Array.from(
+    new Set(
+      selectedRows
+        .map((entry) => Number(entry.index))
+        .filter((draftId) => Number.isFinite(draftId)),
+    ),
+  );
+
+  let importedCount = 0;
+  let skippedManualCount = 0;
+  let missingDraftCount = 0;
+  const failedImports = [];
+
+  for (const draftId of selectedDraftIds) {
+    const draft = window.transactions.find(
+      (transaction) => Number(transaction.draftId) === Number(draftId),
+    );
+    if (!draft) {
+      missingDraftCount++;
+      continue;
+    }
+
+    if (!draft.quickRecordingPossible) {
+      skippedManualCount++;
+      continue;
+    }
+
+    const importResult = await quickImportDraftTransaction(draftId, {
+      showToast: false,
+    });
+    if (importResult.ok) {
+      importedCount++;
+      setDslPreviewRowSelected(draftId, false);
+    } else {
+      failedImports.push(importResult.message);
+    }
+  }
+
+  window.table.clear().rows.add(window.transactions).draw();
+  updateDslPreviewSelectionSummary();
+
+  const failedCount = failedImports.length;
+  const summaryMessage =
+    'Import finished. Selected: ' +
+    selectedDraftIds.length +
+    ', imported: ' +
+    importedCount +
+    ', skipped (manual): ' +
+    skippedManualCount +
+    ', missing drafts: ' +
+    missingDraftCount +
+    ', failed: ' +
+    failedCount +
+    '.';
+  const summaryTone = failedCount > 0 ? 'warning' : 'success';
+  setAiDslStatus(summaryMessage, summaryTone);
+
+  if (importedCount > 0 || failedCount > 0) {
+    showImportNotification(
+      failedCount > 0 ? 'warning' : 'success',
+      summaryMessage,
+    );
+  }
+
+  window.dslBulkImportInProgress = false;
+  updateDslPreviewSelectionSummary();
 }
 
 function decodeCsvData(fileData) {
@@ -1299,6 +1623,9 @@ document.getElementById('csv_file').addEventListener('change', function () {
   window.dslPreviewPromptUnmatchedIndexes = [];
   window.dslPreviewPromptStrictValueKeys = [];
   window.dslPreviewIssueRows = {};
+  window.dslPreviewSelectedRows = {};
+  window.csvDraftsReady = false;
+  window.dslBulkImportInProgress = false;
   clearDslPreviewFilters();
   table.clear().draw();
   clearUnmatchedRowsTable();
@@ -1429,12 +1756,14 @@ document.getElementById('csv_file').addEventListener('change', function () {
 
         // If all rows have been processed, refill tables
         if (processedRows === csvRows.length) {
+          window.csvDraftsReady = true;
           table.clear().rows.add(transactions).draw();
           table.columns.adjust().draw();
           setSectionVisibility(
             identifiedTransactionsSectionSelector,
             transactions.length > 0,
           );
+          updateDslPreviewSelectionSummary();
 
           if (unmatchedRows.length > 0) {
             refillUnmatchedRows(unmatchedRows);
@@ -1860,6 +2189,36 @@ $('#dsl_preview_clear_filters').on('click', function () {
 });
 
 $(document).on(
+  'change',
+  '#dsl_preview_matched_table .dsl-preview-select-row',
+  function () {
+    const rowIndex = Number(this.dataset.rowIndex);
+    if (!Number.isFinite(rowIndex)) {
+      return;
+    }
+
+    setDslPreviewRowSelected(rowIndex, this.checked);
+    updateDslPreviewSelectionSummary();
+  },
+);
+
+$(document).on('change', '#dsl_preview_select_all', function () {
+  const isChecked = this.checked;
+  const visibleRowIndexes = getVisibleDslPreviewRowIndexes();
+  visibleRowIndexes.forEach((rowIndex) => {
+    setDslPreviewRowSelected(rowIndex, isChecked);
+  });
+
+  document
+    .querySelectorAll('#dsl_preview_matched_table .dsl-preview-select-row')
+    .forEach((checkbox) => {
+      checkbox.checked = isChecked;
+    });
+
+  updateDslPreviewSelectionSummary();
+});
+
+$(document).on(
   'click',
   '#dsl_preview_matched_table .dsl-cell-filter-include',
   function () {
@@ -1924,11 +2283,16 @@ $(document).on(
 );
 
 document
+  .getElementById('ai_import_matched_dsl')
+  .addEventListener('click', importSelectedDslPreviewRows);
+
+document
   .getElementById('ai_save_dsl_profile')
   .addEventListener('click', saveDslToSelectedProfile);
 
 setAiDslStatus('Load a CSV file to generate an AI prompt.', 'muted');
 updateDslPreviewFiltersStatus();
+updateDslPreviewSelectionSummary();
 resetDslStatusState(0);
 
 // Select 2 functionality for account select
@@ -2415,80 +2779,24 @@ window.addEventListener('transaction-created', function (event) {
 });
 
 // Set up an event listener for immediately creating a transaction
-$(tableSelector).on('click', 'button.record', function () {
-  recentTransactionDraftId = $(this).data('draft');
-  // TODO: Disable all the action buttons of this item
+$(tableSelector).on('click', 'button.record', async function () {
+  const draftId = Number($(this).data('draft'));
+  if (!Number.isFinite(draftId)) {
+    return;
+  }
+  recentTransactionDraftId = draftId;
 
-  let transaction = window.transactions.find(
-    (transaction) => transaction.draftId == $(this).data('draft'),
-  );
-
-  // Further data preparation
-  transaction.action = 'create';
-  transaction.config_type = 'standard';
-  transaction.items = [];
-  transaction.fromModal = true;
-  transaction.config.account_from_id = transaction.config.account_from.id;
-  transaction.config.account_to_id = transaction.config.account_to.id;
-
-  // If default category is set, use it as remaining payee default amount
-  if (transaction.config.account_to?.config.category) {
-    transaction.remaining_payee_default_amount = transaction.amount;
-    transaction.remaining_payee_default_category_id =
-      transaction.config.account_to.config.category.id;
+  const result = await quickImportDraftTransaction(draftId, {
+    showToast: true,
+  });
+  if (!result.ok) {
+    setAiDslStatus(result.message, 'warning');
+    console.error(result.message);
+    return;
   }
 
-  // Call the backend to create the transaction
-  const url = route('api.transactions.storeStandard');
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'X-CSRF-TOKEN': window.csrfToken,
-    },
-    body: JSON.stringify(transaction),
-  })
-    .then((response) => {
-      if (response.statusText !== 'OK') {
-        throw new Error(response.statusText);
-      }
-
-      response.json();
-    })
-    .then((data) => {
-      // Get the new transaction from the response
-      let transaction = data.transaction;
-
-      // TODO: This should be unified with the same modal behavior
-      // Emit a custom event to global scope about the new transaction to be displayed as a notification
-      let notificationEvent = new CustomEvent('notification', {
-        detail: {
-          notification: {
-            type: 'success',
-            message: 'Transaction added (#' + transaction.id + ')',
-            title: null,
-            icon: null,
-            dismissible: true,
-          },
-        },
-      });
-      window.dispatchEvent(notificationEvent);
-
-      // Emit a custom event about the new transaction to be displayed
-      let transactionEvent = new CustomEvent('transaction-created', {
-        detail: {
-          // Pass the entire transaction object to the event
-          transaction: transaction,
-        },
-      });
-      window.dispatchEvent(transactionEvent);
-    })
-    .finally(() => {
-      // TODO: Re-enable all the action buttons of this item
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+  window.table.clear().rows.add(window.transactions).draw();
+  updateDslPreviewSelectionSummary();
 });
 
 // Event listener for marking a transaction as handled
@@ -2542,6 +2850,9 @@ $('#reset').on('click', function () {
   window.dslPreviewPromptUnmatchedIndexes = [];
   window.dslPreviewPromptStrictValueKeys = [];
   window.dslPreviewIssueRows = {};
+  window.dslPreviewSelectedRows = {};
+  window.csvDraftsReady = false;
+  window.dslBulkImportInProgress = false;
   clearDslPreviewFilters();
   selectedImportProfile = null;
   document.getElementById('ai_dsl_prompt_output').value = '';
