@@ -204,6 +204,26 @@ function setSectionVisibility(sectionSelector, isVisible) {
   }
 }
 
+function updateProfileDslEditorButtonState() {
+  const toggleButton = document.getElementById('toggle_profile_dsl_editor');
+  if (!toggleButton) {
+    return;
+  }
+
+  const hasSelectedProfile = Boolean(selectedImportProfile?.id);
+  if (!hasSelectedProfile) {
+    toggleButton.classList.add('d-none');
+    toggleButton.textContent = 'Edit selected profile DSL';
+    return;
+  }
+
+  const isEditorVisible = !$(aiAssistantSectionSelector).hasClass('d-none');
+  toggleButton.classList.remove('d-none');
+  toggleButton.textContent = isEditorVisible
+    ? 'Hide profile DSL editor'
+    : 'Edit selected profile DSL';
+}
+
 function clearUnmatchedRowsTable() {
   document.getElementById('unmatched_table_head').innerHTML = '';
   document.getElementById('unmatched_table_body').innerHTML = '';
@@ -432,6 +452,8 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '- The source column mapped to column_mapping.type is STRICT by default in YAFFA preview.',
     '- Amount-sign rules should be fallback only, not the only strict source.',
     '- Map column_mapping.type to the transaction-kind/type source column from this CSV.',
+    '- Map column_mapping.from and column_mapping.to to counterparty/payee-like columns, not execution-date/reference metadata columns.',
+    '- If counterparty text is embedded in longer metadata strings, use csv_options.counterparty_extract_regex (and optional csv_options.counterparty_extract_group) to extract merchant/payee name.',
     '',
     'Hard engine constraints (MANDATORY):',
     '- In value_mappings[].when, use ONLY keys based on exact CSV headers:',
@@ -446,7 +468,7 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '',
     'Expected output structure:',
     '{',
-    '  "csv_options": { "delimiter": ";", "encoding": "windows-1250" },',
+    '  "csv_options": { "delimiter": ";", "encoding": "windows-1250", "counterparty_extract_regex": "Address:\\\\s*(.*?)\\\\s*City:", "counterparty_extract_group": 1 },',
     '  "column_mapping": { "date": "<DATE_HEADER>", "amount": "<AMOUNT_HEADER>", "description": "<DESCRIPTION_HEADER>", "type": "<TYPE_HEADER>", "from": "<FROM_HEADER>", "to": "<TO_HEADER>" },',
     '  "value_mappings": [',
     '    { "when": { "<TYPE_HEADER>_regex": "^CARD\\\\s+PAYMENT$" }, "set": { "transaction_type": "withdrawal" } }',
@@ -461,6 +483,7 @@ function buildAiDslPrompt(csvRows, additionalRows = [], flaggedIssueRows = []) {
     '- Replace all placeholder header names with exact values from CSV headers.',
     '- Ensure conditions assigning transaction_type are based on the source column mapped to column_mapping.type.',
     '- transaction_type must be one of: withdrawal, deposit, transfer.',
+    '- Prefer counterparty extraction patterns that are language-agnostic and derived from the actual sample rows (no bank-specific assumptions).',
     '',
     'CSV headers:',
     JSON.stringify(headers),
@@ -567,6 +590,86 @@ function parseAiDslInput(rawValue) {
     if (hasInvalidStrictColumns) {
       throw new Error(
         '"csv_options.strict_columns" must contain non-empty strings.',
+      );
+    }
+  }
+
+  const counterpartyRegexConfig =
+    parsed.csv_options?.counterparty_extract_regex;
+  if (
+    counterpartyRegexConfig !== undefined &&
+    counterpartyRegexConfig !== null
+  ) {
+    const validateRegexPattern = (pattern, pathLabel) => {
+      if (typeof pattern !== 'string' || !pattern.trim()) {
+        throw new Error('"' + pathLabel + '" must be a non-empty string.');
+      }
+      try {
+        new RegExp(pattern);
+      } catch (error) {
+        throw new Error(
+          '"' + pathLabel + '" is not a valid regex: ' + error.message,
+        );
+      }
+    };
+
+    if (typeof counterpartyRegexConfig === 'string') {
+      validateRegexPattern(
+        counterpartyRegexConfig,
+        'csv_options.counterparty_extract_regex',
+      );
+    } else if (typeof counterpartyRegexConfig === 'object') {
+      const regexEntries = Object.entries(counterpartyRegexConfig);
+      if (regexEntries.length === 0) {
+        throw new Error(
+          '"csv_options.counterparty_extract_regex" object cannot be empty.',
+        );
+      }
+      regexEntries.forEach(([key, value]) => {
+        validateRegexPattern(
+          value,
+          'csv_options.counterparty_extract_regex.' + key,
+        );
+      });
+    } else {
+      throw new Error(
+        '"csv_options.counterparty_extract_regex" must be a string or object.',
+      );
+    }
+  }
+
+  const counterpartyGroupConfig =
+    parsed.csv_options?.counterparty_extract_group;
+  if (
+    counterpartyGroupConfig !== undefined &&
+    counterpartyGroupConfig !== null
+  ) {
+    const validateGroup = (groupValue, pathLabel) => {
+      if (!Number.isInteger(groupValue) || groupValue < 0) {
+        throw new Error(
+          '"' + pathLabel + '" must be an integer greater than or equal to 0.',
+        );
+      }
+    };
+
+    if (Number.isInteger(counterpartyGroupConfig)) {
+      validateGroup(
+        counterpartyGroupConfig,
+        'csv_options.counterparty_extract_group',
+      );
+    } else if (typeof counterpartyGroupConfig === 'object') {
+      const groupEntries = Object.entries(counterpartyGroupConfig);
+      if (groupEntries.length === 0) {
+        throw new Error(
+          '"csv_options.counterparty_extract_group" object cannot be empty.',
+        );
+      }
+      groupEntries.forEach(([key, value]) => {
+        validateGroup(value, 'csv_options.counterparty_extract_group.' + key);
+      });
+    } else {
+      throw new Error(
+        '"csv_options.counterparty_extract_group" must be an integer or object.',
       );
     }
   }
@@ -714,6 +817,73 @@ function parseDslAmountValue(rawAmountValue) {
   return Math.abs(parsedNumber);
 }
 
+function getCounterpartyExtractorConfig(dslPayload, sourceColumnName) {
+  const csvOptions = dslPayload?.csv_options ?? {};
+  const normalizedColumnName = String(sourceColumnName ?? '').trim();
+
+  let pattern = '';
+  const patternConfig = csvOptions.counterparty_extract_regex;
+  if (typeof patternConfig === 'string') {
+    pattern = patternConfig;
+  } else if (patternConfig && typeof patternConfig === 'object') {
+    pattern =
+      String(
+        patternConfig[normalizedColumnName] ??
+          patternConfig.default ??
+          patternConfig['*'] ??
+          '',
+      ) || '';
+  }
+  pattern = String(pattern).trim();
+
+  let group = 1;
+  const groupConfig = csvOptions.counterparty_extract_group;
+  if (Number.isInteger(groupConfig) && groupConfig >= 0) {
+    group = groupConfig;
+  } else if (groupConfig && typeof groupConfig === 'object') {
+    const mappedGroup =
+      groupConfig[normalizedColumnName] ?? groupConfig.default;
+    if (Number.isInteger(mappedGroup) && mappedGroup >= 0) {
+      group = mappedGroup;
+    }
+  }
+
+  return {
+    pattern: pattern,
+    group: group,
+  };
+}
+
+function extractCounterpartyValue(rawValue, dslPayload, sourceColumnName = '') {
+  const sourceText = String(rawValue ?? '').trim();
+  if (!sourceText) {
+    return '';
+  }
+
+  const extractorConfig = getCounterpartyExtractorConfig(
+    dslPayload,
+    sourceColumnName,
+  );
+  if (!extractorConfig.pattern) {
+    return sourceText;
+  }
+
+  try {
+    const regex = new RegExp(extractorConfig.pattern);
+    const match = regex.exec(sourceText);
+    if (!match) {
+      return sourceText;
+    }
+
+    const extractedValue = String(
+      match[extractorConfig.group] ?? match[1] ?? '',
+    ).trim();
+    return extractedValue || sourceText;
+  } catch (_error) {
+    return sourceText;
+  }
+}
+
 function findPayeeByImportValue(rawValue) {
   const sourceValue = String(rawValue ?? '')
     .trim()
@@ -747,13 +917,22 @@ function findPayeeByImportValue(rawValue) {
   return null;
 }
 
-function resolveCounterpartyAccount(rawValue) {
-  const matchedPayee = findPayeeByImportValue(rawValue);
+function resolveCounterpartyAccount(
+  rawValue,
+  dslPayload = null,
+  sourceColumnName = '',
+) {
+  const normalizedValue = extractCounterpartyValue(
+    rawValue,
+    dslPayload,
+    sourceColumnName,
+  );
+  const matchedPayee = findPayeeByImportValue(normalizedValue);
   if (matchedPayee) {
     return matchedPayee;
   }
 
-  const fallbackLabel = String(rawValue ?? '').trim();
+  const fallbackLabel = String(normalizedValue ?? '').trim();
   if (!fallbackLabel) {
     return undefined;
   }
@@ -846,17 +1025,27 @@ function buildDslDraftTransaction(row, draftId, dslPayload, mappedValues) {
 
   if (transactionTypeName === 'withdrawal') {
     rawTransaction.config.account_from = selectedAccount;
+    const hasToValue = String(toValue ?? '').trim().length > 0;
     rawTransaction.config.account_to = resolveCounterpartyAccount(
-      toValue ?? fromValue,
+      hasToValue ? toValue : fromValue,
+      dslPayload,
+      hasToValue ? toColumnName : fromColumnName,
     );
   } else if (transactionTypeName === 'deposit') {
+    const hasFromValue = String(fromValue ?? '').trim().length > 0;
     rawTransaction.config.account_from = resolveCounterpartyAccount(
-      fromValue ?? toValue,
+      hasFromValue ? fromValue : toValue,
+      dslPayload,
+      hasFromValue ? fromColumnName : toColumnName,
     );
     rawTransaction.config.account_to = selectedAccount;
   } else {
     rawTransaction.config.account_from = selectedAccount;
-    rawTransaction.config.account_to = resolveCounterpartyAccount(toValue);
+    rawTransaction.config.account_to = resolveCounterpartyAccount(
+      toValue,
+      dslPayload,
+      toColumnName,
+    );
   }
 
   rawTransaction.quickRecordingPossible = isQuickRecordPossible(rawTransaction);
@@ -892,8 +1081,16 @@ function buildTransactionsFromDslPreviewRows(previewRows, dslPayload) {
   };
 }
 
-function getCounterpartyDisplayName(rawValue) {
-  const resolvedAccount = resolveCounterpartyAccount(rawValue);
+function getCounterpartyDisplayName(
+  rawValue,
+  dslPayload = null,
+  sourceColumnName = '',
+) {
+  const resolvedAccount = resolveCounterpartyAccount(
+    rawValue,
+    dslPayload,
+    sourceColumnName,
+  );
   if (!resolvedAccount) {
     return '';
   }
@@ -928,18 +1125,36 @@ function buildYaffaPreviewFields(entry, dslPayload) {
   const descriptionValue = String(row[descriptionColumnName] ?? '').trim();
   const fromSourceValue = row[fromColumnName];
   const toSourceValue = row[toColumnName];
+  const hasCounterpartyExtractor = Boolean(
+    getCounterpartyExtractorConfig(dslPayload, fromColumnName).pattern ||
+      getCounterpartyExtractorConfig(dslPayload, toColumnName).pattern,
+  );
 
   let yaffaFrom = '';
   let yaffaTo = '';
   if (mappedType === 'withdrawal') {
     yaffaFrom = selectedAccountName;
-    yaffaTo = getCounterpartyDisplayName(toSourceValue ?? fromSourceValue);
+    const hasToSource = String(toSourceValue ?? '').trim().length > 0;
+    yaffaTo = getCounterpartyDisplayName(
+      hasToSource ? toSourceValue : fromSourceValue,
+      dslPayload,
+      hasToSource ? toColumnName : fromColumnName,
+    );
   } else if (mappedType === 'deposit') {
-    yaffaFrom = getCounterpartyDisplayName(fromSourceValue ?? toSourceValue);
+    const hasFromSource = String(fromSourceValue ?? '').trim().length > 0;
+    yaffaFrom = getCounterpartyDisplayName(
+      hasFromSource ? fromSourceValue : toSourceValue,
+      dslPayload,
+      hasFromSource ? fromColumnName : toColumnName,
+    );
     yaffaTo = selectedAccountName;
   } else if (mappedType === 'transfer') {
     yaffaFrom = selectedAccountName;
-    yaffaTo = getCounterpartyDisplayName(toSourceValue);
+    yaffaTo = getCounterpartyDisplayName(
+      toSourceValue,
+      dslPayload,
+      toColumnName,
+    );
   }
 
   const mappingSummaryParts = [
@@ -950,6 +1165,7 @@ function buildYaffaPreviewFields(entry, dslPayload) {
     descriptionColumnName ? 'description<-' + descriptionColumnName : '',
     fromColumnName ? 'from<-' + fromColumnName : '',
     toColumnName ? 'to<-' + toColumnName : '',
+    hasCounterpartyExtractor ? 'counterparty_extract=enabled' : '',
   ].filter((part) => part.length > 0);
 
   return {
@@ -2572,6 +2788,7 @@ $('#import_profile')
       selectedImportProfile = null;
       setSectionVisibility(aiAssistantSectionSelector, true);
       document.getElementById('ai_dsl_input').value = '';
+      updateProfileDslEditorButtonState();
       setAiDslStatus(
         'New profile mode enabled. Configure DSL and click Save to selected profile.',
         'muted',
@@ -2588,8 +2805,11 @@ $('#import_profile')
       const profile = await loadImportProfile(e.params.data.id);
       document.getElementById('ai_dsl_input').value =
         profileDslToTextareaValue(profile);
+      updateProfileDslEditorButtonState();
       setAiDslStatus('Import profile loaded.', 'muted');
     } catch (error) {
+      selectedImportProfile = null;
+      updateProfileDslEditorButtonState();
       setAiDslStatus(error.message, 'danger');
     }
   })
@@ -2597,11 +2817,42 @@ $('#import_profile')
     delete document.getElementById('csv_file').dataset.importProfileId;
     selectedImportProfile = null;
     setSectionVisibility(aiAssistantSectionSelector, false);
+    updateProfileDslEditorButtonState();
   })
   .on('select2:clear', function () {
     delete document.getElementById('csv_file').dataset.importProfileId;
     selectedImportProfile = null;
     setSectionVisibility(aiAssistantSectionSelector, false);
+    updateProfileDslEditorButtonState();
+  });
+
+document
+  .getElementById('toggle_profile_dsl_editor')
+  .addEventListener('click', function () {
+    if (!selectedImportProfile?.id) {
+      setAiDslStatus('Select an import profile first.', 'warning');
+      return;
+    }
+
+    const editorCurrentlyVisible = !$(aiAssistantSectionSelector).hasClass(
+      'd-none',
+    );
+    const shouldShowEditor = !editorCurrentlyVisible;
+    setSectionVisibility(aiAssistantSectionSelector, shouldShowEditor);
+    updateProfileDslEditorButtonState();
+
+    if (!shouldShowEditor) {
+      setAiDslStatus('Profile DSL editor hidden.', 'muted');
+      return;
+    }
+
+    document.getElementById('ai_dsl_input').value = profileDslToTextareaValue(
+      selectedImportProfile,
+    );
+    setAiDslStatus(
+      'Profile DSL editor opened. Update JSON and click Save to selected profile.',
+      'muted',
+    );
   });
 
 document
@@ -2703,7 +2954,7 @@ document.getElementById('ai_validate_dsl').addEventListener('click', () => {
     const broadAmountHint =
       previewResult.matchedRows.length === previewResult.totalRows &&
       hasBroadAmountTransactionTypeRules(dslPayload)
-        ? ' All rows matched; broad amount-based rules (e.g., Kwota_regex/amount_regex) may be matching every row.'
+        ? ' All rows matched; broad amount-based rules (e.g., <AMOUNT_HEADER>_regex) may be matching every row.'
         : '';
     const strictColumnsHint =
       previewResult.strictColumns.length > 0
@@ -2881,6 +3132,7 @@ updateDslPreviewFiltersStatus();
 updateDslPreviewSelectionSummary();
 updateCsvImportSummary(0, 0, 0);
 setSectionVisibility(aiAssistantSectionSelector, false);
+updateProfileDslEditorButtonState();
 resetDslStatusState(0);
 
 // Select 2 functionality for account select
@@ -3456,6 +3708,7 @@ $('#reset').on('click', function () {
   clearDslPreviewMatchedRowsTable();
   setSectionVisibility(dslPreviewMatchedSectionSelector, false);
   setSectionVisibility(aiAssistantSectionSelector, false);
+  updateProfileDslEditorButtonState();
   resetDslStatusState(0);
   setAiDslStatus('Form reset.', 'muted');
 

@@ -17,6 +17,13 @@
                         <div class="col-md-3 form-group">
                             <label for="import_profile">{{ __('Import profile') }}</label>
                             <select name="import_profile" id="import_profile" class="form-control"></select>
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary btn-sm mt-2 d-none"
+                                id="toggle_profile_dsl_editor"
+                            >
+                                {{ __('Edit selected profile DSL') }}
+                            </button>
                         </div>
                         <div class="col-md-4 form-group">
                             <label for="csv_file">{{ __('File') }}</label><br>
