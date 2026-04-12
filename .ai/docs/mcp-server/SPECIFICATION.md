@@ -2,38 +2,50 @@
 
 ## Feature Summary
 
-Expose yaffa as a Model Context Protocol (MCP) server, allowing external AI clients (Claude Desktop, Cursor, custom agents) to query and manipulate the authenticated user's financial data through a standardized tool interface.
+Expose yaffa as a Model Context Protocol (MCP) server using the `laravel/mcp` package (already listed as a project dependency in AGENTS.md). External AI clients — Claude Desktop, Cursor, custom agents — can query and manipulate the authenticated user's financial data through a standardized tool interface.
 
-The MCP server reuses the tool catalog introduced by the AI Chat Assistant feature (`AiToolRegistry`, `AiTool` implementations). It adds a single HTTP endpoint implementing the MCP Streamable HTTP transport (protocol version 2025-03-26), authenticated via Laravel Sanctum personal access tokens. A dedicated UI page allows users to generate and manage these tokens.
+MCP tools are organized into two servers with distinct access profiles: a read-only server for safe portfolio queries, and a write server for mutations. Both authenticate via Laravel Sanctum personal access tokens with a dedicated `mcp` ability, enforced through bearer-only middleware that explicitly rejects session-based authentication. A dedicated UI page lets users generate and manage tokens.
 
 ## Goals / Non-Goals
 
 - Goals:
-  - Implement the MCP Streamable HTTP transport at a single `/mcp` endpoint.
-  - Expose all tools from `AiToolRegistry` as MCP tools.
-  - Authenticate requests via Sanctum personal access tokens with a dedicated `mcp` ability.
+  - Implement two MCP servers via `laravel/mcp`: `YaffaReadServer` and `YaffaWriteServer`.
+  - Authenticate requests via Sanctum personal access tokens with the `mcp` ability.
+  - Reject session-based authentication on the MCP endpoints (bearer token only).
   - Provide a UI for users to create, name, and revoke MCP tokens.
-  - Support `initialize`, `tools/list`, and `tools/call` MCP methods in MVP.
+  - Add `throttle:mcp` rate limiting to MCP routes.
+  - Log each tool call (tool name, user id, timestamp, success/error) for basic audit trail.
+  - Use `outputSchema()` on MCP tool classes to return structured data, not JSON-as-text.
+  - Tools delegate to the same service layer used by the chat assistant and regular API.
 
 - Non-Goals:
   - MCP Resources or Prompts primitives (tools only in MVP).
-  - SSE server-to-client push stream (GET `/mcp` returns 405 in MVP).
-  - OAuth 2.0 authorization flow (simple Bearer token is sufficient).
-  - Token scoping beyond a single `mcp` ability.
-  - Rate limiting per MCP token (can be added in a follow-up).
-  - Audit log of MCP tool calls.
-  - Support for the deprecated HTTP+SSE transport (2024-11-05).
+  - SSE server-to-client push stream (not needed with Streamable HTTP transport).
+  - OAuth 2.1 authorization flow (Sanctum PAT is sufficient for self-hosted use).
+  - Token scoping beyond `mcp` ability in MVP.
+  - Per-user rate limit overrides (global `throttle:mcp` is sufficient for MVP).
 
 ## Assumptions
 
-- `AiToolRegistry` and all `AiTool` implementations from the AI Chat Assistant feature are available.
-- Laravel Sanctum is already installed and the `User` model uses `HasApiTokens`.
-- Clients send a `POST` to `/mcp` for all MCP messages (Streamable HTTP transport).
-- Session management: the server does not issue `Mcp-Session-Id` in MVP; each request is stateless and authenticated solely by the Bearer token.
-- Tool execution runs synchronously within the HTTP request; the 60-second timeout applied to the chat assistant applies here too.
-- The MCP endpoint is public-facing (behind the application's existing TLS termination).
+- `laravel/mcp` is installed via Composer and `routes/ai.php` is published.
+- `laravel/mcp` handles all protocol-level concerns: `initialize` handshake, `tools/list`, `tools/call` dispatch, protocol version negotiation, JSON-RPC envelope. No custom controller is written for these.
+- Tool execution is synchronous within the HTTP request; a 60-second timeout applies.
+- Delegating to shared services (not re-implementing data logic in MCP tool classes) keeps both servers in sync automatically.
+- Tools in `YaffaWriteServer` must not be included in `YaffaReadServer` and vice versa.
+
+## Why Two Servers
+
+Separating read and write tools into distinct servers allows clients to be granted minimal access:
+
+- A read-only dashboard integration gets the URL for `YaffaReadServer` only.
+- A fully capable agent gets both, or only `YaffaWriteServer` if reads can be inferred.
+- It also prevents accidental write exposure when a client only needs portfolio data.
 
 ## Backend Scope (Laravel)
+
+- Dependencies:
+  - Add `laravel/mcp` to `composer.json` (already in AGENTS.md, not yet in composer.json).
+  - Publish `routes/ai.php` via `php artisan vendor:publish --tag=ai-routes`.
 
 - Models:
   - No new models. Sanctum's `PersonalAccessToken` is used as-is.
@@ -41,36 +53,57 @@ The MCP server reuses the tool catalog introduced by the AI Chat Assistant featu
 - Migrations:
   - None.
 
+- MCP Servers (new, in `app/Mcp/Servers/`):
+  - `YaffaReadServer` — registers read-only tools.
+  - `YaffaWriteServer` — registers mutation tools.
+
+- MCP Tools (new, in `app/Mcp/Tools/`, extend `Laravel\Mcp\Server\Tool`):
+  - Read tools (registered in `YaffaReadServer`):
+    - `ListInvestmentsTool`
+    - `GetInvestmentDetailsTool`
+    - `ListTransactionsTool`
+    - `ListAccountsTool`
+    - `GetAccountBalanceTool`
+    - `ListPayeesTool`
+    - `ListCategoriesTool`
+    - `GetCashflowReportTool`
+  - Write tools (registered in `YaffaWriteServer`):
+    - `CreateInvestmentTransactionTool`
+    - `CreateStandardTransactionTool`
+
 - Controllers / APIs:
-  - `McpController` (new)
-    - `POST /mcp` — handles all MCP JSON-RPC messages.
-    - `GET /mcp` — returns HTTP 405 (SSE not implemented in MVP).
-  - `ApiTokenController` (new)
-    - `GET /api/v1/user/api-tokens` — list the authenticated user's tokens (id, name, abilities, last_used_at, created_at). Token plaintext is never returned after creation.
-    - `POST /api/v1/user/api-tokens` — create a new token; returns the plaintext token once.
-    - `DELETE /api/v1/user/api-tokens/{tokenId}` — revoke a token.
+  - `ApiTokenController` (new, in `app/Http/Controllers/API/`)
+    - `GET /api/v1/user/api-tokens` — list tokens (id, name, abilities, last_used_at, created_at). Plaintext never returned after creation.
+    - `POST /api/v1/user/api-tokens` — create token; returns plaintext once.
+    - `DELETE /api/v1/user/api-tokens/{tokenId}` — revoke token.
+
+- Middleware:
+  - `RequireBearerToken` (new) — rejects requests authenticated via session (no `tokenCan` check can substitute this); ensures `/mcp` is only accessible with a Sanctum PAT, never from a browser session.
 
 - Services:
-  - `McpRequestHandler` (new)
-    - Dispatches incoming JSON-RPC method calls:
-      - `initialize` → returns server capabilities and protocol version.
-      - `notifications/initialized` → returns 202 Accepted, no body.
-      - `tools/list` → returns all tools from `AiToolRegistry` formatted as MCP tool definitions.
-      - `tools/call` → resolves tool from registry, executes with authenticated user, returns MCP content response.
-      - Unknown method → returns JSON-RPC error `-32601` (Method not found).
-    - All tool execution errors are returned as MCP tool results with `isError: true`, not as JSON-RPC protocol errors (per MCP spec).
+  - Each MCP tool delegates directly to the existing service layer (same services used by `TransactionApiController`, `InvestmentApiController`, etc.). No new service classes are introduced for MCP.
 
-- Contracts:
-  - `AiTool` interface provides `getInputSchema()` which maps directly to MCP's `inputSchema` field. No additional contract needed.
+- Routing (in `routes/ai.php`):
+  ```php
+  use App\Mcp\Servers\YaffaReadServer;
+  use App\Mcp\Servers\YaffaWriteServer;
+  use Laravel\Mcp\Facades\Mcp;
+
+  Mcp::web('/mcp/read', YaffaReadServer::class)
+      ->middleware(['auth:sanctum', 'require-bearer-token', 'throttle:mcp']);
+
+  Mcp::web('/mcp/write', YaffaWriteServer::class)
+      ->middleware(['auth:sanctum', 'require-bearer-token', 'throttle:mcp']);
+  ```
+
+- Audit logging:
+  - Each tool's `handle()` method writes a log entry via `Log::info()` or a dedicated channel: tool name, user ID, arguments summary (no sensitive values), success/error outcome.
 
 - Policies / Auth:
-  - `McpController` uses `auth:sanctum` middleware.
-  - Token ability `mcp` is checked via `$request->user()->tokenCan('mcp')`.
-  - Requests without a valid token or without the `mcp` ability receive HTTP 401.
+  - `auth:sanctum` resolves the user from the Bearer token.
+  - `RequireBearerToken` middleware rejects session-authenticated requests with HTTP 401.
+  - `$request->user()->tokenCan('mcp')` is checked inside `RequireBearerToken` after confirming a PAT is present.
   - `ApiTokenController` uses `auth:sanctum` + `verified`.
-
-- Events / Notifications:
-  - None.
 
 ## Frontend Scope (Vue + Bootstrap)
 
@@ -80,12 +113,12 @@ The MCP server reuses the tool catalog introduced by the AI Chat Assistant featu
 - Components:
   - `ApiTokenManager.vue` (new)
     - Lists existing tokens: name, abilities, last used, created date, revoke button.
-    - "Create token" form: name field (required) + submit button.
-    - After creation: displays the token plaintext in a one-time alert with a copy button. Instructs the user to copy it now — it will not be shown again.
-    - Revoke confirmation: inline confirmation before DELETE.
+    - "Create token" form: name input (required) + submit.
+    - After creation: one-time alert with the plaintext token and a copy button. Clear instruction that the token will not be shown again.
+    - Revoke: inline confirmation before DELETE.
 
 - State management:
-  - Component-local state only; no store.
+  - Component-local state only.
 
 - API interactions:
   - `GET /api/v1/user/api-tokens`
@@ -94,91 +127,87 @@ The MCP server reuses the tool catalog introduced by the AI Chat Assistant featu
 
 - UX / validation rules:
   - Token name: required, max 100 characters.
-  - After revocation: token removed from list immediately; no page reload needed.
-  - Copy button uses the Clipboard API; shows confirmation ("Copied!") for 2 seconds.
+  - After revocation: token removed from list immediately without page reload.
+  - Copy button uses the Clipboard API; shows "Copied!" for 2 seconds.
 
-## Data & API Design
+## Tool Design
 
-### MCP Endpoint
+### Read/Write Classification
 
-`POST /mcp`
+| Tool | Server | Idempotent |
+|---|---|---|
+| `ListInvestmentsTool` | Read | Yes |
+| `GetInvestmentDetailsTool` | Read | Yes |
+| `ListTransactionsTool` | Read | Yes |
+| `ListAccountsTool` | Read | Yes |
+| `GetAccountBalanceTool` | Read | Yes |
+| `ListPayeesTool` | Read | Yes |
+| `ListCategoriesTool` | Read | Yes |
+| `GetCashflowReportTool` | Read | Yes |
+| `CreateInvestmentTransactionTool` | Write | No |
+| `CreateStandardTransactionTool` | Write | No |
 
-All requests follow JSON-RPC 2.0. Examples:
+### Write Tool Idempotency
 
-**initialize:**
-```json
-// Request
-{ "jsonrpc": "2.0", "id": 1, "method": "initialize",
-  "params": { "protocolVersion": "2025-03-26", "capabilities": {},
-              "clientInfo": { "name": "Claude Desktop", "version": "1.0" } } }
+Write tools are not idempotent. MCP clients must not retry a `tools/call` for a write tool after a timeout or ambiguous failure. Each tool returns the created record's ID in its output so that clients can verify the outcome by calling the corresponding read tool.
 
-// Response
-{ "jsonrpc": "2.0", "id": 1,
-  "result": { "protocolVersion": "2025-03-26",
-              "capabilities": { "tools": {} },
-              "serverInfo": { "name": "yaffa", "version": "3.0" } } }
-```
+### Structured Output
 
-**tools/list:**
-```json
-// Response
-{ "jsonrpc": "2.0", "id": 2,
-  "result": {
-    "tools": [
-      { "name": "list_investments",
-        "description": "...",
-        "inputSchema": { "type": "object", "properties": { "active_only": { "type": "boolean" } } } }
-    ]
-  }
+Each tool implements `outputSchema()` using `laravel/mcp`'s `JsonSchema` fluent API. Example for `ListInvestmentsTool`:
+
+```php
+public function outputSchema(JsonSchema $schema): array
+{
+    return [
+        'investments' => $schema->array()
+            ->description('List of investments belonging to the user.')
+            ->items($schema->object()->properties([
+                'id'       => $schema->integer()->description('Investment ID')->required(),
+                'name'     => $schema->string()->description('Investment name')->required(),
+                'symbol'   => $schema->string()->description('Ticker symbol')->required(),
+                'currency' => $schema->string()->description('ISO currency code')->required(),
+                'active'   => $schema->boolean()->description('Whether automatic price updates are enabled')->required(),
+            ])),
+    ];
 }
 ```
 
-**tools/call:**
-```json
-// Request
-{ "jsonrpc": "2.0", "id": 3, "method": "tools/call",
-  "params": { "name": "list_investments", "arguments": { "active_only": true } } }
+### Tool Descriptions
 
-// Success response
-{ "jsonrpc": "2.0", "id": 3,
-  "result": { "content": [{ "type": "text", "text": "[{\"id\":1,\"name\":\"ISAC\"}]" }],
-              "isError": false } }
+Tool descriptions are the primary signal for LLM tool selection. They must be specific and action-oriented.
 
-// Tool execution error response (per MCP spec — NOT a JSON-RPC error)
-{ "jsonrpc": "2.0", "id": 3,
-  "result": { "content": [{ "type": "text", "text": "Investment not found." }],
-              "isError": true } }
-```
+| Tool | Key description element |
+|---|---|
+| `ListInvestmentsTool` | "Call this first when the user mentions an investment by name or symbol, to resolve its ID before creating a transaction." |
+| `CreateInvestmentTransactionTool` | "Requires `investment_id` from ListInvestments. Supported types: buy, sell, dividend, add_shares, remove_shares. Do not guess IDs." |
+| `GetAccountBalanceTool` | "Use this to answer questions about available funds or current account state." |
+
+## Data & API Design
 
 ### Token API
 
 `POST /api/v1/user/api-tokens`
-
 Request: `{ "name": "Claude Desktop" }`
+Response 201: `{ "id": 1, "name": "Claude Desktop", "token": "1|plaintext-shown-once", "abilities": ["mcp"] }`
 
-Response (201):
-```json
-{ "token": "1|plaintext-only-shown-once", "name": "Claude Desktop", "id": 1 }
-```
+`GET /api/v1/user/api-tokens`
+Response: `{ "data": [{ "id": 1, "name": "Claude Desktop", "abilities": ["mcp"], "last_used_at": "...", "created_at": "..." }] }`
 
-`GET /api/v1/user/api-tokens` response:
-```json
-{
-  "data": [
-    { "id": 1, "name": "Claude Desktop", "abilities": ["mcp"],
-      "last_used_at": "2026-04-12T10:00:00Z", "created_at": "2026-04-10T08:00:00Z" }
-  ]
-}
-```
+`DELETE /api/v1/user/api-tokens/{id}` → 204 No Content.
 
-### Client Configuration Example (Claude Desktop)
+### Client Configuration (Claude Desktop)
 
 ```json
 {
   "mcpServers": {
-    "yaffa": {
+    "yaffa-read": {
       "type": "http",
-      "url": "https://your-yaffa-instance.example.com/mcp",
+      "url": "https://your-yaffa-instance.example.com/mcp/read",
+      "headers": { "Authorization": "Bearer <token>" }
+    },
+    "yaffa-write": {
+      "type": "http",
+      "url": "https://your-yaffa-instance.example.com/mcp/write",
       "headers": { "Authorization": "Bearer <token>" }
     }
   }
@@ -187,49 +216,49 @@ Response (201):
 
 ## Processing Flow
 
-1. External MCP client sends `POST /mcp` with `Authorization: Bearer <token>`.
-2. `auth:sanctum` middleware validates the token and resolves the user.
-3. `McpController` verifies the `mcp` token ability; returns 401 if missing.
-4. `McpController` passes the JSON-RPC payload to `McpRequestHandler`.
-5. `McpRequestHandler` dispatches by method name.
-6. For `tools/call`: resolves the tool from `AiToolRegistry`, calls `execute($params, $user)`.
-7. Tool result is JSON-encoded and returned as an MCP text content block.
-8. Controller returns the JSON-RPC response with `Content-Type: application/json`.
+1. External MCP client sends `POST /mcp/read` or `POST /mcp/write` with `Authorization: Bearer <token>`.
+2. `auth:sanctum` validates the token and resolves the user.
+3. `RequireBearerToken` middleware confirms authentication is via PAT (not session) and that the token has the `mcp` ability.
+4. `laravel/mcp` dispatches the JSON-RPC method (`tools/list`, `tools/call`, etc.).
+5. For `tools/call`: the appropriate MCP tool's `handle()` method is invoked with the authenticated user in context.
+6. Tool delegates to the existing service layer, scoped to the user.
+7. Tool logs the call.
+8. `laravel/mcp` formats the response using the tool's `outputSchema()`.
 
 ## Security Considerations
 
-- Token plaintext is returned once at creation and never stored in plaintext (Sanctum hashes it).
-- Token revocation is immediate; any in-flight request with a revoked token returns 401 after the middleware check.
-- The `mcp` ability is the only ability granted to MCP tokens — they cannot access non-MCP endpoints through ability checks.
-- All tool `execute()` calls are scoped to the token's owner; cross-user access is not possible.
-- The `Origin` header is not applicable for server-to-server token-based requests, but the endpoint must not be accessible without authentication.
-- Input validation: `tools/call` arguments are validated against each tool's `getInputSchema()` before execution.
+- Token plaintext is shown once at creation; Sanctum stores only the hash.
+- The `RequireBearerToken` middleware is the enforcement point that prevents first-party session auth from accessing `/mcp/*`. This addresses the known `tokenCan()` behaviour where it returns `true` for all abilities in session-authenticated contexts.
+- Write tools (`/mcp/write`) may only be accessed with a token that explicitly has the `mcp` ability. Read-only integrations should be pointed at `/mcp/read` only.
+- All tool queries are scoped to `$request->user()` — no cross-user access is possible.
+- Tool arguments are validated via `$request->validate()` inside `handle()` before reaching the service layer.
+- `throttle:mcp` prevents abusive call volumes.
 
 ## Test Strategy
 
 - Backend unit tests:
-  - `McpRequestHandler`: each supported method returns the correct JSON-RPC structure.
-  - `McpRequestHandler`: unknown method returns error `-32601`.
-  - `McpRequestHandler`: tool execution error returns `isError: true` in result, not a JSON-RPC error.
-  - `ApiTokenController`: create token returns plaintext once.
-  - `ApiTokenController`: list tokens does not include plaintext.
-  - `ApiTokenController`: revoke removes the token.
+  - Each MCP tool: valid input → correct service call → correct structured output shape.
+  - Each MCP tool: invalid input fails `validate()` and returns a tool error response.
+  - `RequireBearerToken`: session-authenticated request → 401.
+  - `RequireBearerToken`: bearer token without `mcp` ability → 401.
+  - `ApiTokenController`: create returns plaintext once; list never returns plaintext; revoke removes token.
 - Backend feature tests:
-  - `POST /mcp` without token → 401.
-  - `POST /mcp` with valid token, `initialize` → correct capabilities.
-  - `POST /mcp` with valid token, `tools/call list_investments` → returns user's investments.
-  - `POST /mcp` with token missing `mcp` ability → 401.
+  - `POST /mcp/read` without token → 401.
+  - `POST /mcp/read` with valid PAT and `mcp` ability → `tools/list` returns read tools only.
+  - `POST /mcp/write` with valid PAT → `tools/call CreateInvestmentTransaction` creates a record and returns its ID.
+  - `POST /mcp/write` with session auth (no Bearer header) → 401.
   - `DELETE /api/v1/user/api-tokens/{id}` for another user's token → 403.
 - Edge cases:
-  - Malformed JSON body → JSON-RPC error `-32700` (Parse error).
-  - `tools/call` with unknown tool name → JSON-RPC error `-32602` (Invalid params).
-  - `tools/call` with invalid arguments (fails schema validation) → `isError: true` in result.
+  - Write tool called twice with identical arguments → two records created (not idempotent; expected).
+  - Tool called with unknown investment ID → tool returns structured error in output, `isError: true`.
+  - Token revoked mid-session → next request returns 401.
 
 ## Acceptance Criteria
 
-- Given a user creates an MCP token in the settings UI, when they paste the token into Claude Desktop and send "list my investments", then Claude Desktop calls `tools/list` followed by `tools/call list_investments` and returns the user's investment list.
-- Given the token plaintext is shown after creation, when the user navigates away and returns, then the plaintext is no longer visible — only the token name and metadata.
-- Given a user revokes a token, when an MCP client makes a subsequent request with that token, then the server returns HTTP 401.
-- Given an MCP client calls `tools/call` with an unknown tool name, then the server returns a valid JSON-RPC error response with code `-32602`.
-- Given an MCP client calls `GET /mcp`, then the server returns HTTP 405.
-- Given the `mcp` ability is not present on the token, then `POST /mcp` returns HTTP 401 regardless of whether the token is otherwise valid.
+- Given a user creates an MCP token, when they configure Claude Desktop with that token and ask "list my investments", then `YaffaReadServer` returns the user's investments as structured JSON, not as a plain text blob.
+- Given the MCP token is used from a browser session (no Bearer header), then `POST /mcp/read` returns 401.
+- Given a user revokes a token, then the next MCP request with that token returns 401.
+- Given a client points only at `/mcp/read`, then write tools are not exposed and cannot be called.
+- Given `CreateInvestmentTransactionTool` is called with valid arguments, then the transaction is created and the response includes the new transaction ID.
+- Given `CreateInvestmentTransactionTool` is called twice with identical arguments, then two separate transactions are created (no silent deduplication).
+- Given a tool is called with invalid arguments, then the response contains `isError: true` and a human-readable message; no unhandled exception is thrown.

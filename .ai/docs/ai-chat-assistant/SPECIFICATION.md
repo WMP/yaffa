@@ -26,6 +26,7 @@ The assistant is opt-in and only active when the user has an AI provider configu
   - Modifying or replacing the existing AI document processing pipeline.
   - Cost tracking or per-user token budgets.
   - Multi-user or admin-level tool access.
+  - Sharing tool class implementations with the MCP server. Both features delegate to the same service layer, but the MCP server uses `laravel/mcp` Tool classes while the chat assistant uses the `AiTool` interface backed by Prism. The shared layer is the service layer, not the tool wrappers.
 
 ## Assumptions
 
@@ -171,6 +172,14 @@ Tool descriptions are the primary mechanism by which the model selects the corre
 | `list_accounts` | "List all accounts. Call this when a target account is needed for a transaction and the user has not specified an account ID." |
 | `get_account_balance` | "Return the current balance for all accounts or a specific account. Use this to answer questions about available funds." |
 | `get_cashflow_report` | "Return aggregated income and expense data. Use this to answer questions about spending, income trends, or monthly summaries." |
+
+## Write Tool Idempotency
+
+Write tools (`CreateInvestmentTransactionTool`, `CreateStandardTransactionTool`) are not idempotent. If the LLM retries a tool call after a timeout or ambiguous result, duplicate records may be created. Mitigation:
+
+- The tool returns the created record ID in its result. The model should confirm with the user before retrying after a failure.
+- The system prompt instructs the model to call the corresponding read tool to verify outcome before retrying a write.
+- Duplicate detection is not the chat assistant's responsibility; it relies on the existing duplicate detection logic available through the service layer.
 
 ## Processing Flow
 
