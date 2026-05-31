@@ -11,6 +11,7 @@ use App\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Laracasts\Utilities\JavaScript\JavaScriptFacade;
@@ -22,10 +23,10 @@ class CategoryController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            ['auth', 'verified'],
-            new Middleware('can:viewAny,App\Models\Category', only: ['index']),
-            new Middleware('can:view,category', only: ['show']),
-            new Middleware('can:create,App\Models\Category', only: ['create', 'store']),
+            'auth',
+            'verified',
+            new Middleware('can:viewAny,' . Category::class, only: ['index']),
+            new Middleware('can:create,' . Category::class, only: ['create', 'store']),
             new Middleware('can:update,category', only: ['edit', 'update']),
             new Middleware('can:delete,category', only: ['destroy']),
         ];
@@ -37,40 +38,41 @@ class CategoryController extends Controller implements HasMiddleware
     public function index(Request $request): View
     {
         /**
-         * @get('/categories')
-         * @name('categories.index')
-         * @middlewares('web', 'auth', 'verified', 'can:viewAny,App\Models\Category')
+         * @get("/categories")
+         * @name("categories.index")
+         * @middlewares("web", "auth", "verified")
          */
         // Show all categories of user from the database and return to view
         $categories = $request->user()
             ->categories()
             ->with(['parent'])
-            // Also pass the number of associated standard transactions
             ->withCount([
-                'transaction as transactions_count' => function (Builder $query) {
-                    $query->select(DB::raw('COUNT(distinct transactions.id)'))
+                'transaction as transactions_count_regular' => function (Builder $query): void {
+                    $query->selectRaw('COUNT(DISTINCT transactions.id)')
                         ->where('transactions.schedule', false)
                         ->where('transactions.budget', false);
-                }
+                },
+                'transaction as transactions_count_with_schedule' => function (Builder $query): void {
+                    $query->selectRaw('COUNT(DISTINCT transactions.id)')
+                        ->where(function (Builder $query): void {
+                            $query->where('transactions.schedule', true)
+                                ->orWhere('transactions.budget', true);
+                        });
+                },
             ])
-            ->withCount('transaction as transactions_count_total')
             ->withCount('children')
-            // TODO: how should this be solved using withMin?
-            ->withCount([
-                'transaction as transactions_min_date' => function (Builder $query) {
-                    $query->select(DB::raw('MIN(transactions.date)'))
-                        ->where('transactions.schedule', false)
+            ->withMin([
+                'transaction as transactions_min_date' => function (Builder $query): void {
+                    $query->where('transactions.schedule', false)
                         ->where('transactions.budget', false);
-                }
-            ])
-            // TODO: how should this be solved using withMax?
-            ->withCount([
-                'transaction as transactions_max_date' => function (Builder $query) {
-                    $query->select(DB::raw('MAX(transactions.date)'))
-                        ->where('transactions.schedule', false)
+                },
+            ], 'date')
+            ->withMax([
+                'transaction as transactions_max_date' => function (Builder $query): void {
+                    $query->where('transactions.schedule', false)
                         ->where('transactions.budget', false);
-                }
-            ])
+                },
+            ], 'date')
             ->withCount('payeesNotPreferring')
             ->withCount('payeesPreferring')
             ->withCount('payeesDefaulting')
@@ -90,9 +92,9 @@ class CategoryController extends Controller implements HasMiddleware
     public function create(): View
     {
         /**
-         * @get('/categories/create')
-         * @name('categories.create')
-         * @middlewares('web', 'auth', 'verified', 'can:create,App\Models\Category')
+         * @get("/categories/create")
+         * @name("categories.create")
+         * @middlewares("web", "auth", "verified")
          */
         return view('categories.form');
     }
@@ -100,9 +102,9 @@ class CategoryController extends Controller implements HasMiddleware
     public function store(CategoryRequest $request): RedirectResponse
     {
         /**
-         * @post('/categories')
-         * @name('categories.store')
-         * @middlewares('web', 'auth', 'verified', 'can:create,App\Models\Category')
+         * @post("/categories")
+         * @name("categories.store")
+         * @middlewares("web", "auth", "verified")
          */
         $request->user()->categories()->create($request->validated());
 
@@ -117,9 +119,9 @@ class CategoryController extends Controller implements HasMiddleware
     public function edit(Category $category): View
     {
         /**
-         * @get('/categories/{category}/edit')
-         * @name('categories.edit')
-         * @middlewares('web', 'auth', 'verified', 'can:update,category')
+         * @get("/categories/{category}/edit")
+         * @name("categories.edit")
+         * @middlewares("web", "auth", "verified")
          */
         return view(
             'categories.form',
@@ -132,10 +134,10 @@ class CategoryController extends Controller implements HasMiddleware
     public function update(CategoryRequest $request, Category $category): RedirectResponse
     {
         /**
-         * @methods('PUT', PATCH')
-         * @uri('/categories/{category}')
-         * @name('categories.update')
-         * @middlewares('web', 'auth', 'verified', 'can:update,category')
+         * @methods("PUT", "PATCH")
+         * @uri("/categories/{category}")
+         * @name("categories.update")
+         * @middlewares("web", "auth", "verified")
          */
         // Retrieve the validated input data
         $validated = $request->validated();
@@ -154,9 +156,9 @@ class CategoryController extends Controller implements HasMiddleware
     public function destroy(Category $category): RedirectResponse
     {
         /**
-         * @delete('/categories/{category}')
-         * @name('categories.destroy')
-         * @middlewares('web', 'auth', 'verified', 'can:delete,category')
+         * @delete("/categories/{category}")
+         * @name("categories.destroy")
+         * @middlewares("web", "auth", "verified")
          */
         try {
             $category->delete();
@@ -180,11 +182,13 @@ class CategoryController extends Controller implements HasMiddleware
     public function mergeCategoriesForm(?Category $categorySource): View
     {
         /**
-         * @get('/categories/merge/{categorySource?}')
-         * @name('categories.merge.form')
-         * @middlewares('web', 'auth', 'verified')
+         * @get("/categories/merge/{categorySource?}")
+         * @name("categories.merge.form")
+         * @middlewares("web", "auth", "verified")
          */
         if ($categorySource) {
+            Gate::authorize('view', $categorySource);
+
             JavaScriptFacade::put([
                 'categorySource' => $categorySource,
             ]);
@@ -202,12 +206,17 @@ class CategoryController extends Controller implements HasMiddleware
     public function mergeCategories(CategoryMergeRequest $request): RedirectResponse
     {
         /**
-         * @post('/categories/merge')
-         * @name('categories.merge.submit')
-         * @middlewares('web', 'auth', 'verified')
+         * @post("/categories/merge")
+         * @name("categories.merge.submit")
+         * @middlewares("web", "auth", "verified")
          */
         // Retrieve the validated input data
         $validated = $request->validated();
+        $categorySource = Category::query()->findOrFail($validated['category_source']);
+        $categoryTarget = Category::query()->findOrFail($validated['category_target']);
+
+        Gate::authorize($request->action === 'delete' ? 'delete' : 'update', $categorySource);
+        Gate::authorize('update', $categoryTarget);
 
         // Wrap database transaction
         DB::beginTransaction();
@@ -221,10 +230,6 @@ class CategoryController extends Controller implements HasMiddleware
             DB::table('categories')
                 ->where('parent_id', $validated['category_source'])
                 ->update(['parent_id' => $validated['category_target']]);
-
-            // Hydrate the source category
-            $categorySource = Category::find($validated['category_source']);
-
             // Delete or set active to false the source category model, based on value of action field
             if ($request->action === 'delete') {
                 $categorySource->delete();

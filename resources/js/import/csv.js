@@ -5,12 +5,17 @@
 
 import 'datatables.net-bs5';
 // Import dataTable helper functions
-import * as dataTableHelpers from './../components/dataTableHelper';
-import { toFormattedCurrency, toIsoDateString } from '../helpers';
+import * as dataTableHelpers from '@/shared/lib/datatable'
+import { getDataTablesLanguageOptions, toFormattedCurrency, __ } from '@/shared/lib/i18n';
+import { toIsoDateString } from '@/shared/lib/helpers';
 
 // Import RRule library for handling schedules
 import { RRule } from 'rrule';
-import 'select2';
+
+// Select2 for account selection
+import { initializeSelect2 } from '@/shared/lib/select2';
+initializeSelect2(window.YAFFA.userSettings.language);
+
 import 'jquery-csv';
 
 window.transactions = [];
@@ -1837,7 +1842,7 @@ function refreshPromptFromCurrentPreview() {
 }
 
 async function loadImportProfile(profileId) {
-  const response = await fetch('/api/import/csv/profiles/' + profileId, {
+  const response = await fetch('/api/v1/import/csv/profiles/' + profileId, {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
     },
@@ -1874,7 +1879,7 @@ async function saveDslToSelectedProfile() {
         return;
       }
 
-      const createResponse = await fetch('/api/import/csv/profiles', {
+      const createResponse = await fetch('/api/v1/import/csv/profiles', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1913,7 +1918,7 @@ async function saveDslToSelectedProfile() {
     }
 
     const updateResponse = await fetch(
-      '/api/import/csv/profiles/' + profileId,
+      '/api/v1/import/csv/profiles/' + profileId,
       {
         method: 'PATCH',
         headers: {
@@ -2008,7 +2013,7 @@ async function quickImportDraftTransaction(draftId, options = {}) {
   }
 
   try {
-    const response = await fetch(route('api.transactions.storeStandard'), {
+    const response = await fetch(route('api.v1.transactions.store-standard'), {
       method: 'POST',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
@@ -2603,7 +2608,7 @@ function collectSimilarTransactions() {
   );
 
   // Get all standard transactions in the range of min and max date
-  let url = new URL(window.location.origin + '/api/transactions');
+  let url = new URL(window.location.origin + '/api/v1/transactions');
   url.searchParams.append('date_from', toIsoDateString(minDate));
   url.searchParams.append('date_to', toIsoDateString(maxDate));
 
@@ -2771,7 +2776,7 @@ $('#import_profile')
   .select2({
     multiple: false,
     ajax: {
-      url: '/api/import/csv/profiles',
+      url: '/api/v1/import/csv/profiles',
       dataType: 'json',
       delay: 150,
       data: function (params) {
@@ -3181,7 +3186,7 @@ $('#account')
   .select2({
     multiple: false,
     ajax: {
-      url: '/api/assets/account',
+      url: '/api/v1/accounts',
       dataType: 'json',
       delay: 150,
       data: function (params) {
@@ -3207,7 +3212,7 @@ $('#account')
   })
   .on('select2:select', function (e) {
     $.ajax({
-      url: '/api/assets/account/' + e.params.data.id,
+      url: '/api/v1/accounts/' + e.params.data.id,
       data: {
         _token: csrfToken,
       },
@@ -3228,6 +3233,7 @@ $('#account')
 const tableSelector = '#dataTable';
 
 window.table = $(tableSelector).DataTable({
+  language: getDataTablesLanguageOptions() || undefined,
   data: window.transactions,
   columns: [
     {
@@ -3510,7 +3516,7 @@ $(tableSelector).on(
     const originalIconClass = icon.className;
     icon.className = 'fa fa-fw fa-spin fa-spinner';
 
-    fetch('/api/transaction/' + this.dataset.id)
+    fetch('/api/v1/transactions/' + this.dataset.id)
       .then(function (response) {
         if (!response.ok) {
           throw Error(response.statusText);
@@ -3586,7 +3592,7 @@ $(tableSelector).on(
     const originalIconClass = icon.className;
     icon.className = 'fa fa-fw fa-spin fa-spinner';
 
-    fetch('/api/transaction/' + this.dataset.id)
+    fetch('/api/v1/transactions/' + this.dataset.id)
       .then(function (response) {
         if (!response.ok) {
           throw Error(response.statusText);
@@ -3765,7 +3771,7 @@ $('#reset').on('click', function () {
 });
 
 // Load active schedules via API
-fetch('/api/transactions/get_scheduled_items/schedule')
+fetch('/api/v1/transactions/scheduled-items?type=schedule')
   .then((response) => response.json())
   .then((data) => {
     window.schedules = data.transactions
@@ -3813,14 +3819,16 @@ fetch('/api/transactions/get_scheduled_items/schedule')
 
 // Initialize Vue for the quick view
 import { createApp } from 'vue';
+import { installRouteGlobal } from '@/shared/lib/vue/installRouteGlobal';
 
 const app = createApp({});
 
 // Add global translator function
 app.config.globalProperties.__ = window.__;
+installRouteGlobal(app);
 
-import TransactionShowModal from './../components/TransactionDisplay/Modal.vue';
-import TransactionCreateModal from './../components/TransactionForm/ModalStandard.vue';
+import TransactionShowModal from '@/transactions/components/display/Modal.vue';
+import TransactionCreateModal from '@/transactions/components/form/ModalStandard.vue';
 
 app.component('transaction-show-modal', TransactionShowModal);
 app.component('transaction-create-standard-modal', TransactionCreateModal);

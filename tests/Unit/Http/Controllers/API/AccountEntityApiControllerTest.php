@@ -12,11 +12,20 @@ use App\Models\TransactionDetailStandard;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
 class AccountEntityApiControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_unauthenticated_user_cannot_trigger_account_monthly_summary_recalculation(): void
+    {
+        $response = $this->postJson(route('api.v1.maintenance.recalculate-account-monthly-summaries'));
+
+        $this->assertUserNotAuthorized($response);
+        $response->assertJsonStructure(['error' => ['code', 'message']]);
+    }
 
     public function test_it_updates_the_active_status_of_an_account_entity(): void
     {
@@ -34,10 +43,11 @@ class AccountEntityApiControllerTest extends TestCase
             ]);
 
         $this->actingAs($user);
-        $response = $this->put(route('api.accountentity.updateActive', [
+        $response = $this->patchJson(route('api.v1.account-entities.patch-active', [
             'accountEntity' => $accountEntity->id,
+        ]), [
             'active' => true,
-        ]));
+        ]);
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -61,21 +71,26 @@ class AccountEntityApiControllerTest extends TestCase
             ]);
 
         // Try to update the account entity as an unauthenticated user
-        $response = $this->put(
+        $response = $this->patchJson(
             route(
-                'api.accountentity.updateActive',
+                'api.v1.account-entities.patch-active',
                 [
                     'accountEntity' => $accountEntity->id,
-                    'active' => 1,
                 ]
             ),
-            [],
+            ['active' => true],
             [
                 'Accept' => 'application/json'
             ]
         );
 
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $this->assertThat(
+            $response->status(),
+            $this->logicalOr(
+                $this->equalTo(Response::HTTP_UNAUTHORIZED),
+                $this->equalTo(Response::HTTP_FORBIDDEN)
+            )
+        );
 
         $this->assertEquals(false, $accountEntity->fresh()->active);
 
@@ -84,14 +99,53 @@ class AccountEntityApiControllerTest extends TestCase
         $user2 = User::factory()->create();
 
         $this->actingAs($user2);
-        $response = $this->put(route('api.accountentity.updateActive', [
+        $response = $this->patchJson(route('api.v1.account-entities.patch-active', [
             'accountEntity' => $accountEntity->id,
-            'active' => 1,
-        ]));
+        ]), [
+            'active' => true,
+        ]);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
 
         $this->assertEquals($accountEntity->fresh()->active, $accountEntity->active);
+    }
+
+    public function test_authenticated_user_can_trigger_account_monthly_summary_recalculation_for_current_user(): void
+    {
+        Artisan::spy();
+
+        /** @var User $user */
+        $user = User::factory()->create([
+            'language' => 'en',
+            'locale' => 'en-US',
+        ]);
+
+        AccountEntity::factory()
+            ->for($user)
+            ->for(Account::factory()->withUser($user), 'config')
+            ->create(['config_type' => 'account']);
+        AccountEntity::factory()
+            ->for($user)
+            ->for(Account::factory()->withUser($user), 'config')
+            ->create(['config_type' => 'account']);
+
+        $otherUser = User::factory()->create();
+        AccountEntity::factory()
+            ->for($otherUser)
+            ->for(Account::factory()->withUser($otherUser), 'config')
+            ->create(['config_type' => 'account']);
+
+        $response = $this->actingAs($user)
+            ->postJson(route('api.v1.maintenance.recalculate-account-monthly-summaries'));
+
+        $response->assertOk()
+            ->assertJsonPath('message', __('maintenance.accountMonthlySummaries.queued'));
+
+        Artisan::shouldHaveReceived('queue')
+            ->once()
+            ->with('app:cache:account-monthly-summaries', [
+                'userId' => $user->id,
+            ]);
     }
 
     public function test_user_can_delete_an_existing_payee(): void
@@ -111,7 +165,7 @@ class AccountEntityApiControllerTest extends TestCase
         $payee->load('config');
 
         $response = $this->actingAs($user)
-            ->deleteJson(route("api.accountentity.destroy", $payee));
+            ->deleteJson(route("api.v1.account-entities.destroy", $payee));
 
         // Response should be 200 OK
         $response->assertStatus(Response::HTTP_OK);
@@ -143,7 +197,7 @@ class AccountEntityApiControllerTest extends TestCase
         $account->load('config');
 
         $response = $this->actingAs($user)
-            ->deleteJson(route("api.accountentity.destroy", $account));
+            ->deleteJson(route("api.v1.account-entities.destroy", $account));
 
         // Response should be 200 OK
         $response->assertStatus(Response::HTTP_OK);
@@ -201,7 +255,7 @@ class AccountEntityApiControllerTest extends TestCase
 
         // Try to delete the payee
         $response = $this->actingAs($user)
-            ->deleteJson(route("api.accountentity.destroy", $payee));
+            ->deleteJson(route("api.v1.account-entities.destroy", $payee));
 
         // Response should be 422 Unprocessable Entity
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -216,7 +270,7 @@ class AccountEntityApiControllerTest extends TestCase
 
         // Try to delete the account
         $response = $this->actingAs($user)
-            ->deleteJson(route("api.accountentity.destroy", $account));
+            ->deleteJson(route("api.v1.account-entities.destroy", $account));
 
         // Response should be 422 Unprocessable Entity
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);

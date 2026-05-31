@@ -1,14 +1,26 @@
-import * as am4core from "@amcharts/amcharts4/core";
-import * as am4charts from "@amcharts/amcharts4/charts";
-import am4themes_animated from "@amcharts/amcharts4/themes/animated";
-import am4themes_kelly from "@amcharts/amcharts4/themes/kelly";
-import * as dataTableHelpers from './../components/dataTableHelper'
-import * as helpers from "../helpers";
+// Chart components
+import * as am4core from '@amcharts/amcharts4/core';
+import * as am4charts from '@amcharts/amcharts4/charts';
+import am4themes_animated from '@amcharts/amcharts4/themes/animated';
+import am4themes_kelly from '@amcharts/amcharts4/themes/kelly';
+
+// Generic helpers
+import * as dataTableHelpers from '@/shared/lib/datatable'
+import * as helpers from '@/shared/lib/helpers';
+import { applyAmChartsLocalization } from '@/shared/lib/i18n/amcharts';
+import { __, getDataTablesLanguageOptions } from '@/shared/lib/i18n';
+import { initializeSelect2 } from '@/shared/lib/select2';
+import * as toastHelpers from '@/shared/lib/toast';
+
+// Category tree
 import 'jstree';
 import 'jstree/src/themes/default/style.css'
 
+// DataTables
 import 'datatables.net-bs5';
-import 'select2';
+
+// Select2 for account selection
+initializeSelect2(window.YAFFA.userSettings.language);
 
 const accountSelector = '#accountList';
 const treeSelector = '#categoryTree';
@@ -71,11 +83,12 @@ const elementRefreshButton = document.getElementById('reload');
 am4core.useTheme(am4themes_animated);
 am4core.useTheme(am4themes_kelly);
 window.chart = am4core.create("chartdiv", am4charts.XYChart);
+applyAmChartsLocalization(chart, window.YAFFA.userSettings.locale, window.YAFFA.userSettings.language);
 
-chart.numberFormatter.intlLocales = window.YAFFA.locale;
+chart.numberFormatter.intlLocales = window.YAFFA.userSettings.locale;
 chart.numberFormatter.numberFormat = {
     style: 'currency',
-    currency: window.YAFFA.baseCurrency.iso_code,
+    currency: window.YAFFA.userSettings.baseCurrency.iso_code,
     minimumFractionDigits: 0
 };
 
@@ -140,7 +153,7 @@ let reloadData = function () {
     const selectedCategories = ($(treeSelector).jstree() ? $(treeSelector).jstree('get_checked', true) : []);
 
     $.ajax({
-        url: window.route('api.reports.budgetchart'),
+        url: window.route('api.v1.reports.budget-chart'),
         data: {
             categories: selectedCategories.map(category => category.id),
             accountSelection: $('input[name=table_filter_account_scope]:checked').val(),
@@ -148,14 +161,16 @@ let reloadData = function () {
         }
     })
         .done(function (data) {
+            const chartData = Array.isArray(data) ? data : (data.chartData || []);
+
             // Convert date strings to Date objects
-            data = data.map(function (item) {
+            const parsedChartData = chartData.map(function (item) {
                 item.date = new Date(item.period);
                 return item;
             });
 
             // Store the raw data for later use
-            rawData = data.slice();
+            rawData = parsedChartData.slice();
 
             // Determine the highest level of aggregation based on selected categories
             let aggregation = 'month';
@@ -179,6 +194,17 @@ let reloadData = function () {
 
             // Update the chart
             updateChart(rawData);
+
+            if (data.warnings && data.warnings.currenciesWithoutRates && data.warnings.currenciesWithoutRates.length > 0) {
+                const currencyList = data.warnings.currenciesWithoutRates
+                    .map(c => `${c.name} (${c.iso_code})`)
+                    .join(', ');
+
+                toastHelpers.showWarningToast(
+                    __('reports.cashflow.missingRatesWarningPrefix') + currencyList +
+                    '. ' + __('reports.cashflow.missingRatesWarningSuffix')
+                );
+            }
         })
         .always(function () {
             elementRefreshButton.disabled = false;
@@ -360,8 +386,9 @@ let initialTableLoad = true;
 const tableSelector = '#table';
 
 window.table = $(tableSelector).DataTable({
+    language: getDataTablesLanguageOptions() || undefined,
     ajax: {
-        url: window.route('api.transactions.getScheduledItems', {type: 'any'}),
+        url: window.route('api.v1.transactions.scheduled-items', {type: 'any'}),
         type: 'GET',
         dataSrc: function (data) {
             if (!data.transactions) {
@@ -390,7 +417,7 @@ window.table = $(tableSelector).DataTable({
         },
     },
     columns: [
-        dataTableHelpers.transactionColumnDefinition.dateFromCustomField("transaction_schedule.start_date", __("Start date"), window.YAFFA.locale),
+        dataTableHelpers.transactionColumnDefinition.dateFromCustomField("transaction_schedule.start_date", __("Start date"), window.YAFFA.userSettings.locale),
         {
             data: "transaction_schedule.rule",
             title: __("Schedule"),
@@ -400,23 +427,11 @@ window.table = $(tableSelector).DataTable({
                 return data.toText();
             }
         },
-        dataTableHelpers.transactionColumnDefinition.dateFromCustomField("transaction_schedule.next_date", __("Next date"), window.YAFFA.locale),
+        dataTableHelpers.transactionColumnDefinition.dateFromCustomField("transaction_schedule.next_date", __("Next date"), window.YAFFA.userSettings.locale),
         dataTableHelpers.transactionColumnDefinition.iconFromBooleanField('schedule', __('Schedule')),
         dataTableHelpers.transactionColumnDefinition.iconFromBooleanField('budget', __('Budget')),
         dataTableHelpers.transactionColumnDefinition.iconFromBooleanField('transaction_schedule.active', __('Active')),
-        {
-            data: "transaction_type.type",
-            title: __("Type"),
-            render: function (data, type) {
-                if (type === 'filter') {
-                    return data;
-                }
-                return (data === 'standard'
-                    ? '<i class="fa fa-money text-primary" title="' + __('Standard') + '"></i>'
-                    : '<i class="fa fa-line-chart text-primary" title="' + __('Investment') + '"></i>');
-            },
-            className: "text-center",
-        },
+        dataTableHelpers.transactionColumnDefinition.type(true),
         dataTableHelpers.transactionColumnDefinition.payee,
         dataTableHelpers.transactionColumnDefinition.category,
         dataTableHelpers.transactionColumnDefinition.amount,
@@ -520,7 +535,7 @@ $(treeSelector)
     .jstree({
         core: {
             data: function (_obj, callback) {
-                fetch('/api/assets/categories?withInactive=1')
+                fetch('/api/v1/categories?withInactive=1&q=*')
                     .then(response => response.json())
                     .then(data => {
                         /**
@@ -577,7 +592,7 @@ $(treeSelector)
 $(accountSelector).select2({
     theme: "bootstrap-5",
     ajax: {
-        url: '/api/assets/account',
+        url: '/api/v1/accounts',
         dataType: 'json',
         delay: 150,
         data: function (params) {
@@ -607,7 +622,7 @@ $(accountSelector).select2({
 // Default account
 if (typeof presetAccount !== 'undefined') {
     $.ajax({
-        url: '/api/assets/account/' + presetAccount,
+        url: '/api/v1/accounts/' + presetAccount,
         data: {
             _token: window.csrfToken,
         }

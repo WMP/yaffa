@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Transaction;
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Tests\TestCase;
@@ -62,6 +65,80 @@ class CategoryTest extends TestCase
         $response->assertViewIs("{$this->base_route}.index");
     }
 
+    public function test_category_query_returns_first_and_last_regular_transaction_dates(): void
+    {
+        $user = User::factory()->create();
+        $category = Category::factory()->for($user)->create();
+
+        $earliestRegularTransaction = Transaction::factory()->deposit($user)->create([
+            'date' => '2024-01-10',
+            'schedule' => false,
+            'budget' => false,
+        ]);
+        $latestRegularTransaction = Transaction::factory()->deposit($user)->create([
+            'date' => '2024-03-15',
+            'schedule' => false,
+            'budget' => false,
+        ]);
+        $scheduledTransaction = Transaction::factory()->deposit($user)->create([
+            'date' => '2023-01-01',
+            'schedule' => true,
+            'budget' => false,
+        ]);
+        $budgetTransaction = Transaction::factory()->deposit($user)->create([
+            'date' => '2025-01-01',
+            'schedule' => false,
+            'budget' => true,
+        ]);
+
+        foreach (
+            [
+                $earliestRegularTransaction,
+                $latestRegularTransaction,
+                $scheduledTransaction,
+                $budgetTransaction,
+            ] as $transaction
+        ) {
+            $transaction->transactionItems()->firstOrFail()->update([
+                'category_id' => $category->id,
+            ]);
+        }
+
+        $categoryWithDates = $user->categories()
+            ->withCount([
+                'transaction as transactions_count_regular' => function (Builder $query): void {
+                    $query->selectRaw('COUNT(DISTINCT transactions.id)')
+                        ->where('transactions.schedule', false)
+                        ->where('transactions.budget', false);
+                },
+                'transaction as transactions_count_with_schedule' => function (Builder $query): void {
+                    $query->selectRaw('COUNT(DISTINCT transactions.id)')
+                        ->where(function (Builder $query): void {
+                            $query->where('transactions.schedule', true)
+                                ->orWhere('transactions.budget', true);
+                        });
+                },
+            ])
+            ->withMin([
+                'transaction as transactions_min_date' => function (Builder $query): void {
+                    $query->where('transactions.schedule', false)
+                        ->where('transactions.budget', false);
+                },
+            ], 'date')
+            ->withMax([
+                'transaction as transactions_max_date' => function (Builder $query): void {
+                    $query->where('transactions.schedule', false)
+                        ->where('transactions.budget', false);
+                },
+            ], 'date')
+            ->findOrFail($category->id);
+
+        $this->assertSame(2, $categoryWithDates->transactions_count_regular);
+        $this->assertSame(2, $categoryWithDates->transactions_count_with_schedule);
+        $this->assertSame('2024-01-10', Carbon::parse($categoryWithDates->transactions_min_date)->toDateString());
+        $this->assertSame('2024-03-15', Carbon::parse($categoryWithDates->transactions_max_date)->toDateString());
+    }
+
     public function test_user_cannot_create_a_category_with_missing_data(): void
     {
         $user = User::factory()->create();
@@ -97,6 +174,31 @@ class CategoryTest extends TestCase
         $user = User::factory()->create();
 
         $this->assertCreateForUser($user);
+    }
+
+    public function test_user_can_create_a_category_with_optional_description(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->postJson(
+                route("{$this->base_route}.store"),
+                [
+                    'name' => 'Category with description',
+                    'active' => 1,
+                    'parent_id' => null,
+                    'default_aggregation' => 'month',
+                    'description' => "line one\nline two",
+                ]
+            );
+
+        $response->assertRedirectToRoute("{$this->base_route}.index");
+        $this->assertDatabaseHas('categories', [
+            'user_id' => $user->id,
+            'name' => 'Category with description',
+            'description' => "line one\nline two",
+        ]);
     }
 
     public function test_user_can_edit_an_existing_category(): void
@@ -169,11 +271,68 @@ class CategoryTest extends TestCase
         $this->assertTrue($successNotificationExists);
     }
 
+    public function test_user_can_update_a_category_description(): void
+    {
+        $user = User::factory()->create();
+        $category = Category::factory()->for($user)->create([
+            'description' => null,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->patchJson(
+                route("{$this->base_route}.update", $category->id),
+                [
+                    'name' => $category->name,
+                    'active' => $category->active,
+                    'parent_id' => $category->parent_id,
+                    'default_aggregation' => 'month',
+                    'description' => "updated description\nsecond line",
+                ]
+            );
+
+        $response->assertRedirectToRoute("{$this->base_route}.index");
+        $this->assertDatabaseHas('categories', [
+            'id' => $category->id,
+            'description' => "updated description\nsecond line",
+        ]);
+    }
+
     public function test_user_can_delete_an_existing_category(): void
     {
         /** @var User $user */
         $user = User::factory()->create();
         $this->assertDestroyWithUser($user);
+    }
+
+    public function test_user_cannot_open_merge_form_for_other_users_category(): void
+    {
+        $sourceOwner = User::factory()->create();
+        $category = Category::factory()->for($sourceOwner)->create();
+        $otherUser = User::factory()->create();
+
+        $this->actingAs($otherUser)
+            ->get(route('categories.merge.form', ['categorySource' => $category->id]))
+            ->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    public function test_user_cannot_merge_other_users_category(): void
+    {
+        $sourceOwner = User::factory()->create();
+        $targetOwner = User::factory()->create();
+
+        $foreignCategory = Category::factory()->for($sourceOwner)->create();
+        $ownCategory = Category::factory()->for($targetOwner)->create();
+
+        $response = $this->actingAs($targetOwner)
+            ->postJson(route('categories.merge.submit'), [
+                'category_source' => $foreignCategory->id,
+                'category_target' => $ownCategory->id,
+                'action' => 'close',
+            ]);
+
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $response->assertJsonValidationErrors(['category_source']);
     }
 
     /**
@@ -265,5 +424,50 @@ class CategoryTest extends TestCase
             'name' => $category->name . '2',
             'parent_id' => $category->parent_id,
         ]);
+    }
+
+    public function test_user_cannot_set_category_as_its_own_parent(): void
+    {
+        $user = User::factory()->create();
+        $category = Category::factory()->for($user)->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->patchJson(
+                route("{$this->base_route}.update", $category->id),
+                [
+                    'name' => $category->name,
+                    'active' => $category->active,
+                    'parent_id' => $category->id,
+                    'default_aggregation' => 'month',
+                ]
+            );
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['parent_id']);
+    }
+
+    public function test_user_cannot_create_parent_cycle_between_categories(): void
+    {
+        $user = User::factory()->create();
+        $categoryA = Category::factory()->for($user)->create();
+        $categoryB = Category::factory()->for($user)->create([
+            'parent_id' => $categoryA->id,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->patchJson(
+                route("{$this->base_route}.update", $categoryA->id),
+                [
+                    'name' => $categoryA->name,
+                    'active' => $categoryA->active,
+                    'parent_id' => $categoryB->id,
+                    'default_aggregation' => 'month',
+                ]
+            );
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['parent_id']);
     }
 }
