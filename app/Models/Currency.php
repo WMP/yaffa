@@ -27,6 +27,8 @@ use Kantorge\CurrencyExchangeRates\Facades\CurrencyExchangeRates;
  * @property string $iso_code
  * @property bool|null $base
  * @property bool $auto_update
+ * @property int|null $generic_decimal_precision
+ * @property int|null $detailed_decimal_precision
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read User $user
@@ -47,23 +49,26 @@ use Kantorge\CurrencyExchangeRates\Facades\CurrencyExchangeRates;
  * @method static Builder|Currency whereUpdatedAt($value)
  * @method static Builder|Currency whereUserId($value)
  * @mixin Eloquent
+ * @mixin \Eloquent
  */
 class Currency extends Model
 {
+    use CurrencyTrait;
     use HasFactory;
     use ModelOwnedByUserTrait;
-    use CurrencyTrait;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
         'iso_code',
         'base',
         'auto_update',
+        'generic_decimal_precision',
+        'detailed_decimal_precision',
     ];
 
     /**
@@ -76,6 +81,8 @@ class Currency extends Model
         return [
             'base' => 'boolean',
             'auto_update' => 'boolean',
+            'generic_decimal_precision' => 'integer',
+            'detailed_decimal_precision' => 'integer',
         ];
     }
 
@@ -254,7 +261,7 @@ class Currency extends Model
             ->first();
 
         $this->retrieveCurrencyRateToBase(
-            $rate?->date ?? Carbon::parse('30 days ago') // Fallback to last 30 days
+            $rate->date ?? Carbon::parse('30 days ago') // Fallback to last 30 days
         );
     }
 

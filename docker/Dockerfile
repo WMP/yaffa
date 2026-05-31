@@ -11,22 +11,32 @@ RUN npm ci
 RUN npm run build
 
 # Stage 2: Base PHP + Apache setup (this part won't change often)
-FROM php:8.3-apache AS base
+FROM php:8.4-apache AS base
 
 # Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     supervisor \
+    default-mysql-client \
     libzip-dev zip unzip git curl libxml2-dev zlib1g-dev libonig-dev \
+    libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
     && pecl install redis \
     && docker-php-ext-enable redis \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
-        pdo pdo_mysql mbstring zip xml
+    pdo pdo_mysql mbstring zip xml gd exif
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# Stream Apache logs to container stdout/stderr for centralized collection.
+COPY ./docker/apache-logging.conf /etc/apache2/conf-available/docker-logging.conf
+RUN a2enconf docker-logging
+
 # Install Composer globally (will be cached until the next change)
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Configure MySQL client to skip SSL verification (avoids self-signed cert errors in Docker)
+RUN printf '[client]\nssl=FALSE\n' > /root/.my.cnf && chmod 600 /root/.my.cnf
 
 # Stage 3: Copy application code, PHP dependencies, and built assets
 FROM base AS app
@@ -42,6 +52,9 @@ COPY --from=assets /app/public/build /var/www/html/public/build
 ENV APP_ENV=production \
     APP_DEBUG=false
 
+# Production-safe PHP error logging to stderr (visible in container logs).
+COPY ./docker/php-logging.ini /usr/local/etc/php/conf.d/zz-php-logging.ini
+
 # Install dependencies via Composer
 RUN composer install --no-dev --no-interaction --no-progress
 
@@ -49,9 +62,10 @@ RUN composer install --no-dev --no-interaction --no-progress
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Update the Apache configuration to use the new document root
+# Replace the default Apache vhost with one that points at Laravel's public/ directory.
+# ErrorLog/CustomLog are inherited from conf-enabled/docker-logging.conf above.
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf /etc/apache2/apache2.conf
+COPY ./docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 
 # Expose the default HTTP port
 EXPOSE 80

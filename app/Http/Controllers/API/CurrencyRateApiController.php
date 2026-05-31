@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Exceptions\CurrencyRateConversionException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CurrencyRateRequest;
+use App\Http\Traits\CurrencyTrait;
 use App\Models\Currency;
 use App\Models\CurrencyRate;
 use App\Services\CurrencyRateService;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Gate;
 
 class CurrencyRateApiController extends Controller implements HasMiddleware
 {
+    use CurrencyTrait;
     public function __construct(
         protected CurrencyRateService $currencyRateService
     ) {
@@ -25,7 +27,8 @@ class CurrencyRateApiController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            ['auth:sanctum', 'verified'],
+            'auth:sanctum',
+            'verified',
         ];
     }
 
@@ -65,8 +68,15 @@ class CurrencyRateApiController extends Controller implements HasMiddleware
      */
     public function store(CurrencyRateRequest $request): JsonResponse
     {
-        // Note, that the CurrencyRateRequest validates that from_id and to_id exist and belong to the authenticated user.
-        $rate = CurrencyRate::create($request->validated());
+        $validated = $request->validated();
+
+        $fromCurrency = Currency::query()->findOrFail($validated['from_id']);
+        $toCurrency = Currency::query()->findOrFail($validated['to_id']);
+
+        Gate::authorize('update', $fromCurrency);
+        Gate::authorize('update', $toCurrency);
+
+        $rate = CurrencyRate::create($validated);
 
         return response()->json([
             'rate' => $rate->load(['currencyFrom', 'currencyTo']),
@@ -81,8 +91,12 @@ class CurrencyRateApiController extends Controller implements HasMiddleware
      */
     public function update(CurrencyRateRequest $request, CurrencyRate $currencyRate): JsonResponse
     {
-        // Note, that the CurrencyRateRequest validates that from_id and to_id exist and belong to the authenticated user.
-        $currencyRate->update($request->validated());
+        $validated = $request->validated();
+
+        Gate::authorize('update', $currencyRate->currencyFrom);
+        Gate::authorize('update', $currencyRate->currencyTo);
+
+        $currencyRate->update($validated);
 
         return response()->json([
             'rate' => $currencyRate->fresh(['currencyFrom', 'currencyTo']),
@@ -97,8 +111,8 @@ class CurrencyRateApiController extends Controller implements HasMiddleware
      */
     public function destroy(CurrencyRate $currencyRate): JsonResponse
     {
-        Gate::authorize('view', $currencyRate->currencyFrom);
-        Gate::authorize('view', $currencyRate->currencyTo);
+        Gate::authorize('delete', $currencyRate->currencyFrom);
+        Gate::authorize('delete', $currencyRate->currencyTo);
 
         $currencyRate->delete();
 
@@ -120,12 +134,28 @@ class CurrencyRateApiController extends Controller implements HasMiddleware
         } catch (CurrencyRateConversionException $e) {
             return response()->json(
                 [
-                    'message' => $e->getMessage(),
+                    'error' => [
+                        'code' => 'CONVERSION_ERROR',
+                        'message' => $e->getMessage(),
+                    ],
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
 
         return response()->json();
+    }
+
+    /**
+     * Clear all currency-related caches for the current user.
+     * This includes the monthly average rates and individual currency lists.
+     */
+    public function clearCache(Request $request): JsonResponse
+    {
+        $this->clearCurrencyCache($request->user()->id);
+
+        return response()->json([
+            'message' => __('maintenance.currencyCache.cleared'),
+        ], Response::HTTP_OK);
     }
 }
